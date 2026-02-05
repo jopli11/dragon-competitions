@@ -15,12 +15,12 @@ const Section = styled.section`
     position: absolute;
     top: 0;
     right: 0;
-    width: 40%;
+    width: 100%;
     height: 100%;
     background: radial-gradient(
-      circle at 70% 30%,
-      rgba(229, 83, 26, 0.1),
-      transparent 70%
+      circle at 80% 20%,
+      rgba(229, 83, 26, 0.05),
+      transparent 50%
     );
     pointer-events: none;
   }

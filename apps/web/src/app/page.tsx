@@ -8,6 +8,7 @@ import Image from "next/image";
 import { BrandHeroCarousel } from "@/components/BrandHeroCarousel";
 import { HowItWorks } from "@/components/HowItWorks";
 import { WinnersSection } from "@/components/WinnersSection";
+import { TrustpilotBadge } from "@/components/TrustpilotBadge";
 
 const CountdownContainer = styled.div`
   background: linear-gradient(135deg, #1f2a33 0%, #11181d 100%);
@@ -80,7 +81,7 @@ const CategoryFilter = styled.div`
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.75rem;
-  margin-top: 4rem;
+  margin-top: 2rem;
 `;
 
 const FilterButton = styled.button<{ active?: boolean }>`
@@ -140,7 +141,11 @@ export default function Home() {
         </CountdownContainer>
       </div>
 
-      <Container className="py-20">
+      <div className="mt-6">
+        <TrustpilotBadge />
+      </div>
+
+      <Container className="pt-6 pb-20">
         <div className="text-center">
           <BrandSectionHeading>Current Competitions</BrandSectionHeading>
           <CategoryFilter>
