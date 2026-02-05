@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Raffles: Publicly readable for ticket counts and draw status
+    match /raffles/{raffleId} {
+      allow read: if true;
+      allow write: if false; // Only via Admin SDK/Cloud Functions
+      
+      match /entries/{entryId} {
+        allow read: if false; // Entries are private
+        allow write: if false;
+      }
+    }
+
+    // Orders: Private to the user (if authenticated) or hidden
+    match /orders/{orderId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Quiz Passes: Short-lived, internal only
+    match /quizPasses/{passId} {
+      allow read, write: if false;
+    }
+  }
+}
