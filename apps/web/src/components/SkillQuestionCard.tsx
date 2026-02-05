@@ -3,52 +3,62 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styled from "@emotion/styled";
+import { BrandButton } from "@/lib/styles";
 
 const OptionButton = styled.button<{ active: boolean; isWrong: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-radius: 1rem;
-  border: 1px solid
+  border: 2px solid
     ${({ active, isWrong }) =>
       isWrong && active
-        ? "rgba(239, 68, 68, 0.5)"
+        ? "#ef4444"
         : active
-        ? "rgba(0, 0, 0, 0.2)"
-        : "rgba(0, 0, 0, 0.1)"};
-  padding: 0.75rem 1rem;
+        ? "#e5531a"
+        : "rgba(31, 42, 51, 0.1)"};
+  padding: 1rem 1.25rem;
   text-align: left;
   font-size: 0.875rem;
-  transition: background-color 0.2s;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
   background-color: ${({ active, isWrong }) =>
     isWrong && active
       ? "rgba(239, 68, 68, 0.05)"
       : active
-      ? "rgba(0, 0, 0, 0.05)"
-      : "transparent"};
+      ? "rgba(229, 83, 26, 0.05)"
+      : "white"};
+  color: #1f2a33;
 
   &:hover {
-    background-color: ${({ active }) => (active ? "" : "rgba(0, 0, 0, 0.05)")};
+    border-color: ${({ active }) => (active ? "#e5531a" : "rgba(229, 83, 26, 0.3)")};
+    background-color: ${({ active }) => (active ? "" : "rgba(229, 83, 26, 0.02)")};
   }
 
   @media (prefers-color-scheme: dark) {
-    border-color: ${({ active, isWrong }) =>
-      isWrong && active
-        ? "rgba(239, 68, 68, 0.5)"
-        : active
-        ? "rgba(255, 255, 255, 0.2)"
-        : "rgba(255, 255, 255, 0.15)"};
     background-color: ${({ active, isWrong }) =>
       isWrong && active
-        ? "rgba(239, 68, 68, 0.05)"
+        ? "rgba(239, 68, 68, 0.1)"
         : active
-        ? "rgba(255, 255, 255, 0.05)"
-        : "transparent"};
+        ? "rgba(229, 83, 26, 0.1)"
+        : "#161616"};
+    color: #f6f2ed;
+    border-color: ${({ active, isWrong }) =>
+      isWrong && active
+        ? "#ef4444"
+        : active
+        ? "#e5531a"
+        : "rgba(255, 255, 255, 0.1)"};
+  }
+`;
 
-    &:hover {
-      background-color: ${({ active }) =>
-        active ? "" : "rgba(255, 255, 255, 0.1)"};
-    }
+const QuestionHeading = styled.h2`
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2a33;
+  letter-spacing: -0.01em;
+  @media (prefers-color-scheme: dark) {
+    color: #f6f2ed;
   }
 `;
 
@@ -137,56 +147,58 @@ export function SkillQuestionCard({
 
   if (quizPassId) {
     return (
-      <section className="rounded-3xl border border-black/5 bg-background p-6 shadow-sm dark:border-white/10">
-        <h2 className="text-base font-semibold tracking-tight text-green-600 dark:text-green-500">
+      <section className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand dark:border-white/10 dark:bg-[#161616]">
+        <h2 className="text-lg font-bold tracking-tight text-green-600 dark:text-green-500">
           ✓ Correct Answer!
         </h2>
         <p className="mt-2 text-sm text-foreground/70">
           How many tickets would you like to purchase?
         </p>
 
-        <div className="mt-6 flex items-center justify-center gap-6">
+        <div className="mt-8 flex items-center justify-center gap-8">
           <button
             type="button"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/10 text-xl font-bold hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
           >
             -
           </button>
-          <span className="text-xl font-semibold tabular-nums">{quantity}</span>
+          <span className="text-3xl font-bold tabular-nums">{quantity}</span>
           <button
             type="button"
             onClick={() => setQuantity(Math.min(100, quantity + 1))}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/10 text-xl font-bold hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
           >
             +
           </button>
         </div>
 
         {error && (
-          <p className="mt-4 text-xs font-medium text-red-500">{error}</p>
+          <p className="mt-4 text-xs font-medium text-red-500 text-center">{error}</p>
         )}
 
-        <button
+        <BrandButton
           type="button"
           onClick={handleCheckout}
           disabled={loading}
-          className="mt-8 inline-flex h-11 w-full items-center justify-center rounded-full bg-foreground px-5 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-50"
+          fullWidth
+          size="lg"
+          className="mt-8"
         >
           {loading ? "Preparing checkout..." : "Buy tickets now"}
-        </button>
+        </BrandButton>
       </section>
     );
   }
 
   return (
-    <section className="rounded-3xl border border-black/5 bg-background p-6 shadow-sm dark:border-white/10">
-      <h2 className="text-base font-semibold tracking-tight">
+    <section className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand dark:border-white/10 dark:bg-[#161616]">
+      <QuestionHeading>
         Skill question
-      </h2>
+      </QuestionHeading>
       <p className="mt-2 text-sm text-foreground/70">{question}</p>
 
-      <div className="mt-5 grid gap-3">
+      <div className="mt-6 grid gap-3">
         {options.map((opt, idx) => {
           const active = selected === idx;
           return (
@@ -204,12 +216,12 @@ export function SkillQuestionCard({
               <span className="font-medium">{opt}</span>
               <span
                 className={[
-                  "inline-flex h-5 w-5 items-center justify-center rounded-full border",
+                  "inline-flex h-5 w-5 items-center justify-center rounded-full border-2",
                   active
                     ? isWrong
                       ? "border-red-500 bg-red-500 text-white"
-                      : "border-foreground bg-foreground text-background"
-                    : "border-foreground/30",
+                      : "border-dragon-orange bg-dragon-orange text-white"
+                    : "border-black/10 dark:border-white/10",
                 ].join(" ")}
                 aria-hidden="true"
               >
@@ -221,21 +233,23 @@ export function SkillQuestionCard({
       </div>
 
       {error && (
-        <p className="mt-4 text-xs font-medium text-red-500">{error}</p>
+        <p className="mt-4 text-xs font-medium text-red-500 text-center">{error}</p>
       )}
 
-      <p className="mt-5 text-xs text-foreground/60">
+      <p className="mt-6 text-[11px] font-medium text-foreground/50 text-center uppercase tracking-wider">
         You must answer correctly to proceed to checkout.
       </p>
 
-      <button
+      <BrandButton
         type="button"
         onClick={handleContinue}
         disabled={selected === null || loading}
-        className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-foreground px-5 text-sm font-medium text-background disabled:cursor-not-allowed disabled:opacity-50"
+        fullWidth
+        size="lg"
+        className="mt-6"
       >
         {loading ? "Checking..." : "Continue"}
-      </button>
+      </BrandButton>
     </section>
   );
 }

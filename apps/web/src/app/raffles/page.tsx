@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { isContentfulConfigured } from "@/lib/contentful/publicClient";
+import { BrandButton, BrandSectionHeading } from "@/lib/styles";
 
 function formatGBPFromPence(pence: number) {
+  if (pence < 100) return `${pence}p`;
   return new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency: "GBP",
@@ -32,50 +34,57 @@ export default async function RafflesPage() {
 
   return (
     <Container className="py-16">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Raffles</h1>
-        <p className="mt-2 text-sm text-foreground/70">
-          Answer correctly, pick your ticket quantity, and enter securely.
+      <div className="text-center">
+        <BrandSectionHeading>Current Competitions</BrandSectionHeading>
+        <p className="mt-3 text-sm font-medium text-foreground/50 uppercase tracking-widest">
+          Answer correctly, pick your quantity, and win big.
         </p>
       </div>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {raffles.map((r) => (
           <div
             key={r.id}
-            className="group overflow-hidden rounded-2xl border border-black/5 bg-background shadow-sm transition-shadow hover:shadow-md dark:border-white/10"
+            className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#161616]"
           >
             <Link href={`/raffles/${r.slug}`} className="block">
-              <div className="relative aspect-[16/10] bg-black/5 dark:bg-white/10">
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <div className="absolute top-3 left-3 z-10 rounded-lg bg-dragon-orange/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
+                  Entries Open
+                </div>
                 {r.heroImageUrl ? (
                   <Image
                     src={r.heroImageUrl}
                     alt={r.title}
                     fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                ) : null}
+                ) : (
+                  <div className="h-full w-full bg-black/5 dark:bg-white/5" />
+                )}
               </div>
-              <div className="p-5">
-                <p className="text-xs font-medium text-foreground/60">
-                  Tickets from {formatGBPFromPence(r.ticketPricePence)}
-                </p>
-                <h2 className="mt-2 text-base font-semibold tracking-tight">
+              <div className="p-6">
+                <h3 className="text-lg font-bold tracking-tight text-charcoal-navy dark:text-white">
                   {r.title}
-                </h2>
-                <p className="mt-2 text-sm text-foreground/70">
-                  Ends{" "}
-                  {new Intl.DateTimeFormat("en-GB", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  }).format(new Date(r.endAt))}
-                </p>
-                <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium">
-                  View details
-                  <span className="transition-transform group-hover:translate-x-0.5">
-                    →
-                  </span>
+                </h3>
+                <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase dark:text-white/40">
+                  <span>Tickets sold: coming soon</span>
+                  <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+                </div>
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
+                  <div
+                    className="h-full bg-dragon-orange"
+                    style={{ width: "10%" }}
+                  />
+                </div>
+                <div className="mt-6 text-center">
+                  <p className="text-xs font-bold text-charcoal-navy/60 uppercase tracking-widest dark:text-white/60">
+                    Just <span className="text-dragon-orange">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
+                  </p>
+                  <BrandButton fullWidth className="mt-4">
+                    Enter Now
+                  </BrandButton>
                 </div>
               </div>
             </Link>
@@ -84,10 +93,14 @@ export default async function RafflesPage() {
       </div>
 
       {raffles.length === 0 ? (
-        <p className="mt-10 text-sm text-foreground/70">
-          No live raffles yet. Publish a `raffle` entry in Contentful with
-          `status = live`.
-        </p>
+        <div className="mt-20 text-center">
+          <p className="text-sm font-bold text-foreground/40 uppercase tracking-widest">
+            No live raffles yet.
+          </p>
+          <p className="mt-2 text-xs text-foreground/30">
+            Check back soon for epic prizes!
+          </p>
+        </div>
       ) : null}
     </Container>
   );
