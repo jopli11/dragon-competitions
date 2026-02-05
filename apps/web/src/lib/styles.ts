@@ -117,3 +117,23 @@ export const BrandSectionHeading = styled.h2`
     color: #f6f2ed;
   }
 `;
+
+export const GlassCard = styled.div`
+  background: white;
+  border-radius: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  padding: 2rem;
+
+  @media (prefers-color-scheme: dark) {
+    background: #161616;
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+`;
+
+export const GradientText = styled.span`
+  background: linear-gradient(to right, #e5531a, #c43a12);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+`;
