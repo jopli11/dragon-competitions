@@ -192,10 +192,11 @@ export function SkillQuestionCard({
   }
 
   return (
-    <section className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand dark:border-white/10 dark:bg-[#161616]">
-      <QuestionHeading>
-        Skill question
-      </QuestionHeading>
+    <section
+      id="skill-question"
+      className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand dark:border-white/10 dark:bg-[#161616]"
+    >
+      <QuestionHeading>Skill question</QuestionHeading>
       <p className="mt-2 text-sm text-foreground/70">{question}</p>
 
       <div className="mt-6 grid gap-3">

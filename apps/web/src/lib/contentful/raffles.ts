@@ -58,9 +58,51 @@ function toSummary(entry: Entry<RaffleSkeleton>): RaffleSummary {
   };
 }
 
+const MOCK_RAFFLES: RaffleDetail[] = [
+  {
+    id: "mock-1",
+    title: "£20,000 Tax Free Cash",
+    slug: "win-20000-cash",
+    status: "live",
+    startAt: new Date().toISOString(),
+    endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString(),
+    ticketPricePence: 18,
+    skillQuestion: "What is the capital of France?",
+    answerOptions: ["London", "Paris", "Berlin"],
+    heroImageUrl: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=2000&auto=format&fit=crop",
+  },
+  {
+    id: "mock-2",
+    title: "Tesla Model S Plaid",
+    slug: "tesla-model-s",
+    status: "live",
+    startAt: new Date().toISOString(),
+    endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 5).toISOString(),
+    ticketPricePence: 18,
+    skillQuestion: "Which company makes the Model S?",
+    answerOptions: ["Ford", "Tesla", "BMW"],
+    heroImageUrl: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=2000&auto=format&fit=crop",
+  },
+  {
+    id: "mock-3",
+    title: "PS5 Ultimate Bundle",
+    slug: "ps5-bundle",
+    status: "live",
+    startAt: new Date().toISOString(),
+    endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(),
+    ticketPricePence: 18,
+    skillQuestion: "Who manufactures the PlayStation?",
+    answerOptions: ["Microsoft", "Sony", "Nintendo"],
+    heroImageUrl: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?q=80&w=2000&auto=format&fit=crop",
+  }
+];
+
 export async function fetchLiveRaffles(): Promise<RaffleSummary[]> {
   const client = getContentfulPublicClient();
-  if (!client) return [];
+  if (!client) {
+    // Return mock data if Contentful is not configured
+    return MOCK_RAFFLES.map(({ skillQuestion, answerOptions, startAt, ...rest }) => rest);
+  }
 
   const query = {
     content_type: "raffle",
@@ -89,7 +131,10 @@ export async function fetchRaffleBySlug(
   slug: string,
 ): Promise<RaffleDetail | null> {
   const client = getContentfulPublicClient();
-  if (!client) return null;
+  if (!client) {
+    // Return mock data if Contentful is not configured
+    return MOCK_RAFFLES.find((r) => r.slug === slug) || null;
+  }
 
   const query = {
     content_type: "raffle",
@@ -117,7 +162,10 @@ export async function fetchRaffleCorrectAnswer(
   slug: string,
 ): Promise<number | null> {
   const client = getContentfulAdminClient();
-  if (!client) return null;
+  if (!client) {
+    // Return mock correct answer (index 1 for Paris/Tesla/Sony)
+    return 1;
+  }
 
   const query = {
     content_type: "raffle",

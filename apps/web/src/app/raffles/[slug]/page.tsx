@@ -1,44 +1,55 @@
+"use client";
+
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
 import { SkillQuestionCard } from "@/components/SkillQuestionCard";
 import { fetchRaffleBySlug } from "@/lib/contentful/raffles";
 import { isContentfulConfigured } from "@/lib/contentful/publicClient";
-import { BrandBadge, GlassCard, GradientText } from "@/lib/styles";
+import { BrandBadge, GlassCard, GradientText, BrandButton } from "@/lib/styles";
+import { use, useEffect, useState } from "react";
+import { RaffleDetail } from "@/lib/contentful/raffles";
 
-function formatGBPFromPence(pence: number) {
-  if (pence < 100) return `${pence}p`;
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-  }).format(pence / 100);
-}
-
-export default async function RaffleDetailPage({
+export default function RaffleDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  if (!isContentfulConfigured()) {
+  const { slug } = use(params);
+  const [raffle, setRaffle] = useState<RaffleDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadRaffle() {
+      const data = await fetchRaffleBySlug(slug);
+      setRaffle(data);
+      setLoading(false);
+    }
+    loadRaffle();
+  }, [slug]);
+
+  if (loading) {
     return (
-      <Container className="py-16">
-        <h1 className="text-2xl font-semibold tracking-tight">Raffle</h1>
-        <p className="mt-3 max-w-2xl text-sm text-foreground/70">
-          Contentful isn’t configured yet. Add `CONTENTFUL_SPACE_ID` and
-          `CONTENTFUL_PUBLIC_TOKEN` in <code className="rounded bg-black/5 px-1.5 py-0.5 text-[0.85em] dark:bg-white/10">.env.local</code>.
-        </p>
-      </Container>
+      <div className="min-h-screen bg-[#f6f2ed] flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-dragon-orange border-t-transparent" />
+      </div>
     );
   }
 
-  const { slug } = params;
-  const raffle = await fetchRaffleBySlug(slug);
   if (!raffle) notFound();
+
+  function formatGBPFromPence(pence: number) {
+    if (pence < 100) return `${pence}p`;
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: "GBP",
+    }).format(pence / 100);
+  }
 
   return (
     <div className="min-h-screen bg-[#f6f2ed] pb-20">
       {/* Hero Section */}
-      <div className="relative h-[40vh] min-h-[400px] w-full overflow-hidden bg-charcoal-navy">
+      <div className="relative h-[20vh] min-h-[240px] w-full overflow-hidden bg-charcoal-navy">
         {raffle.heroImageUrl && (
           <Image
             src={raffle.heroImageUrl}
@@ -50,22 +61,22 @@ export default async function RaffleDetailPage({
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#f6f2ed] via-charcoal-navy/40 to-transparent" />
         
-        <Container className="relative h-full flex flex-col justify-end pb-12">
-          <BrandBadge className="mb-4">Entries Open</BrandBadge>
-          <h1 className="text-4xl font-black uppercase tracking-tighter text-charcoal-navy sm:text-5xl md:text-6xl">
+        <Container className="relative h-full flex flex-col justify-end pb-6">
+          <BrandBadge className="mb-3 self-start">Entries Open</BrandBadge>
+          <h1 className="text-3xl font-black uppercase tracking-tighter text-charcoal-navy sm:text-4xl md:text-5xl lg:text-6xl break-words">
             {raffle.title}
           </h1>
-          <div className="mt-4 flex items-center gap-6 text-sm font-bold uppercase tracking-widest text-charcoal-navy/60">
+          <div className="mt-3 flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-charcoal-navy/60">
             <div className="flex items-center gap-2">
               <span className="text-dragon-orange">Just</span>
-              <span className="text-xl text-charcoal-navy">{formatGBPFromPence(raffle.ticketPricePence)}</span>
+              <span className="text-lg text-charcoal-navy">{formatGBPFromPence(raffle.ticketPricePence)}</span>
               <span>per entry</span>
             </div>
           </div>
         </Container>
       </div>
 
-      <Container className="-mt-8 relative z-10">
+      <Container className="-mt-4 relative z-10">
         <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-start">
           <div className="space-y-8">
             {/* Main Image Card */}
@@ -87,18 +98,18 @@ export default async function RaffleDetailPage({
             </div>
 
             {/* About Section */}
-            <GlassCard>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-charcoal-navy dark:text-white">
+            <GlassCard className="p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-charcoal-navy dark:text-white">
                 About this <GradientText>Raffle</GradientText>
               </h2>
               <div className="mt-6 prose prose-sm max-w-none text-charcoal-navy/70 dark:text-white/70">
-                <p className="text-lg leading-relaxed">
+                <p className="text-base sm:text-lg leading-relaxed">
                   Get ready for your chance to win this incredible {raffle.title}. 
                   This competition is skill-based, meaning you'll need to answer 
                   the question correctly to be entered into the draw.
                 </p>
                 
-                <div className="mt-8 grid gap-6 sm:grid-cols-2">
+                <div className="mt-8 grid gap-4 sm:gap-6 sm:grid-cols-2">
                   <div className="rounded-2xl bg-charcoal-navy/5 p-6 dark:bg-white/5">
                     <h4 className="font-bold uppercase tracking-wider text-dragon-orange text-xs mb-2">Guaranteed Draw</h4>
                     <p className="text-sm font-medium">This draw will take place regardless of ticket sales. No extensions, ever.</p>
@@ -112,7 +123,7 @@ export default async function RaffleDetailPage({
             </GlassCard>
 
             {/* FAQ / Rules Placeholder */}
-            <GlassCard>
+            <GlassCard className="p-6 sm:p-8">
               <h2 className="text-xl font-black uppercase tracking-tight text-charcoal-navy dark:text-white">
                 Competition <GradientText>Rules</GradientText>
               </h2>
@@ -152,6 +163,12 @@ export default async function RaffleDetailPage({
               <div className="mt-4 h-2 w-full bg-charcoal-navy/5 rounded-full overflow-hidden dark:bg-white/5">
                 <div className="h-full bg-dragon-orange w-[15%] rounded-full shadow-[0_0_10px_rgba(229,83,26,0.5)]" />
               </div>
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-charcoal-navy/60 dark:text-white/60">
+                  5 people entered in the last hour
+                </p>
+              </div>
               <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-dragon-orange">
                 Drawing in: 2 days, 14 hours
               </p>
@@ -159,6 +176,31 @@ export default async function RaffleDetailPage({
           </div>
         </div>
       </Container>
+
+      {/* Mobile Floating CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/5 bg-white/80 p-4 backdrop-blur-lg lg:hidden dark:border-white/10 dark:bg-black/80">
+        <Container>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-charcoal-navy/40 dark:text-white/40">
+                Ticket Price
+              </p>
+              <p className="text-lg font-black text-charcoal-navy dark:text-white">
+                {formatGBPFromPence(raffle.ticketPricePence)}
+              </p>
+            </div>
+            <BrandButton
+              fullWidth
+              onClick={() => {
+                const el = document.getElementById("skill-question");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              Enter Now
+            </BrandButton>
+          </div>
+        </Container>
+      </div>
     </div>
   );
 }

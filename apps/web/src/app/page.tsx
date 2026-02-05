@@ -35,10 +35,14 @@ const CountdownContainer = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding: 0.75rem 1.5rem;
-    gap: 1rem;
+    padding: 1rem 1.5rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
     justify-content: center;
+    margin-top: -1.5rem;
+    border-radius: 1rem;
+    width: calc(100% - 2rem);
+    max-width: 320px;
   }
 `;
 
@@ -46,7 +50,11 @@ const CountdownItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 3rem;
+  min-width: 2.5rem;
+
+  @media (max-width: 768px) {
+    min-width: 2rem;
+  }
 
   .value {
     font-size: 1.5rem;
@@ -55,6 +63,10 @@ const CountdownItem = styled.div`
     line-height: 1;
     font-variant-numeric: tabular-nums;
     text-shadow: 0 0 10px rgba(229, 83, 26, 0.2);
+
+    @media (max-width: 768px) {
+      font-size: 1.25rem;
+    }
   }
   .label {
     font-size: 0.625rem;
@@ -63,6 +75,10 @@ const CountdownItem = styled.div`
     color: #e5531a;
     letter-spacing: 0.1em;
     margin-top: 0.25rem;
+
+    @media (max-width: 768px) {
+      font-size: 0.5rem;
+    }
   }
 `;
 
@@ -78,10 +94,24 @@ const CountdownDivider = styled.div`
 
 const CategoryFilter = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
   gap: 0.75rem;
   margin-top: 2rem;
+  overflow-x: auto;
+  padding: 0.5rem 1rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: visible;
+    padding: 0;
+  }
 `;
 
 const FilterButton = styled.button<{ active?: boolean }>`
@@ -161,7 +191,7 @@ export default function Home() {
           </CategoryFilter>
         </div>
 
-        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 px-4 sm:px-0">
           {/* Placeholder Raffle Cards */}
           {[
             {

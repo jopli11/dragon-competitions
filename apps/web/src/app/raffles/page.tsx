@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { isContentfulConfigured } from "@/lib/contentful/publicClient";
-import { BrandButton, BrandSectionHeading } from "@/lib/styles";
+import { BrandButton, BrandSectionHeading, GradientText } from "@/lib/styles";
 
 function formatGBPFromPence(pence: number) {
   if (pence < 100) return `${pence}p`;
@@ -14,32 +14,19 @@ function formatGBPFromPence(pence: number) {
 }
 
 export default async function RafflesPage() {
-  if (!isContentfulConfigured()) {
-    return (
-      <Container className="py-16">
-        <h1 className="text-2xl font-semibold tracking-tight">Raffles</h1>
-        <p className="mt-3 max-w-2xl text-sm text-foreground/70">
-          Contentful isn’t configured yet. Add `CONTENTFUL_SPACE_ID`,
-          `CONTENTFUL_PUBLIC_TOKEN` (and optionally `CONTENTFUL_ENVIRONMENT`) in{" "}
-          <code className="rounded bg-black/5 px-1.5 py-0.5 text-[0.85em] dark:bg-white/10">
-            .env.local
-          </code>{" "}
-          then restart the dev server.
-        </p>
-      </Container>
-    );
-  }
-
   const raffles = await fetchLiveRaffles();
 
   return (
-    <Container className="py-16">
-      <div className="text-center">
-        <BrandSectionHeading>Current Competitions</BrandSectionHeading>
-        <p className="mt-3 text-sm font-medium text-foreground/50 uppercase tracking-widest">
-          Answer correctly, pick your quantity, and win big.
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#f6f2ed] py-16">
+      <Container>
+        <div className="text-center">
+          <BrandSectionHeading className="!text-[#1f2a33] dark:!text-white">
+            Current <GradientText>Competitions</GradientText>
+          </BrandSectionHeading>
+          <p className="mt-4 text-charcoal-navy/60 font-medium uppercase tracking-widest text-sm">
+            Answer correctly, pick your quantity, and win big.
+          </p>
+        </div>
 
       <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {raffles.map((r) => (
@@ -64,14 +51,17 @@ export default async function RafflesPage() {
                   <div className="h-full w-full bg-black/5 dark:bg-white/5" />
                 )}
               </div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold tracking-tight text-charcoal-navy dark:text-white">
-                  {r.title}
-                </h3>
-                <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase dark:text-white/40">
+            <div className="p-6">
+              <h3 className="text-lg font-bold tracking-tight text-charcoal-navy dark:text-white">
+                {r.title}
+              </h3>
+              <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase dark:text-white/40">
+                <div className="flex items-center gap-1.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                   <span>Tickets sold: coming soon</span>
-                  <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
                 </div>
+                <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+              </div>
                 <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
                   <div
                     className="h-full bg-dragon-orange"
@@ -103,6 +93,7 @@ export default async function RafflesPage() {
         </div>
       ) : null}
     </Container>
+    </div>
   );
 }
 

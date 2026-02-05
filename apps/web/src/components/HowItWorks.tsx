@@ -6,9 +6,13 @@ import { Container } from "./Container";
 const Section = styled.section`
   background: #11181d;
   color: white;
-  padding: 8rem 0;
+  padding: 4rem 0;
   position: relative;
   overflow: hidden;
+
+  @media (min-width: 768px) {
+    padding: 8rem 0;
+  }
 
   &::before {
     content: "";
@@ -18,10 +22,12 @@ const Section = styled.section`
     width: 100%;
     height: 100%;
     background: radial-gradient(
-      circle at 80% 20%,
-      rgba(229, 83, 26, 0.05),
-      transparent 50%
-    );
+        circle at 80% 20%,
+        rgba(229, 83, 26, 0.05),
+        transparent 50%
+      ),
+      url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+    opacity: 0.15;
     pointer-events: none;
   }
 `;
@@ -40,9 +46,14 @@ const Grid = styled.div`
 const StepCard = styled.div`
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 2rem;
-  padding: 2.5rem;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
   transition: all 0.3s ease;
+
+  @media (min-width: 768px) {
+    border-radius: 2rem;
+    padding: 2.5rem;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.05);

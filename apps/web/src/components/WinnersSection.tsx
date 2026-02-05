@@ -5,8 +5,12 @@ import { Container } from "./Container";
 import Image from "next/image";
 
 const Section = styled.section`
-  padding: 8rem 0;
+  padding: 4rem 0;
   background: #f6f2ed;
+
+  @media (min-width: 768px) {
+    padding: 8rem 0;
+  }
 `;
 
 const WinnerCard = styled.div`
@@ -14,12 +18,38 @@ const WinnerCard = styled.div`
   border-radius: 2rem;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border: 1px solid rgba(0, 0, 0, 0.03);
+  position: relative;
 
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+    border-color: rgba(229, 83, 26, 0.2);
+  }
+`;
+
+const VerifiedBadge = styled.div`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  background: #00b67a;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 10px rgba(0, 182, 122, 0.3);
+
+  svg {
+    width: 10px;
+    height: 10px;
   }
 `;
 
@@ -27,6 +57,13 @@ const ImageWrapper = styled.div`
   position: relative;
   aspect-ratio: 4/3;
   width: 100%;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.4) 100%);
+  }
 `;
 
 const Content = styled.div`
@@ -115,9 +152,15 @@ export function WinnersSection() {
           </h3>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 px-4 sm:px-0">
           {winners.map((winner, i) => (
             <WinnerCard key={i}>
+              <VerifiedBadge>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Verified Winner
+              </VerifiedBadge>
               <ImageWrapper>
                 <Image
                   src={winner.image}

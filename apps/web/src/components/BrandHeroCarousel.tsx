@@ -9,12 +9,12 @@ import { Container } from "./Container";
 const CarouselWrapper = styled.section`
   position: relative;
   width: 100%;
-  aspect-ratio: 21/9;
+  aspect-ratio: 16/9;
   background: #0a0a0a;
   overflow: hidden;
   
-  @media (max-width: 768px) {
-    aspect-ratio: 16/9;
+  @media (min-width: 768px) {
+    aspect-ratio: 21/9;
   }
 `;
 
@@ -134,7 +134,7 @@ export function BrandHeroCarousel() {
             <Overlay />
             <SlideContent>
               <Container>
-                <h2 className="text-2xl font-black uppercase tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
+                <h2 className="text-xl font-black uppercase tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl px-4">
                   {slide.title}
                 </h2>
               </Container>
