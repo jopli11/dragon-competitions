@@ -6,22 +6,38 @@ import styled from "@emotion/styled";
 import { BrandButton, BrandSectionHeading } from "@/lib/styles";
 import Image from "next/image";
 import { BrandHeroCarousel } from "@/components/BrandHeroCarousel";
+import { HowItWorks } from "@/components/HowItWorks";
+import { WinnersSection } from "@/components/WinnersSection";
 
 const CountdownContainer = styled.div`
-  background: #1f2a33;
-  border-radius: 2rem;
-  padding: 1.5rem 3rem;
+  background: linear-gradient(135deg, #1f2a33 0%, #11181d 100%);
+  border-radius: 1.5rem;
+  padding: 1rem 2.5rem;
   display: inline-flex;
-  gap: 2rem;
-  margin-top: -2rem;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: -2.5rem;
   position: relative;
   z-index: 20;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 15px 35px -8px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(229, 83, 26, 0.1);
+  border: 1px solid rgba(229, 83, 26, 0.2);
 
-  @media (max-width: 640px) {
-    padding: 1rem 1.5rem;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 1.6rem;
+    background: linear-gradient(to right, #e5531a, #c43a12, transparent, transparent);
+    z-index: -1;
+    opacity: 0.4;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 1.5rem;
     gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 `;
 
@@ -29,17 +45,33 @@ const CountdownItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 3rem;
+
   .value {
     font-size: 1.5rem;
-    font-weight: 800;
+    font-weight: 900;
     color: white;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 10px rgba(229, 83, 26, 0.2);
   }
   .label {
     font-size: 0.625rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
+    color: #e5531a;
     letter-spacing: 0.1em;
+    margin-top: 0.25rem;
+  }
+`;
+
+const CountdownDivider = styled.div`
+  height: 2rem;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1), transparent);
+  
+  @media (max-width: 768px) {
+    display: none;
   }
 `;
 
@@ -81,25 +113,28 @@ export default function Home() {
             <span className="value">0</span>
             <span className="label">Days</span>
           </CountdownItem>
+          <CountdownDivider />
           <CountdownItem>
             <span className="value">12</span>
             <span className="label">Hours</span>
           </CountdownItem>
+          <CountdownDivider />
           <CountdownItem>
             <span className="value">34</span>
             <span className="label">Mins</span>
           </CountdownItem>
+          <CountdownDivider />
           <CountdownItem>
             <span className="value">08</span>
             <span className="label">Secs</span>
           </CountdownItem>
           <div className="hidden h-10 w-px bg-white/10 sm:block" />
           <div className="hidden flex-col justify-center text-left sm:flex">
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">
-              Until the next
+            <span className="text-[10px] font-black text-dragon-orange uppercase tracking-[0.15em]">
+              Next Draw
             </span>
-            <span className="text-xs font-bold text-white uppercase">
-              Competition Ends
+            <span className="text-sm font-black text-white uppercase leading-none">
+              Ending Soon
             </span>
           </div>
         </CountdownContainer>
@@ -195,6 +230,9 @@ export default function Home() {
           ))}
         </div>
       </Container>
+
+      <HowItWorks />
+      <WinnersSection />
     </div>
   );
 }
