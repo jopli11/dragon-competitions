@@ -14,11 +14,12 @@ if (!admin.apps.length) {
         privateKey,
       }),
     });
+  } else if (projectId) {
+    // Fallback for local development or build time if projectId is present
+    admin.initializeApp({ projectId });
   } else {
-    // Fallback for local development if using FIREBASE_AUTH_EMULATOR_HOST or similar
-    if (process.env.NODE_ENV === "development" && projectId) {
-      admin.initializeApp({ projectId });
-    }
+    // Last resort for build time to avoid crashing
+    admin.initializeApp({ projectId: "placeholder-project-id" });
   }
 }
 

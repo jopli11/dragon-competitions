@@ -1,0 +1,42 @@
+---
+description: Enforce React and Next.js best practices for performance and code quality.
+globs: apps/web/src/**/*.{ts,tsx}
+---
+
+# React Best Practices
+
+Always follow the official Vercel React Best Practices when implementing or refactoring components and hooks in this project.
+
+## Core Directives
+
+### 1. Eliminating Waterfalls (CRITICAL)
+- **Parallelize Awaits**: Use `Promise.all()` for independent operations.
+- **Defer Await**: Move `await` into the specific branches where the data is actually used.
+- **API Routes**: Start independent promises immediately at the top of the handler.
+
+### 2. Bundle Size Optimization (CRITICAL)
+- **Direct Imports**: Avoid barrel files. Import directly from source (e.g., `import Button from '@mui/material/Button'`).
+- **Dynamic Imports**: Use `next/dynamic` for heavy components like editors or complex charts.
+
+### 3. Server-Side Performance (HIGH)
+- **Authenticate Actions**: Always verify authorization *inside* every `"use server"` function.
+- **Minimize Serialization**: Only pass the specific fields needed by the client from RSC to Client Components.
+- **Composition**: Use component composition to parallelize data fetching in the RSC tree.
+
+### 4. Re-rendering & State (MEDIUM)
+- **Derived State**: Compute values during render; do not use `useEffect` to sync state from props.
+- **Functional Updates**: Use `setCount(c => c + 1)` to prevent stale closure bugs.
+- **Lazy Initialization**: Use `useState(() => compute())` for expensive initial state.
+
+### 5. JavaScript & Rendering (MEDIUM)
+- **Index Maps**: Use a `Map` for repeated lookups instead of repeated `.find()` calls.
+- **Layout Thrashing**: Batch DOM reads and writes; never interleave them.
+- **SVG Optimization**: Animate SVG wrappers (divs) instead of the SVG element itself for hardware acceleration.
+
+### 6. Styling (Emotion CSS)
+- Prefer `styled` components for reusable UI elements.
+- Use the `css` prop for one-off or conditional styles.
+- Keep styles close to the component definition.
+
+---
+*Full rules are available in the installed agent skill at `~/.agents/skills/vercel-react-best-practices/AGENTS.md`.*

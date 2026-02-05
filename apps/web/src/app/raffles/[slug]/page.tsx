@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { AnimatedIn } from "@/components/AnimatedIn";
 import { Container } from "@/components/Container";
 import { Countdown } from "@/components/Countdown";
 import { SkillQuestionCard } from "@/components/SkillQuestionCard";
@@ -40,7 +39,7 @@ export default async function RaffleDetailPage({
       <Container>
         <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr] lg:items-start">
           <div>
-            <AnimatedIn>
+            <div>
               <p className="text-xs font-medium text-foreground/60">
                 Tickets from {formatGBPFromPence(raffle.ticketPricePence)}
               </p>
@@ -54,9 +53,9 @@ export default async function RaffleDetailPage({
                 <div className="h-1 w-1 rounded-full bg-foreground/30" />
                 <div>Tickets sold: coming soon</div>
               </div>
-            </AnimatedIn>
+            </div>
 
-            <AnimatedIn delay={0.08} className="mt-8">
+            <div className="mt-8">
               <div className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-black/5 bg-black/5 dark:border-white/10 dark:bg-white/10">
                 {raffle.heroImageUrl ? (
                   <Image
@@ -69,9 +68,9 @@ export default async function RaffleDetailPage({
                   />
                 ) : null}
               </div>
-            </AnimatedIn>
+            </div>
 
-            <AnimatedIn delay={0.12} className="mt-8">
+            <div className="mt-8">
               <section className="rounded-3xl border border-black/5 bg-background p-6 shadow-sm dark:border-white/10">
                 <h2 className="text-base font-semibold tracking-tight">
                   About this raffle
@@ -81,15 +80,16 @@ export default async function RaffleDetailPage({
                   rules will render here next.
                 </p>
               </section>
-            </AnimatedIn>
+            </div>
           </div>
 
-          <AnimatedIn delay={0.1} className="lg:sticky lg:top-24">
+          <div className="lg:sticky lg:top-24">
             <SkillQuestionCard
+              slug={raffle.slug}
               question={raffle.skillQuestion}
               options={raffle.answerOptions}
             />
-          </AnimatedIn>
+          </div>
         </div>
       </Container>
     </div>

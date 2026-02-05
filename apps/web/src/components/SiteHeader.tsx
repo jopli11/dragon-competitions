@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatedIn } from "@/components/AnimatedIn";
 import { Container } from "@/components/Container";
 
 export function SiteHeader() {
@@ -29,14 +28,14 @@ export function SiteHeader() {
           </Link>
         </nav>
 
-        <AnimatedIn delay={0.05}>
+        <div className="flex items-center gap-4">
           <Link
             href="/raffles"
             className="inline-flex h-10 items-center justify-center rounded-full bg-foreground px-4 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
           >
             View raffles
           </Link>
-        </AnimatedIn>
+        </div>
       </Container>
     </header>
   );

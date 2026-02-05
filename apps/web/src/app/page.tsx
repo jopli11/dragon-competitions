@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AnimatedIn } from "@/components/AnimatedIn";
 import { Container } from "@/components/Container";
 
 export default function Home() {
@@ -8,7 +7,7 @@ export default function Home() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(1000px_500px_at_50%_0%,color-mix(in_oklab,var(--foreground)_10%,transparent),transparent)]" />
 
       <Container className="relative py-16 sm:py-20">
-        <AnimatedIn>
+        <div>
           <p className="text-sm font-medium text-foreground/70">
             UK skill-based competitions
           </p>
@@ -35,32 +34,32 @@ export default function Home() {
               How it works
             </Link>
           </div>
-        </AnimatedIn>
+        </div>
 
         <div className="mt-16 grid gap-4 sm:grid-cols-3">
-          <AnimatedIn delay={0.05} className="rounded-2xl border border-black/5 bg-background/60 p-6 shadow-sm dark:border-white/10">
+          <div className="rounded-2xl border border-black/5 bg-background/60 p-6 shadow-sm dark:border-white/10">
             <p className="text-sm font-semibold">1) Pick a raffle</p>
             <p className="mt-2 text-sm text-foreground/70">
               Each competition has its own ticket price, prize details, and
               countdown.
             </p>
-          </AnimatedIn>
-          <AnimatedIn delay={0.1} className="rounded-2xl border border-black/5 bg-background/60 p-6 shadow-sm dark:border-white/10">
+          </div>
+          <div className="rounded-2xl border border-black/5 bg-background/60 p-6 shadow-sm dark:border-white/10">
             <p className="text-sm font-semibold">2) Answer correctly</p>
             <p className="mt-2 text-sm text-foreground/70">
               UK skill question gate with up to three possible answers.
             </p>
-          </AnimatedIn>
-          <AnimatedIn delay={0.15} className="rounded-2xl border border-black/5 bg-background/60 p-6 shadow-sm dark:border-white/10">
+          </div>
+          <div className="rounded-2xl border border-black/5 bg-background/60 p-6 shadow-sm dark:border-white/10">
             <p className="text-sm font-semibold">3) Buy tickets</p>
             <p className="mt-2 text-sm text-foreground/70">
               Pay securely, get a confirmation email, and keep an eye on tickets
               sold.
             </p>
-          </AnimatedIn>
+          </div>
         </div>
 
-        <AnimatedIn delay={0.2} className="mt-14 rounded-3xl border border-black/5 bg-foreground/3 p-8 dark:border-white/10 dark:bg-white/6">
+        <div className="mt-14 rounded-3xl border border-black/5 bg-foreground/3 p-8 dark:border-white/10 dark:bg-white/6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold tracking-tight">
@@ -77,7 +76,7 @@ export default function Home() {
               Go to raffles
             </Link>
           </div>
-        </AnimatedIn>
+        </div>
       </Container>
     </div>
   );

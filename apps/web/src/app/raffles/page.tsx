@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatedIn } from "@/components/AnimatedIn";
 import { Container } from "@/components/Container";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { isContentfulConfigured } from "@/lib/contentful/publicClient";
@@ -33,18 +32,17 @@ export default async function RafflesPage() {
 
   return (
     <Container className="py-16">
-      <AnimatedIn>
+      <div>
         <h1 className="text-3xl font-semibold tracking-tight">Raffles</h1>
         <p className="mt-2 text-sm text-foreground/70">
           Answer correctly, pick your ticket quantity, and enter securely.
         </p>
-      </AnimatedIn>
+      </div>
 
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {raffles.map((r, idx) => (
-          <AnimatedIn
+        {raffles.map((r) => (
+          <div
             key={r.id}
-            delay={0.04 * idx}
             className="group overflow-hidden rounded-2xl border border-black/5 bg-background shadow-sm transition-shadow hover:shadow-md dark:border-white/10"
           >
             <Link href={`/raffles/${r.slug}`} className="block">
@@ -81,7 +79,7 @@ export default async function RafflesPage() {
                 </div>
               </div>
             </Link>
-          </AnimatedIn>
+          </div>
         ))}
       </div>
 
