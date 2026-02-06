@@ -11,7 +11,7 @@ export default function EmotionRegistry({
   children: any;
 }) {
   const [cache] = useState(() => {
-    const cache = createCache({ key: "css" });
+    const cache = createCache({ key: "css", prepend: true });
     cache.compat = true;
     return cache;
   });

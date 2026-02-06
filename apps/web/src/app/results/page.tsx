@@ -89,17 +89,17 @@ export default function DrawResultsPage() {
                 </div>
               </div>
               <div className="p-6">
-                <div className="flex items-center justify-between border-b border-black/5 pb-4 dark:border-white/10">
-                  <span className="text-xs font-bold uppercase text-charcoal-navy/50 dark:text-white/50">Winner</span>
-                  <span className="font-black text-charcoal-navy dark:text-white">{result.winner}</span>
+                <div className="flex items-center justify-between border-b border-black/5 pb-4">
+                  <span className="text-xs font-bold uppercase text-charcoal-navy/50">Winner</span>
+                  <span className="font-black text-charcoal-navy">{result.winner}</span>
                 </div>
                 <div className="flex items-center justify-between pt-4">
                   <div>
-                    <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50 dark:text-white/50">Draw Date</span>
-                    <span className="text-sm font-bold text-charcoal-navy/80 dark:text-white/80">{result.date}</span>
+                    <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50">Draw Date</span>
+                    <span className="text-sm font-bold text-charcoal-navy/80">{result.date}</span>
                   </div>
                   <div className="text-right">
-                    <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50 dark:text-white/50">Winning Ticket</span>
+                    <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50">Winning Ticket</span>
                     <span className="text-sm font-black text-dragon-orange">#{result.ticket}</span>
                   </div>
                 </div>

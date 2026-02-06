@@ -137,15 +137,15 @@ export default function WinnersPage() {
                 <h3 className="text-sm font-black text-dragon-red uppercase leading-tight min-h-[2.5rem] flex items-center justify-center">
                   {winner.prize}
                 </h3>
-                <div className="mt-4 pt-4 border-t border-black/5 dark:border-white/10">
-                  <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50 dark:text-white/50">Winner</span>
-                  <span className="text-lg font-black text-charcoal-navy dark:text-white">{winner.winner}</span>
+                <div className="mt-4 pt-4 border-t border-black/5">
+                  <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50">Winner</span>
+                  <span className="text-lg font-black text-charcoal-navy">{winner.winner}</span>
                 </div>
                 <div className="mt-2">
-                  <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50 dark:text-white/50">Winning Ticket</span>
+                  <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50">Winning Ticket</span>
                   <span className="text-sm font-bold text-dragon-orange">#{winner.ticket}</span>
                 </div>
-                <p className="mt-4 text-[10px] font-bold text-charcoal-navy/40 dark:text-white/40 uppercase">{winner.date}</p>
+                <p className="mt-4 text-[10px] font-bold text-charcoal-navy/40 uppercase">{winner.date}</p>
               </div>
             </WinnerCard>
           ))}

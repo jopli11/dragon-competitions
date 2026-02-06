@@ -34,22 +34,6 @@ const OptionButton = styled.button<{ active: boolean; isWrong: boolean }>`
     border-color: ${({ active }) => (active ? "#e5531a" : "rgba(229, 83, 26, 0.3)")};
     background-color: ${({ active }) => (active ? "" : "rgba(229, 83, 26, 0.02)")};
   }
-
-  @media (prefers-color-scheme: dark) {
-    background-color: ${({ active, isWrong }) =>
-      isWrong && active
-        ? "rgba(239, 68, 68, 0.1)"
-        : active
-        ? "rgba(229, 83, 26, 0.1)"
-        : "#161616"};
-    color: #f6f2ed;
-    border-color: ${({ active, isWrong }) =>
-      isWrong && active
-        ? "#ef4444"
-        : active
-        ? "#e5531a"
-        : "rgba(255, 255, 255, 0.1)"};
-  }
 `;
 
 const QuestionHeading = styled.h2`
@@ -57,9 +41,6 @@ const QuestionHeading = styled.h2`
   font-weight: 700;
   color: #1f2a33;
   letter-spacing: -0.01em;
-  @media (prefers-color-scheme: dark) {
-    color: #f6f2ed;
-  }
 `;
 
 export function SkillQuestionCard({
@@ -147,8 +128,8 @@ export function SkillQuestionCard({
 
   if (quizPassId) {
     return (
-      <section className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand dark:border-white/10 dark:bg-[#161616]">
-        <h2 className="text-lg font-bold tracking-tight text-green-600 dark:text-green-500">
+      <section className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand">
+        <h2 className="text-lg font-bold tracking-tight text-green-600">
           ✓ Correct Answer!
         </h2>
         <p className="mt-2 text-sm text-foreground/70">
@@ -159,7 +140,7 @@ export function SkillQuestionCard({
           <button
             type="button"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/10 text-xl font-bold hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/10 text-xl font-bold hover:bg-black/5"
           >
             -
           </button>
@@ -167,7 +148,7 @@ export function SkillQuestionCard({
           <button
             type="button"
             onClick={() => setQuantity(Math.min(100, quantity + 1))}
-            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/10 text-xl font-bold hover:bg-black/5 dark:border-white/15 dark:hover:bg-white/10"
+            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black/10 text-xl font-bold hover:bg-black/5"
           >
             +
           </button>
@@ -194,7 +175,7 @@ export function SkillQuestionCard({
   return (
     <section
       id="skill-question"
-      className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand dark:border-white/10 dark:bg-[#161616]"
+      className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand"
     >
       <QuestionHeading>Skill question</QuestionHeading>
       <p className="mt-2 text-sm text-foreground/70">{question}</p>
@@ -222,7 +203,7 @@ export function SkillQuestionCard({
                     ? isWrong
                       ? "border-red-500 bg-red-500 text-white"
                       : "border-dragon-orange bg-dragon-orange text-white"
-                    : "border-black/10 dark:border-white/10",
+                    : "border-black/10",
                 ].join(" ")}
                 aria-hidden="true"
               >

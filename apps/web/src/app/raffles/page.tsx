@@ -32,7 +32,7 @@ export default async function RafflesPage() {
         {raffles.map((r) => (
           <div
             key={r.id}
-            className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#161616]"
+            className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
           >
             <Link href={`/raffles/${r.slug}`} className="block">
               <div className="relative aspect-[4/3] overflow-hidden">
@@ -48,28 +48,28 @@ export default async function RafflesPage() {
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="h-full w-full bg-black/5 dark:bg-white/5" />
+                  <div className="h-full w-full bg-black/5" />
                 )}
               </div>
             <div className="p-6">
-              <h3 className="text-lg font-bold tracking-tight text-charcoal-navy dark:text-white">
+              <h3 className="text-lg font-bold tracking-tight text-charcoal-navy">
                 {r.title}
               </h3>
-              <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase dark:text-white/40">
+              <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase">
                 <div className="flex items-center gap-1.5">
                   <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                   <span>Tickets sold: coming soon</span>
                 </div>
                 <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
               </div>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/5">
                   <div
                     className="h-full bg-dragon-orange"
                     style={{ width: "10%" }}
                   />
                 </div>
                 <div className="mt-6 text-center">
-                  <p className="text-xs font-bold text-charcoal-navy/60 uppercase tracking-widest dark:text-white/60">
+                  <p className="text-xs font-bold text-charcoal-navy/60 uppercase tracking-widest">
                     Just <span className="text-dragon-orange">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
                   </p>
                   <BrandButton fullWidth className="mt-4">

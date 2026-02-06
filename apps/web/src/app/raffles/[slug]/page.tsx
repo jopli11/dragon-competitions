@@ -80,7 +80,7 @@ export default function RaffleDetailPage({
         <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-start">
           <div className="space-y-8">
             {/* Main Image Card */}
-            <div className="overflow-hidden rounded-[2.5rem] border border-black/5 bg-white shadow-xl dark:border-white/10 dark:bg-[#161616]">
+            <div className="overflow-hidden rounded-[2.5rem] border border-black/5 bg-white shadow-xl">
               <div className="relative aspect-[16/10]">
                 {raffle.heroImageUrl ? (
                   <Image
@@ -92,17 +92,17 @@ export default function RaffleDetailPage({
                     priority
                   />
                 ) : (
-                  <div className="h-full w-full bg-black/5 dark:bg-white/5" />
+                  <div className="h-full w-full bg-black/5" />
                 )}
               </div>
             </div>
 
             {/* About Section */}
             <GlassCard className="p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-charcoal-navy dark:text-white">
+              <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-charcoal-navy">
                 About this <GradientText>Raffle</GradientText>
               </h2>
-              <div className="mt-6 prose prose-sm max-w-none text-charcoal-navy/70 dark:text-white/70">
+              <div className="mt-6 prose prose-sm max-w-none text-charcoal-navy/70">
                 <p className="text-base sm:text-lg leading-relaxed">
                   Get ready for your chance to win this incredible {raffle.title}. 
                   This competition is skill-based, meaning you'll need to answer 
@@ -110,11 +110,11 @@ export default function RaffleDetailPage({
                 </p>
                 
                 <div className="mt-8 grid gap-4 sm:gap-6 sm:grid-cols-2">
-                  <div className="rounded-2xl bg-charcoal-navy/5 p-6 dark:bg-white/5">
+                  <div className="rounded-2xl bg-charcoal-navy/5 p-6">
                     <h4 className="font-bold uppercase tracking-wider text-dragon-orange text-xs mb-2">Guaranteed Draw</h4>
                     <p className="text-sm font-medium">This draw will take place regardless of ticket sales. No extensions, ever.</p>
                   </div>
-                  <div className="rounded-2xl bg-charcoal-navy/5 p-6 dark:bg-white/5">
+                  <div className="rounded-2xl bg-charcoal-navy/5 p-6">
                     <h4 className="font-bold uppercase tracking-wider text-dragon-orange text-xs mb-2">Instant Confirmation</h4>
                     <p className="text-sm font-medium">Receive your ticket numbers via email immediately after a successful entry.</p>
                   </div>
@@ -124,7 +124,7 @@ export default function RaffleDetailPage({
 
             {/* FAQ / Rules Placeholder */}
             <GlassCard className="p-6 sm:p-8">
-              <h2 className="text-xl font-black uppercase tracking-tight text-charcoal-navy dark:text-white">
+              <h2 className="text-xl font-black uppercase tracking-tight text-charcoal-navy">
                 Competition <GradientText>Rules</GradientText>
               </h2>
               <ul className="mt-6 space-y-4">
@@ -134,7 +134,7 @@ export default function RaffleDetailPage({
                   "Correct answer to the skill question is required for entry.",
                   "Draw will be conducted live on our social media channels.",
                 ].map((rule, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm font-medium text-charcoal-navy/60 dark:text-white/60">
+                  <li key={i} className="flex items-start gap-3 text-sm font-medium text-charcoal-navy/60">
                     <span className="flex-shrink-0 w-5 h-5 rounded-full bg-dragon-orange/10 flex items-center justify-center text-dragon-orange text-[10px] font-bold">
                       {i + 1}
                     </span>
@@ -154,18 +154,18 @@ export default function RaffleDetailPage({
             />
             
             <GlassCard className="text-center py-8">
-              <div className="text-xs font-bold uppercase tracking-[0.2em] text-charcoal-navy/40 dark:text-white/40 mb-2">
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-charcoal-navy/40 mb-2">
                 Tickets Sold
               </div>
-              <div className="text-3xl font-black text-charcoal-navy dark:text-white">
+              <div className="text-3xl font-black text-charcoal-navy">
                 -- <span className="text-lg text-charcoal-navy/20">/ --</span>
               </div>
-              <div className="mt-4 h-2 w-full bg-charcoal-navy/5 rounded-full overflow-hidden dark:bg-white/5">
+              <div className="mt-4 h-2 w-full bg-charcoal-navy/5 rounded-full overflow-hidden">
                 <div className="h-full bg-dragon-orange w-[15%] rounded-full shadow-[0_0_10px_rgba(229,83,26,0.5)]" />
               </div>
               <div className="mt-4 flex items-center justify-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-charcoal-navy/60 dark:text-white/60">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-charcoal-navy/60">
                   5 people entered in the last hour
                 </p>
               </div>
@@ -178,14 +178,14 @@ export default function RaffleDetailPage({
       </Container>
 
       {/* Mobile Floating CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/5 bg-white/80 p-4 backdrop-blur-lg lg:hidden dark:border-white/10 dark:bg-black/80">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-black/5 bg-white/80 p-4 backdrop-blur-lg lg:hidden">
         <Container>
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-charcoal-navy/40 dark:text-white/40">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-charcoal-navy/40">
                 Ticket Price
               </p>
-              <p className="text-lg font-black text-charcoal-navy dark:text-white">
+              <p className="text-lg font-black text-charcoal-navy">
                 {formatGBPFromPence(raffle.ticketPricePence)}
               </p>
             </div>

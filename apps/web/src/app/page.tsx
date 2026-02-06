@@ -9,6 +9,7 @@ import { BrandHeroCarousel } from "@/components/BrandHeroCarousel";
 import { HowItWorks } from "@/components/HowItWorks";
 import { WinnersSection } from "@/components/WinnersSection";
 import { TrustpilotBadge } from "@/components/TrustpilotBadge";
+import { useState, useEffect } from "react";
 
 const CountdownContainer = styled.div`
   background: linear-gradient(135deg, #1f2a33 0%, #11181d 100%);
@@ -134,6 +135,12 @@ const FilterButton = styled.button<{ active?: boolean }>`
 `;
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f6f2ed]">
       <BrandHeroCarousel />
@@ -141,22 +148,22 @@ export default function Home() {
       <div className="flex justify-center">
         <CountdownContainer>
           <CountdownItem>
-            <span className="value">0</span>
+            <span className="value">{mounted ? "0" : "--"}</span>
             <span className="label">Days</span>
           </CountdownItem>
           <CountdownDivider />
           <CountdownItem>
-            <span className="value">12</span>
+            <span className="value">{mounted ? "12" : "--"}</span>
             <span className="label">Hours</span>
           </CountdownItem>
           <CountdownDivider />
           <CountdownItem>
-            <span className="value">34</span>
+            <span className="value">{mounted ? "34" : "--"}</span>
             <span className="label">Mins</span>
           </CountdownItem>
           <CountdownDivider />
           <CountdownItem>
-            <span className="value">08</span>
+            <span className="value">{mounted ? "08" : "--"}</span>
             <span className="label">Secs</span>
           </CountdownItem>
           <div className="hidden h-10 w-px bg-white/10 sm:block" />
@@ -225,7 +232,7 @@ export default function Home() {
           ].map((item, i) => (
             <div
               key={i}
-              className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#161616]"
+              className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="relative aspect-[4/3] overflow-hidden">
                 <div className="absolute top-3 left-3 z-10 rounded-lg bg-dragon-orange/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
@@ -239,21 +246,21 @@ export default function Home() {
                 />
               </div>
               <div className="p-6">
-                <h3 className="text-lg font-bold tracking-tight text-charcoal-navy dark:text-white">
+                <h3 className="text-lg font-bold tracking-tight text-charcoal-navy">
                   {item.title}
                 </h3>
-                <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase dark:text-white/40">
+                <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase">
                   <span>{item.sold}</span>
                   <span>Ends: {item.ends}</span>
                 </div>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/5">
                   <div
                     className="h-full bg-dragon-orange"
                     style={{ width: "30%" }}
                   />
                 </div>
                 <div className="mt-6 text-center">
-                  <p className="text-xs font-bold text-charcoal-navy/60 uppercase tracking-widest dark:text-white/60">
+                  <p className="text-xs font-bold text-charcoal-navy/60 uppercase tracking-widest">
                     Just <span className="text-dragon-orange">{item.price}</span> per entry
                   </p>
                   <BrandButton fullWidth className="mt-4">

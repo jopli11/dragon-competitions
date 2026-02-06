@@ -6,7 +6,8 @@ import { GlassCard, GradientText, BrandSectionHeading, BrandLinkButton } from "@
 import Image from "next/image";
 
 const PageWrapper = styled.div`
-  min-h-screen bg-[#f6f2ed];
+  min-height: 100vh;
+  background: #f6f2ed;
   position: relative;
   overflow: hidden;
 `;
@@ -36,7 +37,7 @@ const Hero = styled.div`
     bottom: 0;
     left: 0;
     right: 0;
-    height: 150px;
+    height: 250px;
     background: linear-gradient(to bottom, transparent, #f6f2ed);
   }
 `;
@@ -127,10 +128,10 @@ export default function AboutPage() {
         <ContentGrid>
           <div className="space-y-8">
             <GlassCard className="!p-10">
-              <h2 className="text-3xl font-black uppercase tracking-tight text-charcoal-navy dark:text-white">
+              <h2 className="text-3xl font-black uppercase tracking-tight text-charcoal-navy">
                 Our <GradientText>Heritage</GradientText>
               </h2>
-              <div className="mt-8 space-y-6 text-charcoal-navy/70 dark:text-white/70 text-lg leading-relaxed">
+              <div className="mt-8 space-y-6 text-charcoal-navy/70 text-lg leading-relaxed">
                 <p>
                   Dragon Competitions was born from a passion for high-performance machinery and the desire to make premium experiences accessible to everyone. We saw a gap in the market for a truly transparent, UK-based platform that puts the community first.
                 </p>
@@ -158,11 +159,11 @@ export default function AboutPage() {
               <GlassCard>
                 <FeatureIcon>
                   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 21.355r-.39-.233A11.952 11.955 0 003.382 5.44M12 21.355l.39-.233A11.952 11.955 0 0020.618 5.44" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 21.355l-.39-.233A11.952 11.955 0 003.382 5.44M12 21.355l.39-.233A11.952 11.955 0 0020.618 5.44" />
                   </svg>
                 </FeatureIcon>
-                <h3 className="text-xl font-black uppercase tracking-tight text-charcoal-navy dark:text-white">UK Regulated</h3>
-                <p className="mt-3 text-sm text-charcoal-navy/60 dark:text-white/60 leading-relaxed">
+                <h3 className="text-xl font-black uppercase tracking-tight text-charcoal-navy">UK Regulated</h3>
+                <p className="mt-3 text-sm text-charcoal-navy/60 leading-relaxed">
                   Operating strictly under UK skill-based competition laws. Every draw is transparent and auditable.
                 </p>
               </GlassCard>
@@ -172,8 +173,8 @@ export default function AboutPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </FeatureIcon>
-                <h3 className="text-xl font-black uppercase tracking-tight text-charcoal-navy dark:text-white">Instant Wins</h3>
-                <p className="mt-3 text-sm text-charcoal-navy/60 dark:text-white/60 leading-relaxed">
+                <h3 className="text-xl font-black uppercase tracking-tight text-charcoal-navy">Instant Wins</h3>
+                <p className="mt-3 text-sm text-charcoal-navy/60 leading-relaxed">
                   Beyond our main draws, we offer instant win opportunities on select raffles for immediate excitement.
                 </p>
               </GlassCard>
@@ -219,7 +220,7 @@ export default function AboutPage() {
 
       <div className="py-20 text-center">
         <Container>
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-charcoal-navy/20 dark:text-white/10">
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-charcoal-navy/20">
             Dragon Competitions • UK Skill-Based Raffles
           </p>
         </Container>

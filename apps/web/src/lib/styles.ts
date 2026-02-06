@@ -206,11 +206,6 @@ export const BrandCard = styled.div`
     box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.12);
     border-color: rgba(229, 83, 26, 0.1);
   }
-
-  @media (prefers-color-scheme: dark) {
-    background: #161616;
-    border-color: rgba(255, 255, 255, 0.04);
-  }
 `;
 
 export const BrandBadge = styled.span`
@@ -231,10 +226,6 @@ export const BrandSectionHeading = styled.h2`
   letter-spacing: -0.02em;
   color: #1f2a33;
   text-transform: uppercase;
-
-  @media (prefers-color-scheme: dark) {
-    color: #f6f2ed;
-  }
 `;
 
 export const GlassCard = styled.div`
@@ -243,11 +234,6 @@ export const GlassCard = styled.div`
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
   padding: 2rem;
-
-  @media (prefers-color-scheme: dark) {
-    background: #161616;
-    border-color: rgba(255, 255, 255, 0.05);
-  }
 `;
 
 export const GradientText = styled.span`
