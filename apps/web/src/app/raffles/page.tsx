@@ -20,7 +20,7 @@ export default async function RafflesPage() {
     <div className="min-h-screen bg-[#f6f2ed] py-16">
       <Container>
         <div className="text-center">
-          <BrandSectionHeading className="!text-[#1f2a33] dark:!text-white">
+          <BrandSectionHeading className="!text-[#1f2a33]">
             Current <GradientText>Competitions</GradientText>
           </BrandSectionHeading>
           <p className="mt-4 text-charcoal-navy/60 font-medium uppercase tracking-widest text-sm">

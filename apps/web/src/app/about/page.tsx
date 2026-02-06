@@ -196,7 +196,7 @@ export default function AboutPage() {
               </div>
             </div>
             
-            <GlassCard className="bg-gradient-to-br from-[#e5531a] to-[#c43a12] !text-white border-none p-10 relative overflow-hidden">
+            <div className="rounded-[3rem] bg-gradient-to-br from-[#e5531a] to-[#c43a12] p-10 relative overflow-hidden shadow-2xl">
               <div className="relative z-10">
                 <h3 className="text-3xl font-black uppercase tracking-tight text-white">Ready to Win?</h3>
                 <p className="mt-4 text-white/90 text-lg font-medium">
@@ -213,7 +213,7 @@ export default function AboutPage() {
                   <path d="M12 0l3.09 9.5h9.91l-8.09 5.88 3.09 9.5-8.09-5.88-8.09 5.88 3.09-9.5-8.09-5.88h9.91z" />
                 </svg>
               </div>
-            </GlassCard>
+            </div>
           </div>
         </ContentGrid>
       </Container>
