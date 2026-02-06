@@ -72,16 +72,19 @@ const Content = styled.div`
 `;
 
 const PrizeTitle = styled.h3`
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 900;
   color: #c43a12;
   text-transform: uppercase;
   line-height: 1.2;
   margin-bottom: 1.5rem;
-  min-height: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 2.8rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 `;
 
 const WinnerMeta = styled.div`

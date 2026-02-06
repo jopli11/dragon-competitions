@@ -134,7 +134,7 @@ export default function WinnersPage() {
                 />
               </div>
               <div className="p-6 text-center">
-                <h3 className="text-sm font-black text-dragon-red uppercase leading-tight min-h-[2.5rem] flex items-center justify-center">
+                <h3 className="text-sm font-black text-dragon-red uppercase leading-tight h-[2.5rem] flex items-center justify-center overflow-hidden text-ellipsis line-clamp-2">
                   {winner.prize}
                 </h3>
                 <div className="mt-4 pt-4 border-t border-black/5">
