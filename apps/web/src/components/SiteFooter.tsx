@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "@/components/Container";
 import styled from "@emotion/styled";
 
 const FooterWrapper = styled.footer`
-  background: #1f2a33;
+  background: #0a2540;
   color: white;
   padding-top: 4rem;
   padding-bottom: 2rem;
@@ -17,7 +18,7 @@ const FooterLink = styled(Link)`
   font-size: 0.875rem;
   transition: color 0.2s;
   &:hover {
-    color: #e5531a;
+    color: #0070e0;
   }
 `;
 
@@ -27,15 +28,20 @@ export function SiteFooter() {
       <Container>
         <div className="grid gap-12 md:grid-cols-4">
           <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-dragon-orange to-dragon-red shadow-lg">
-                <span className="text-lg font-bold text-white">D</span>
+            <Link href="/" className="flex items-center gap-0">
+              <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex items-center justify-center">
+                <Image
+                  src="/logo.png"
+                  alt="Dragon Competitions"
+                  fill
+                  className="object-contain"
+                />
               </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-lg font-bold tracking-tight uppercase">
+              <div className="flex flex-col justify-center leading-[0.9] -ml-2 sm:-ml-4">
+                <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase">
                   Dragon
                 </span>
-                <span className="text-[10px] font-medium tracking-[0.2em] text-dragon-orange uppercase">
+                <span className="text-[10px] sm:text-[14px] font-medium tracking-[0.15em] text-brand-secondary uppercase">
                   Competitions
                 </span>
               </div>
@@ -86,7 +92,7 @@ export function SiteFooter() {
                   </svg>
                 )},
               ].map((social) => (
-                <div key={social.name} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#e5531a] transition-colors cursor-pointer border border-white/5" title={social.name}>
+                <div key={social.name} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#0070e0] transition-colors cursor-pointer border border-white/5" title={social.name}>
                   {social.icon}
                 </div>
               ))}

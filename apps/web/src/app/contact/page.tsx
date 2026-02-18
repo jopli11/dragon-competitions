@@ -6,7 +6,7 @@ import { GlassCard, GradientText, BrandSectionHeading, BrandButton } from "@/lib
 
 const PageWrapper = styled.div`
   min-height: 100vh;
-  background: #f6f2ed;
+  background: white;
   padding: 4rem 0 8rem;
 `;
 
@@ -31,7 +31,7 @@ const Label = styled.label`
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #1f2a33;
+  color: #0a2540;
   margin-bottom: 0.5rem;
   padding-left: 0.5rem;
 `;
@@ -40,18 +40,18 @@ const Input = styled.input`
   width: 100%;
   padding: 1rem 1.5rem;
   border-radius: 1.25rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  background: rgba(31, 42, 51, 0.02);
+  border: 1px solid rgba(0, 48, 135, 0.05);
+  background: rgba(0, 48, 135, 0.02);
   font-size: 1rem;
   font-weight: 500;
-  color: #1f2a33;
+  color: #0a2540;
   transition: all 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: #e5531a;
+    border-color: #0070e0;
     background: white;
-    box-shadow: 0 0 0 4px rgba(229, 83, 26, 0.05);
+    box-shadow: 0 0 0 4px rgba(0, 112, 224, 0.05);
   }
 `;
 
@@ -59,20 +59,20 @@ const TextArea = styled.textarea`
   width: 100%;
   padding: 1rem 1.5rem;
   border-radius: 1.25rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  background: rgba(31, 42, 51, 0.02);
+  border: 1px solid rgba(0, 48, 135, 0.05);
+  background: rgba(0, 48, 135, 0.02);
   font-size: 1rem;
   font-weight: 500;
-  color: #1f2a33;
+  color: #0a2540;
   min-height: 150px;
   resize: vertical;
   transition: all 0.3s ease;
 
   &:focus {
     outline: none;
-    border-color: #e5531a;
+    border-color: #0070e0;
     background: white;
-    box-shadow: 0 0 0 4px rgba(229, 83, 26, 0.05);
+    box-shadow: 0 0 0 4px rgba(0, 112, 224, 0.05);
   }
 `;
 
@@ -86,14 +86,14 @@ const IconWrapper = styled.div`
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 1.25rem;
-  background: white;
+  background: #e6f2ff;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #e5531a;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  color: #0070e0;
+  box-shadow: 0 4px 12px rgba(0, 48, 135, 0.03);
   flex-shrink: 0;
-  border: 1px solid rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 112, 224, 0.1);
 
   svg {
     width: 1.5rem;
@@ -107,16 +107,16 @@ const InfoContent = styled.div`
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: rgba(31, 42, 51, 0.4);
+    color: rgba(10, 37, 64, 0.4);
     margin-bottom: 0.25rem;
   }
   .value {
     font-size: 1.125rem;
     font-weight: 800;
-    color: #1f2a33;
+    color: #0a2540;
   }
   .link {
-    color: #e5531a;
+    color: #0070e0;
     text-decoration: none;
     &:hover {
       text-decoration: underline;
@@ -130,7 +130,7 @@ export default function ContactPage() {
       <Container>
         <div className="text-center mb-12">
           <BrandSectionHeading>Get in <GradientText>Touch</GradientText></BrandSectionHeading>
-          <p className="mt-4 text-charcoal-navy/60 font-medium uppercase tracking-widest text-sm">
+          <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">
             Have a question or need help? We're here for you.
           </p>
         </div>
@@ -211,7 +211,7 @@ export default function ContactPage() {
               </InfoItem>
             </div>
 
-            <div className="rounded-[2rem] bg-gradient-to-br from-[#1f2a33] to-[#11181d] p-8 !text-white border border-white/5 shadow-xl relative overflow-hidden">
+            <div className="rounded-[2rem] bg-gradient-to-br from-brand-primary to-brand-secondary p-8 !text-white border border-white/5 shadow-xl relative overflow-hidden">
               <div className="relative z-10">
                 <h3 className="text-xl font-black uppercase tracking-tight text-white">Follow the Dragon</h3>
                 <p className="mt-4 text-white/60 text-sm font-medium leading-relaxed">
@@ -236,7 +236,7 @@ export default function ContactPage() {
                       </svg>
                     )},
                   ].map((social) => (
-                    <div key={social.name} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#e5531a] transition-colors cursor-pointer border border-white/5" title={social.name}>
+                    <div key={social.name} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-brand-secondary transition-colors cursor-pointer border border-white/5" title={social.name}>
                       {social.icon}
                     </div>
                   ))}

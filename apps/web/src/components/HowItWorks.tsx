@@ -4,7 +4,7 @@ import styled from "@emotion/styled";
 import { Container } from "./Container";
 
 const Section = styled.section`
-  background: #11181d;
+  background: #0a2540;
   color: white;
   padding: 4rem 0;
   position: relative;
@@ -17,17 +17,12 @@ const Section = styled.section`
   &::before {
     content: "";
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     background: radial-gradient(
-        circle at 80% 20%,
-        rgba(229, 83, 26, 0.05),
-        transparent 50%
-      ),
-      url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
-    opacity: 0.15;
+      circle at 50% 0%,
+      rgba(0, 112, 224, 0.15),
+      transparent 70%
+    );
     pointer-events: none;
   }
 `;
@@ -35,55 +30,68 @@ const Section = styled.section`
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 2rem;
+  gap: 1.5rem;
   margin-top: 4rem;
 
   @media (min-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 1024px) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 `;
 
 const StepCard = styled.div`
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-
-  @media (min-width: 768px) {
-    border-radius: 2rem;
-    padding: 2.5rem;
-  }
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 2rem;
+  padding: 2rem;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(229, 83, 26, 0.3);
-    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(0, 112, 224, 0.4);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, rgba(0, 112, 224, 0.1), transparent);
+    border-radius: 0 0 0 100%;
   }
 `;
 
 const IconWrapper = styled.div`
-  width: 4rem;
-  height: 4rem;
-  background: rgba(229, 83, 26, 0.1);
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(0, 112, 224, 0.15);
   border-radius: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  color: #e5531a;
-  border: 1px solid rgba(229, 83, 26, 0.2);
+  color: #0070e0;
+  border: 1px solid rgba(0, 112, 224, 0.2);
 
   svg {
-    width: 2rem;
-    height: 2rem;
+    width: 1.75rem;
+    height: 1.75rem;
   }
 `;
 
 const StepNumber = styled.span`
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 900;
-  color: #e5531a;
+  color: #0070e0;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   display: block;
@@ -91,15 +99,16 @@ const StepNumber = styled.span`
 `;
 
 const StepTitle = styled.h3`
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 800;
   margin-bottom: 1rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  color: white;
 `;
 
 const StepDescription = styled.p`
   color: rgba(255, 255, 255, 0.5);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   line-height: 1.6;
 `;
 
@@ -171,10 +180,10 @@ export function HowItWorks() {
     <Section>
       <Container>
         <div className="text-center">
-          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-dragon-orange">
+          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-brand-secondary">
             Process
           </h2>
-          <h3 className="mt-4 text-4xl font-black uppercase tracking-tight sm:text-5xl">
+          <h3 className="mt-4 text-4xl font-black uppercase tracking-tight sm:text-5xl text-white">
             How It Works
           </h3>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-white/50">

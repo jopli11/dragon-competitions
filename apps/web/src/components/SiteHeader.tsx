@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "@/components/Container";
 import styled from "@emotion/styled";
 import { BrandLinkButton } from "@/lib/styles";
@@ -10,12 +11,13 @@ const HeaderWrapper = styled.header`
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #1f2a33;
-  color: white;
+  background: white;
+  color: #0a2540;
   height: 4.5rem;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 48, 135, 0.05);
+  box-shadow: 0 2px 10px rgba(0, 48, 135, 0.03);
 
   @media (max-width: 768px) {
     height: 4rem;
@@ -24,11 +26,11 @@ const HeaderWrapper = styled.header`
 
 const NavLink = styled(Link)`
   font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  color: #0a2540;
   transition: color 0.2s;
   &:hover {
-    color: white;
+    color: #0070e0;
   }
 `;
 
@@ -42,17 +44,17 @@ const HeaderButton = styled(Link)`
   cursor: pointer;
   padding: 0.5rem 1.5rem;
   font-size: 0.8125rem;
-  background: linear-gradient(135deg, #e5531a, #c43a12);
+  background: linear-gradient(135deg, #003087, #0070e0);
   color: white;
   border: none;
-  box-shadow: 0 4px 15px rgba(229, 83, 26, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 48, 135, 0.2);
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(229, 83, 26, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 48, 135, 0.3);
     color: white;
   }
 
@@ -65,7 +67,7 @@ const HeaderButton = styled(Link)`
 const MobileMenuOverlay = styled.div<{ isOpen: boolean }>`
   position: fixed;
   inset: 0;
-  background: #1f2a33;
+  background: white;
   z-index: 90;
   display: flex;
   flex-direction: column;
@@ -77,18 +79,18 @@ const MobileMenuOverlay = styled.div<{ isOpen: boolean }>`
 const MobileNavLink = styled(Link)`
   font-size: 1.5rem;
   font-weight: 900;
-  color: white;
+  color: #0a2540;
   text-transform: uppercase;
   letter-spacing: -0.02em;
   padding: 1.5rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 48, 135, 0.05);
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   &::after {
     content: "→";
-    color: #e5531a;
+    color: #0070e0;
     font-size: 1.25rem;
   }
 `;
@@ -112,7 +114,7 @@ const HamburgerButton = styled.button<{ isOpen: boolean }>`
   div {
     width: 1.5rem;
     height: 2px;
-    background: white;
+    background: #0a2540;
     border-radius: 10px;
     transition: all 0.3s linear;
     position: relative;
@@ -156,15 +158,21 @@ export function SiteHeader() {
     <>
       <HeaderWrapper>
         <Container className="flex w-full items-center justify-between">
-          <Link href="/" className="group flex items-center gap-2 sm:gap-3" onClick={() => setIsOpen(false)}>
-            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-dragon-orange to-dragon-red shadow-lg">
-              <span className="text-base sm:text-lg font-bold text-white">D</span>
+          <Link href="/" className="group flex items-center gap-0" onClick={() => setIsOpen(false)}>
+            <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex items-center justify-center">
+              <Image
+                src="/logo.png"
+                alt="Dragon Competitions"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-base sm:text-lg font-bold tracking-tight uppercase">
+            <div className="flex flex-col justify-center leading-[0.9] -ml-2 sm:-ml-4">
+              <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase text-brand-midnight">
                 Dragon
               </span>
-              <span className="text-[8px] sm:text-[10px] font-medium tracking-[0.2em] text-dragon-orange uppercase">
+              <span className="text-[10px] sm:text-[14px] font-bold tracking-[0.15em] text-brand-secondary uppercase">
                 Competitions
               </span>
             </div>
@@ -181,7 +189,7 @@ export function SiteHeader() {
           <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/login"
-              className="hidden text-sm font-medium text-white/80 transition-colors hover:text-white sm:block"
+              className="hidden text-sm font-medium text-brand-midnight/80 transition-colors hover:text-brand-primary sm:block"
             >
               Login
             </Link>
@@ -196,6 +204,24 @@ export function SiteHeader() {
       </HeaderWrapper>
 
       <MobileMenuOverlay isOpen={isOpen}>
+        <div className="flex items-center gap-0 mb-12 px-2">
+          <div className="relative h-24 w-24 flex items-center justify-center">
+            <Image
+              src="/logo.png"
+              alt="Dragon Competitions"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <div className="flex flex-col justify-center leading-[0.9] -ml-4">
+            <span className="text-4xl font-black tracking-tighter uppercase text-brand-midnight">
+              Dragon
+            </span>
+            <span className="text-[16px] font-bold tracking-[0.15em] text-brand-secondary uppercase">
+              Competitions
+            </span>
+          </div>
+        </div>
         <nav className="flex flex-col">
           {navLinks.map((link) => (
             <MobileNavLink key={link.href} href={link.href} onClick={() => setIsOpen(false)}>
@@ -210,7 +236,7 @@ export function SiteHeader() {
           <BrandLinkButton fullWidth size="lg" href="/raffles" onClick={() => setIsOpen(false)}>
             View All Raffles
           </BrandLinkButton>
-          <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-widest text-white/20">
+          <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-widest text-brand-midnight/20">
             18+ Only • BeGambleAware
           </p>
         </div>

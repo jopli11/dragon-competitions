@@ -6,7 +6,7 @@ import { BrandSectionHeading, GradientText, GlassCard } from "@/lib/styles";
 
 const PageWrapper = styled.div`
   min-height: 100vh;
-  background: #f6f2ed;
+  background: white;
   padding: 4rem 0 8rem;
 `;
 
@@ -18,14 +18,14 @@ const Content = styled.div`
     font-size: 1.5rem;
     font-weight: 900;
     text-transform: uppercase;
-    color: #1f2a33;
+    color: #0a2540;
     margin-top: 3rem;
     margin-bottom: 1.5rem;
     letter-spacing: -0.01em;
   }
   
   p {
-    color: rgba(31, 42, 51, 0.7);
+    color: rgba(10, 37, 64, 0.7);
     line-height: 1.8;
     margin-bottom: 1.5rem;
     font-weight: 500;
@@ -35,7 +35,7 @@ const Content = styled.div`
     list-style: disc;
     padding-left: 1.5rem;
     margin-bottom: 1.5rem;
-    color: rgba(31, 42, 51, 0.7);
+    color: rgba(10, 37, 64, 0.7);
     
     li {
       margin-bottom: 0.75rem;
@@ -49,14 +49,14 @@ export default function PrivacyPage() {
       <Container>
         <div className="text-center">
           <BrandSectionHeading>Privacy <GradientText>Policy</GradientText></BrandSectionHeading>
-          <p className="mt-4 text-charcoal-navy/60 font-medium uppercase tracking-widest text-sm">
+          <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">
             Last Updated: February 5, 2026
           </p>
         </div>
 
         <Content>
           <GlassCard className="!p-10 !sm:p-16">
-            <p className="text-lg font-bold text-charcoal-navy">
+            <p className="text-lg font-bold text-brand-midnight">
               Your privacy is important to us. This policy explains how we collect and use your data.
             </p>
             

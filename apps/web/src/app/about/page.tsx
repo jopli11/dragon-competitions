@@ -7,13 +7,13 @@ import Image from "next/image";
 
 const PageWrapper = styled.div`
   min-height: 100vh;
-  background: #f6f2ed;
+  background: white;
   position: relative;
   overflow: hidden;
 `;
 
 const Hero = styled.div`
-  background: #1f2a33;
+  background: #0a2540;
   color: white;
   padding: 8rem 0 12rem;
   text-align: center;
@@ -25,9 +25,8 @@ const Hero = styled.div`
     position: absolute;
     inset: 0;
     background: 
-      radial-gradient(circle at 20% 30%, rgba(229, 83, 26, 0.15), transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(196, 58, 18, 0.1), transparent 40%),
-      url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+      radial-gradient(circle at 20% 30%, rgba(0, 112, 224, 0.15), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(0, 48, 135, 0.1), transparent 40%);
     opacity: 0.4;
   }
 
@@ -38,7 +37,7 @@ const Hero = styled.div`
     left: 0;
     right: 0;
     height: 250px;
-    background: linear-gradient(to bottom, transparent, #f6f2ed);
+    background: linear-gradient(to bottom, transparent, white);
   }
 `;
 
@@ -76,14 +75,14 @@ const StatCard = styled(GlassCard)`
   .value {
     font-size: 1.5rem;
     font-weight: 900;
-    color: #e5531a;
+    color: #0070e0;
   }
   
   .label {
     font-size: 0.625rem;
     font-weight: 800;
     text-transform: uppercase;
-    color: rgba(31, 42, 51, 0.4);
+    color: rgba(10, 37, 64, 0.4);
     letter-spacing: 0.1em;
   }
 `;
@@ -91,14 +90,14 @@ const StatCard = styled(GlassCard)`
 const FeatureIcon = styled.div`
   width: 3rem;
   height: 3rem;
-  background: rgba(229, 83, 26, 0.1);
+  background: #e6f2ff;
   border-radius: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #e5531a;
+  color: #0070e0;
   margin-bottom: 1.25rem;
-  border: 1px solid rgba(229, 83, 26, 0.2);
+  border: 1px solid rgba(0, 112, 224, 0.2);
 
   svg {
     width: 1.5rem;
@@ -111,7 +110,7 @@ export default function AboutPage() {
     <PageWrapper>
       <Hero>
         <Container>
-          <span className="text-sm font-black uppercase tracking-[0.4em] text-dragon-orange mb-4 block">
+          <span className="text-sm font-black uppercase tracking-[0.4em] text-brand-secondary mb-4 block">
             The Legend
           </span>
           <h1 className="text-5xl font-black uppercase tracking-tighter sm:text-7xl md:text-8xl">
@@ -196,14 +195,14 @@ export default function AboutPage() {
               </div>
             </div>
             
-            <div className="rounded-[3rem] bg-gradient-to-br from-[#e5531a] to-[#c43a12] p-10 relative overflow-hidden shadow-2xl">
+            <div className="rounded-[3rem] bg-gradient-to-br from-brand-primary to-brand-secondary p-10 relative overflow-hidden shadow-2xl">
               <div className="relative z-10">
                 <h3 className="text-3xl font-black uppercase tracking-tight text-white">Ready to Win?</h3>
                 <p className="mt-4 text-white/90 text-lg font-medium">
                   Join thousands of happy winners and start your journey today.
                 </p>
                 <div className="mt-8">
-                  <BrandLinkButton variant="secondary" size="lg" href="/raffles" className="!bg-white !text-[#e5531a] hover:!bg-[#f6f2ed]">
+                  <BrandLinkButton variant="secondary" size="lg" href="/raffles" className="!bg-white !text-brand-primary hover:!bg-brand-accent">
                     Explore Live Raffles
                   </BrandLinkButton>
                 </div>
@@ -220,7 +219,7 @@ export default function AboutPage() {
 
       <div className="py-20 text-center">
         <Container>
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-charcoal-navy/20">
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-midnight/20">
             Dragon Competitions • UK Skill-Based Raffles
           </p>
         </Container>

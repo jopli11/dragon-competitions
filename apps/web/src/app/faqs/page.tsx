@@ -7,7 +7,7 @@ import { GlassCard, GradientText, BrandSectionHeading, BrandLinkButton } from "@
 
 const PageWrapper = styled.div`
   min-height: 100vh;
-  background: #f6f2ed;
+  background: white;
   padding: 4rem 0 8rem;
 `;
 
@@ -16,12 +16,12 @@ const AccordionItem = styled.div<{ isOpen: boolean }>`
   border-radius: 1.5rem;
   overflow: hidden;
   background: white;
-  border: 1px solid ${({ isOpen }) => (isOpen ? "rgba(229, 83, 26, 0.3)" : "rgba(0, 0, 0, 0.05)")};
-  box-shadow: ${({ isOpen }) => (isOpen ? "0 10px 30px rgba(229, 83, 26, 0.05)" : "0 4px 12px rgba(0, 0, 0, 0.02)")};
+  border: 1px solid ${({ isOpen }) => (isOpen ? "rgba(0, 112, 224, 0.3)" : "rgba(0, 48, 135, 0.05)")};
+  box-shadow: ${({ isOpen }) => (isOpen ? "0 10px 30px rgba(0, 112, 224, 0.05)" : "0 4px 12px rgba(0, 48, 135, 0.02)")};
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    border-color: rgba(229, 83, 26, 0.2);
+    border-color: rgba(0, 112, 224, 0.2);
     transform: translateY(-2px);
   }
 `;
@@ -41,7 +41,7 @@ const AccordionHeader = styled.button`
 const Question = styled.span`
   font-size: 1.125rem;
   font-weight: 800;
-  color: #1f2a33;
+  color: #0a2540;
   letter-spacing: -0.01em;
 `;
 
@@ -49,8 +49,8 @@ const Icon = styled.span<{ isOpen: boolean }>`
   width: 2rem;
   height: 2rem;
   border-radius: 9999px;
-  background: ${({ isOpen }) => (isOpen ? "#e5531a" : "rgba(31, 42, 51, 0.05)")};
-  color: ${({ isOpen }) => (isOpen ? "white" : "#1f2a33")};
+  background: ${({ isOpen }) => (isOpen ? "#0070e0" : "rgba(0, 48, 135, 0.05)")};
+  color: ${({ isOpen }) => (isOpen ? "white" : "#0a2540")};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +65,7 @@ const AccordionContent = styled.div<{ isOpen: boolean }>`
   padding: ${({ isOpen }) => (isOpen ? "0 2rem 2rem" : "0 2rem")};
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: rgba(31, 42, 51, 0.6);
+  color: rgba(10, 37, 64, 0.6);
   font-size: 1rem;
   line-height: 1.6;
   font-weight: 500;
@@ -74,7 +74,7 @@ const AccordionContent = styled.div<{ isOpen: boolean }>`
 const CategoryTitle = styled.h3`
   font-size: 0.875rem;
   font-weight: 900;
-  color: #e5531a;
+  color: #0070e0;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   margin-bottom: 2rem;
@@ -87,7 +87,7 @@ const CategoryTitle = styled.h3`
     content: "";
     flex: 1;
     height: 1px;
-    background: rgba(229, 83, 26, 0.1);
+    background: rgba(0, 112, 224, 0.1);
   }
 `;
 
@@ -157,7 +157,7 @@ export default function FaqsPage() {
       <Container>
         <div className="text-center mb-12">
           <BrandSectionHeading>Frequently Asked <GradientText>Questions</GradientText></BrandSectionHeading>
-          <p className="mt-4 text-charcoal-navy/60 font-medium uppercase tracking-widest text-sm">
+          <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">
             Everything you need to know about winning with Dragon.
           </p>
         </div>
@@ -189,14 +189,14 @@ export default function FaqsPage() {
           ))}
         </div>
 
-        <div className="mt-20 rounded-[3rem] text-center bg-gradient-to-br from-charcoal-navy to-[#11181d] p-12 relative overflow-hidden shadow-2xl">
+        <div className="mt-20 rounded-[3rem] text-center bg-gradient-to-br from-brand-primary to-brand-secondary p-12 relative overflow-hidden shadow-2xl">
           <div className="relative z-10">
             <h3 className="text-2xl font-black uppercase tracking-tight text-white">Still have questions?</h3>
             <p className="mt-4 text-white/60 font-medium">
               Our support team is always here to help you.
             </p>
             <div className="mt-8">
-              <BrandLinkButton variant="primary" size="lg" href="/contact">
+              <BrandLinkButton variant="secondary" size="lg" href="/contact" className="!bg-white !text-brand-primary hover:!bg-brand-accent">
                 Contact Support
               </BrandLinkButton>
             </div>

@@ -69,13 +69,13 @@ const Dot = styled.button<{ active: boolean }>`
   width: 0.75rem;
   height: 0.75rem;
   border-radius: 9999px;
-  background: ${({ active }) => (active ? "#e5531a" : "rgba(255, 255, 255, 0.3)")};
+  background: ${({ active }) => (active ? "#0070e0" : "rgba(255, 255, 255, 0.3)")};
   border: none;
   cursor: pointer;
   transition: all 0.2s;
   
   &:hover {
-    background: ${({ active }) => (active ? "#e5531a" : "rgba(255, 255, 255, 0.5)")};
+    background: ${({ active }) => (active ? "#0070e0" : "rgba(255, 255, 255, 0.5)")};
   }
 `;
 

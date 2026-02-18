@@ -12,7 +12,7 @@ import { TrustpilotBadge } from "@/components/TrustpilotBadge";
 import { useState, useEffect } from "react";
 
 const CountdownContainer = styled.div`
-  background: linear-gradient(135deg, #1f2a33 0%, #11181d 100%);
+  background: linear-gradient(135deg, #003087 0%, #0070e0 100%);
   border-radius: 1.5rem;
   padding: 1rem 2.5rem;
   display: inline-flex;
@@ -21,19 +21,8 @@ const CountdownContainer = styled.div`
   margin-top: -2.5rem;
   position: relative;
   z-index: 20;
-  box-shadow: 0 15px 35px -8px rgba(0, 0, 0, 0.5),
-    0 0 15px rgba(229, 83, 26, 0.1);
-  border: 1px solid rgba(229, 83, 26, 0.2);
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: 1.6rem;
-    background: linear-gradient(to right, #e5531a, #c43a12, transparent, transparent);
-    z-index: -1;
-    opacity: 0.4;
-  }
+  box-shadow: 0 15px 35px -8px rgba(0, 48, 135, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
   @media (max-width: 768px) {
     padding: 1rem 1.5rem;
@@ -63,7 +52,6 @@ const CountdownItem = styled.div`
     color: white;
     line-height: 1;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 0 10px rgba(229, 83, 26, 0.2);
 
     @media (max-width: 768px) {
       font-size: 1.25rem;
@@ -73,7 +61,7 @@ const CountdownItem = styled.div`
     font-size: 0.625rem;
     font-weight: 800;
     text-transform: uppercase;
-    color: #e5531a;
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0.1em;
     margin-top: 0.25rem;
 
@@ -123,13 +111,13 @@ const FilterButton = styled.button<{ active?: boolean }>`
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.2s;
-  background: ${({ active }) => (active ? "#1f2a33" : "white")};
-  color: ${({ active }) => (active ? "white" : "#1f2a33")};
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  background: ${({ active }) => (active ? "#003087" : "white")};
+  color: ${({ active }) => (active ? "white" : "#0a2540")};
+  border: 1px solid rgba(0, 48, 135, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 48, 135, 0.02);
 
   &:hover {
-    background: ${({ active }) => (active ? "#1f2a33" : "#f9f9f9")};
+    background: ${({ active }) => (active ? "#003087" : "#f0f7ff")};
     transform: translateY(-1px);
   }
 `;
@@ -142,7 +130,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f6f2ed]">
+    <div className="min-h-screen bg-white">
       <BrandHeroCarousel />
 
       <div className="flex justify-center">
@@ -168,7 +156,7 @@ export default function Home() {
           </CountdownItem>
           <div className="hidden h-10 w-px bg-white/10 sm:block" />
           <div className="hidden flex-col justify-center text-left sm:flex">
-            <span className="text-[10px] font-black text-dragon-orange uppercase tracking-[0.15em]">
+            <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.15em]">
               Next Draw
             </span>
             <span className="text-sm font-black text-white uppercase leading-none">
@@ -192,7 +180,7 @@ export default function Home() {
             <FilterButton>Car & Bike</FilterButton>
             <FilterButton>Tax Free Cash</FilterButton>
             <FilterButton>Tech & Watch</FilterButton>
-            <FilterButton className="!bg-dragon-orange !text-white !border-none">
+            <FilterButton className="!bg-brand-secondary !text-white !border-none">
               Ending Soon
             </FilterButton>
           </CategoryFilter>
@@ -227,15 +215,15 @@ export default function Home() {
               price: "18p",
               sold: "840 / 380,000",
               ends: "23rd May",
-              img: "https://images.unsplash.com/photo-1518458028434-541f00c6bfa0?q=80&w=800&auto=format&fit=crop",
+              img: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format&fit=crop",
             },
           ].map((item, i) => (
             <div
               key={i}
-              className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+              className="group overflow-hidden rounded-[2rem] border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute top-3 left-3 z-10 rounded-lg bg-dragon-orange/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
+                <div className="absolute top-3 left-3 z-10 rounded-lg bg-brand-secondary/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
                   Entries Open
                 </div>
                 <Image
@@ -246,22 +234,22 @@ export default function Home() {
                 />
               </div>
               <div className="p-6">
-                <h3 className="text-lg font-bold tracking-tight text-charcoal-navy">
+                <h3 className="text-lg font-bold tracking-tight text-brand-midnight">
                   {item.title}
                 </h3>
-                <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase">
+                <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-brand-midnight/40 uppercase">
                   <span>{item.sold}</span>
                   <span>Ends: {item.ends}</span>
                 </div>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/5">
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-brand-accent">
                   <div
-                    className="h-full bg-dragon-orange"
+                    className="h-full bg-brand-secondary"
                     style={{ width: "30%" }}
                   />
                 </div>
                 <div className="mt-6 text-center">
-                  <p className="text-xs font-bold text-charcoal-navy/60 uppercase tracking-widest">
-                    Just <span className="text-dragon-orange">{item.price}</span> per entry
+                  <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
+                    Just <span className="text-brand-secondary">{item.price}</span> per entry
                   </p>
                   <BrandButton fullWidth className="mt-4">
                     Enter Now

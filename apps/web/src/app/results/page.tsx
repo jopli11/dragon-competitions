@@ -23,10 +23,14 @@ const ResultsGrid = styled.div`
 const ResultCard = styled(GlassCard)`
   padding: 0;
   overflow: hidden;
-  transition: transform 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(0, 48, 135, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 48, 135, 0.03);
   
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 48, 135, 0.1);
+    border-color: rgba(0, 112, 224, 0.2);
   }
 `;
 
@@ -59,12 +63,13 @@ const mockResults = [
 
 export default function DrawResultsPage() {
   return (
-    <div className="min-h-screen bg-[#f6f2ed] py-16">
+    <div className="min-h-screen bg-[#f0f7ff] py-16">
       <Container>
-        <div className="text-center">
+        <div className="text-center max-w-2xl mx-auto">
           <BrandSectionHeading>Draw <GradientText>Results</GradientText></BrandSectionHeading>
-          <p className="mt-4 text-charcoal-navy/60 font-medium uppercase tracking-widest text-sm">
-            Transparency is our priority. View all recent competition winners.
+          <p className="mt-4 text-brand-midnight/60 font-medium text-lg">
+            Transparency is our priority. Our official record of every 
+            guaranteed draw and lucky winner.
           </p>
         </div>
 
@@ -78,29 +83,29 @@ export default function DrawResultsPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-midnight/80 via-brand-midnight/20 to-transparent" />
                 <div className="absolute bottom-4 left-6">
-                  <span className="text-[10px] font-black text-dragon-orange uppercase tracking-widest">
-                    Winner Announced
+                  <span className="text-[10px] font-black text-brand-accent uppercase tracking-widest bg-brand-secondary/20 px-2 py-0.5 rounded backdrop-blur-sm">
+                    Official Result
                   </span>
-                  <h3 className="text-xl font-black text-white uppercase tracking-tight">
+                  <h3 className="text-xl font-black text-white uppercase tracking-tight mt-1">
                     {result.title}
                   </h3>
                 </div>
               </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between border-b border-black/5 pb-4">
-                  <span className="text-xs font-bold uppercase text-charcoal-navy/50">Winner</span>
-                  <span className="font-black text-charcoal-navy">{result.winner}</span>
+              <div className="p-6 bg-white">
+                <div className="flex items-center justify-between border-b border-brand-primary/5 pb-4">
+                  <span className="text-xs font-bold uppercase text-brand-midnight/40">Winner</span>
+                  <span className="font-black text-brand-midnight">{result.winner}</span>
                 </div>
                 <div className="flex items-center justify-between pt-4">
                   <div>
-                    <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50">Draw Date</span>
-                    <span className="text-sm font-bold text-charcoal-navy/80">{result.date}</span>
+                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40">Draw Date</span>
+                    <span className="text-sm font-bold text-brand-midnight">{result.date}</span>
                   </div>
                   <div className="text-right">
-                    <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50">Winning Ticket</span>
-                    <span className="text-sm font-black text-dragon-orange">#{result.ticket}</span>
+                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40">Winning Ticket</span>
+                    <span className="text-sm font-black text-brand-secondary">#{result.ticket}</span>
                   </div>
                 </div>
               </div>

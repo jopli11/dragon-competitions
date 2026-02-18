@@ -15,8 +15,8 @@ const OptionButton = styled.button<{ active: boolean; isWrong: boolean }>`
       isWrong && active
         ? "#ef4444"
         : active
-        ? "#e5531a"
-        : "rgba(31, 42, 51, 0.1)"};
+        ? "#0070e0"
+        : "rgba(0, 48, 135, 0.1)"};
   padding: 1rem 1.25rem;
   text-align: left;
   font-size: 0.875rem;
@@ -26,20 +26,20 @@ const OptionButton = styled.button<{ active: boolean; isWrong: boolean }>`
     isWrong && active
       ? "rgba(239, 68, 68, 0.05)"
       : active
-      ? "rgba(229, 83, 26, 0.05)"
+      ? "rgba(0, 112, 224, 0.05)"
       : "white"};
-  color: #1f2a33;
+  color: #0a2540;
 
   &:hover {
-    border-color: ${({ active }) => (active ? "#e5531a" : "rgba(229, 83, 26, 0.3)")};
-    background-color: ${({ active }) => (active ? "" : "rgba(229, 83, 26, 0.02)")};
+    border-color: ${({ active }) => (active ? "#0070e0" : "rgba(0, 112, 224, 0.3)")};
+    background-color: ${({ active }) => (active ? "" : "rgba(0, 112, 224, 0.02)")};
   }
 `;
 
 const QuestionHeading = styled.h2`
   font-size: 1.125rem;
   font-weight: 700;
-  color: #1f2a33;
+  color: #0a2540;
   letter-spacing: -0.01em;
 `;
 
@@ -202,8 +202,8 @@ export function SkillQuestionCard({
                   active
                     ? isWrong
                       ? "border-red-500 bg-red-500 text-white"
-                      : "border-dragon-orange bg-dragon-orange text-white"
-                    : "border-black/10",
+                      : "border-brand-secondary bg-brand-secondary text-white"
+                    : "border-brand-primary/10",
                 ].join(" ")}
                 aria-hidden="true"
               >

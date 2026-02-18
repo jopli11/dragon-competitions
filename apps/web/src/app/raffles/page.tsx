@@ -17,13 +17,13 @@ export default async function RafflesPage() {
   const raffles = await fetchLiveRaffles();
 
   return (
-    <div className="min-h-screen bg-[#f6f2ed] py-16">
+    <div className="min-h-screen bg-[#f0f7ff] py-16">
       <Container>
         <div className="text-center">
-          <BrandSectionHeading className="!text-[#1f2a33]">
+          <BrandSectionHeading className="!text-brand-midnight">
             Current <GradientText>Competitions</GradientText>
           </BrandSectionHeading>
-          <p className="mt-4 text-charcoal-navy/60 font-medium uppercase tracking-widest text-sm">
+          <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">
             Answer correctly, pick your quantity, and win big.
           </p>
         </div>
@@ -32,11 +32,11 @@ export default async function RafflesPage() {
         {raffles.map((r) => (
           <div
             key={r.id}
-            className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+            className="group overflow-hidden rounded-[2rem] border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
           >
             <Link href={`/raffles/${r.slug}`} className="block">
               <div className="relative aspect-[4/3] overflow-hidden">
-                <div className="absolute top-3 left-3 z-10 rounded-lg bg-dragon-orange/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
+                <div className="absolute top-3 left-3 z-10 rounded-lg bg-brand-secondary/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
                   Entries Open
                 </div>
                 {r.heroImageUrl ? (
@@ -48,29 +48,29 @@ export default async function RafflesPage() {
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="h-full w-full bg-black/5" />
+                  <div className="h-full w-full bg-brand-accent" />
                 )}
               </div>
-            <div className="p-6">
-              <h3 className="text-lg font-bold tracking-tight text-charcoal-navy">
+            <div className="p-6 bg-white">
+              <h3 className="text-lg font-bold tracking-tight text-brand-midnight">
                 {r.title}
               </h3>
-              <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-charcoal-navy/40 uppercase">
+              <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-brand-midnight/40 uppercase">
                 <div className="flex items-center gap-1.5">
                   <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                   <span>Tickets sold: coming soon</span>
                 </div>
                 <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
               </div>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-black/5">
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-brand-accent">
                   <div
-                    className="h-full bg-dragon-orange"
+                    className="h-full bg-brand-secondary"
                     style={{ width: "10%" }}
                   />
                 </div>
                 <div className="mt-6 text-center">
-                  <p className="text-xs font-bold text-charcoal-navy/60 uppercase tracking-widest">
-                    Just <span className="text-dragon-orange">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
+                  <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
+                    Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
                   </p>
                   <BrandButton fullWidth className="mt-4">
                     Enter Now

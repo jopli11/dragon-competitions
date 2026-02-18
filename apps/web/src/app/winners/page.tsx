@@ -7,32 +7,72 @@ import Image from "next/image";
 
 const WinnersGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  margin-top: 4rem;
+`;
 
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+const WinnerCard = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  background: white;
+  border-radius: 2.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 48, 135, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 48, 135, 0.05);
+  transition: all 0.4s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px rgba(0, 48, 135, 0.1);
+    border-color: rgba(0, 112, 224, 0.2);
   }
-  
+
   @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  
-  @media (min-width: 1280px) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: 1fr 1.2fr;
+    min-height: 450px;
   }
 `;
 
-const WinnerCard = styled(GlassCard)`
-  padding: 0;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+const ImageSection = styled.div`
+  position: relative;
+  height: 300px;
   
-  &:hover {
-    transform: translateY(-10px) scale(1.02);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
-    border-color: rgba(229, 83, 26, 0.2);
+  @media (min-width: 1024px) {
+    height: auto;
+  }
+
+  .video-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 5;
+  }
+
+  .play-button {
+    width: 4.5rem;
+    height: 4.5rem;
+    background: white;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0070e0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-left: 0.25rem;
+    }
   }
 `;
 
@@ -60,93 +100,133 @@ const VerifiedBadge = styled.div`
   }
 `;
 
+const ContentSection = styled.div`
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media (min-width: 1024px) {
+    padding: 4rem;
+  }
+`;
+
+const Quote = styled.blockquote`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0a2540;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+  position: relative;
+  font-style: italic;
+
+  &::before {
+    content: '"';
+    font-size: 4rem;
+    color: #0070e0;
+    opacity: 0.1;
+    position: absolute;
+    top: -2rem;
+    left: -1rem;
+    font-family: serif;
+  }
+`;
+
 const winners = [
   {
-    prize: "Win This MK8 VW Golf GTI or This MK8 VW Golf GTD & £1,000 Cash *YOU CHOOSE*",
+    prize: "Tesla Model S Plaid",
     winner: "Michael Walker",
     date: "January 21, 2026",
     ticket: "282262",
-    image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=800&auto=format&fit=crop",
+    quote: "I've been entering for 6 months and finally my number came up! The team at Dragon were amazing and the car is even better in person.",
+    image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=1200&auto=format&fit=crop",
+    hasVideo: true,
   },
   {
     prize: "BMW M5 Competition",
     winner: "Louise St Louie",
     date: "January 20, 2026",
     ticket: "282262",
-    image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=800&auto=format&fit=crop",
+    quote: "Absolutely life changing. I never thought I'd actually win, but here I am with my dream car. Thank you Dragon Competitions!",
+    image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop",
+    hasVideo: false,
   },
   {
-    prize: "JCW Mini GP2",
-    winner: "Triston Upton",
-    date: "January 19, 2026",
-    ticket: "82047",
-    image: "https://images.unsplash.com/photo-1619330091138-ec1aaaf53688?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    prize: "Nissan 370Z Nismo",
+    prize: "£15,000 Tax Free Cash",
     winner: "Danny Hales",
     date: "January 19, 2026",
     ticket: "286004",
-    image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    prize: "Tesla Model S Plaid",
-    winner: "John D.",
-    date: "Jan 15, 2026",
-    ticket: "12845",
-    image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    prize: "£10,000 Cash",
-    winner: "Sarah M.",
-    date: "Jan 12, 2026",
-    ticket: "88231",
-    image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format&fit=crop",
+    quote: "The cash alternative was exactly what my family needed right now. The process was so fast and transparent.",
+    image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=1200&auto=format&fit=crop",
+    hasVideo: true,
   },
 ];
 
 export default function WinnersPage() {
   return (
-    <div className="min-h-screen bg-[#f6f2ed] py-16">
+    <div className="min-h-screen bg-white py-16">
       <Container>
-        <div className="text-center">
-          <BrandSectionHeading>Our <GradientText>Winners</GradientText></BrandSectionHeading>
-          <p className="mt-4 text-charcoal-navy/60 font-medium uppercase tracking-widest text-sm">
-            Join our growing list of winners. Your name could be next!
+        <div className="text-center max-w-3xl mx-auto">
+          <BrandSectionHeading>The <GradientText>Hall of Fame</GradientText></BrandSectionHeading>
+          <p className="mt-4 text-brand-midnight/60 font-medium text-lg">
+            Meet our lucky winners and hear their life-changing stories. 
+            Real people, real prizes, real winners.
           </p>
         </div>
 
         <WinnersGrid>
           {winners.map((winner, i) => (
             <WinnerCard key={i}>
-              <div className="relative aspect-[4/3]">
-                <VerifiedBadge>
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Verified
-                </VerifiedBadge>
+              <ImageSection>
                 <Image
                   src={winner.image}
                   alt={winner.winner}
                   fill
                   className="object-cover"
                 />
-              </div>
-              <div className="p-6 text-center">
-                <h3 className="text-sm font-black text-dragon-red uppercase leading-tight h-[2.5rem] flex items-center justify-center overflow-hidden text-ellipsis line-clamp-2">
-                  {winner.prize}
-                </h3>
-                <div className="mt-4 pt-4 border-t border-black/5">
-                  <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50">Winner</span>
-                  <span className="text-lg font-black text-charcoal-navy">{winner.winner}</span>
+                {winner.hasVideo && (
+                  <div className="video-overlay">
+                    <button className="play-button" aria-label="Play testimonial video">
+                      <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                <VerifiedBadge>
+                  <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Verified Winner
+                </VerifiedBadge>
+              </ImageSection>
+              
+              <ContentSection>
+                <div className="mb-6">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary">
+                    Winner Story
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-black text-brand-midnight uppercase tracking-tight mt-1">
+                    {winner.winner}
+                  </h3>
+                  <p className="text-brand-secondary font-bold text-sm mt-1">
+                    Won: {winner.prize}
+                  </p>
                 </div>
-                <div className="mt-2">
-                  <span className="block text-[10px] font-bold uppercase text-charcoal-navy/50">Winning Ticket</span>
-                  <span className="text-sm font-bold text-dragon-orange">#{winner.ticket}</span>
+
+                <Quote>{winner.quote}</Quote>
+
+                <div className="flex items-center gap-8 pt-6 border-t border-brand-primary/5">
+                  <div>
+                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40">Draw Date</span>
+                    <span className="text-sm font-bold text-brand-midnight">{winner.date}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40">Winning Ticket</span>
+                    <span className="text-sm font-black text-brand-secondary">#{winner.ticket}</span>
+                  </div>
                 </div>
-                <p className="mt-4 text-[10px] font-bold text-charcoal-navy/40 uppercase">{winner.date}</p>
-              </div>
+              </ContentSection>
             </WinnerCard>
           ))}
         </WinnersGrid>
