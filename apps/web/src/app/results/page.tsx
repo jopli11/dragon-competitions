@@ -1,38 +1,6 @@
-"use client";
-
 import { Container } from "@/components/Container";
-import styled from "@emotion/styled";
-import { GlassCard, GradientText, BrandSectionHeading } from "@/lib/styles";
+import { BrandSectionHeading, GradientText } from "@/lib/styles";
 import Image from "next/image";
-
-const ResultsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-`;
-
-const ResultCard = styled(GlassCard)`
-  padding: 0;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border: 1px solid rgba(0, 48, 135, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 48, 135, 0.03);
-  
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 48, 135, 0.1);
-    border-color: rgba(0, 112, 224, 0.2);
-  }
-`;
 
 const mockResults = [
   {
@@ -63,9 +31,9 @@ const mockResults = [
 
 export default function DrawResultsPage() {
   return (
-    <div className="min-h-screen bg-[#f0f7ff] py-16">
+    <div className="min-h-screen bg-[#f0f7ff] py-16 sm:py-24">
       <Container>
-        <div className="text-center max-w-2xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-16">
           <BrandSectionHeading>Draw <GradientText>Results</GradientText></BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium text-lg">
             Transparency is our priority. Our official record of every 
@@ -73,17 +41,18 @@ export default function DrawResultsPage() {
           </p>
         </div>
 
-        <ResultsGrid>
+        <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {mockResults.map((result) => (
-            <ResultCard key={result.id}>
+            <div key={result.id} className="bg-white rounded-4xl overflow-hidden border border-brand-primary/10 shadow-lg transition-all duration-400 hover:-translate-y-2 hover:shadow-2xl hover:border-brand-secondary/30">
               <div className="relative aspect-video">
                 <Image
                   src={result.image}
                   alt={result.title}
                   fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-midnight/80 via-brand-midnight/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-brand-midnight/80 via-brand-midnight/20 to-transparent" />
                 <div className="absolute bottom-4 left-6">
                   <span className="text-[10px] font-black text-brand-accent uppercase tracking-widest bg-brand-secondary/20 px-2 py-0.5 rounded backdrop-blur-sm">
                     Official Result
@@ -109,9 +78,9 @@ export default function DrawResultsPage() {
                   </div>
                 </div>
               </div>
-            </ResultCard>
+            </div>
           ))}
-        </ResultsGrid>
+        </div>
       </Container>
     </div>
   );

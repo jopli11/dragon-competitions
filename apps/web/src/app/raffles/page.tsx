@@ -20,7 +20,7 @@ export default async function RafflesPage() {
     <div className="min-h-screen bg-[#f0f7ff] py-16">
       <Container>
         <div className="text-center">
-          <BrandSectionHeading className="!text-brand-midnight">
+          <BrandSectionHeading className="text-brand-midnight!">
             Current <GradientText>Competitions</GradientText>
           </BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">
@@ -32,10 +32,10 @@ export default async function RafflesPage() {
         {raffles.map((r) => (
           <div
             key={r.id}
-            className="group overflow-hidden rounded-[2rem] border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+            className="group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
           >
             <Link href={`/raffles/${r.slug}`} className="block">
-              <div className="relative aspect-[4/3] overflow-hidden">
+              <div className="relative aspect-4/3 overflow-hidden">
                 <div className="absolute top-3 left-3 z-10 rounded-lg bg-brand-secondary/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
                   Entries Open
                 </div>
@@ -96,4 +96,3 @@ export default async function RafflesPage() {
     </div>
   );
 }
-

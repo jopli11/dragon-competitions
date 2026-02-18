@@ -1,40 +1,18 @@
-"use client";
-
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
 import { SkillQuestionCard } from "@/components/SkillQuestionCard";
+import { RaffleMobileCTA } from "@/components/RaffleMobileCTA";
 import { fetchRaffleBySlug } from "@/lib/contentful/raffles";
-import { isContentfulConfigured } from "@/lib/contentful/publicClient";
-import { BrandBadge, GlassCard, GradientText, BrandButton } from "@/lib/styles";
-import { use, useEffect, useState } from "react";
-import { RaffleDetail } from "@/lib/contentful/raffles";
+import { BrandBadge, GlassCard, GradientText } from "@/lib/styles";
 
-export default function RaffleDetailPage({
+export default async function RaffleDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = use(params);
-  const [raffle, setRaffle] = useState<RaffleDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadRaffle() {
-      const data = await fetchRaffleBySlug(slug);
-      setRaffle(data);
-      setLoading(false);
-    }
-    loadRaffle();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-primary border-t-transparent" />
-      </div>
-    );
-  }
+  const { slug } = await params;
+  const raffle = await fetchRaffleBySlug(slug);
 
   if (!raffle) notFound();
 
@@ -46,6 +24,8 @@ export default function RaffleDetailPage({
     }).format(pence / 100);
   }
 
+  const ticketPriceFormatted = formatGBPFromPence(raffle.ticketPricePence);
+
   return (
     <div className="min-h-screen bg-white pb-20">
       {/* Hero Section */}
@@ -56,20 +36,21 @@ export default function RaffleDetailPage({
             alt={raffle.title}
             fill
             priority
+            sizes="100vw"
             className="object-cover opacity-60 blur-[2px] scale-110"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-brand-midnight/40 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-white via-brand-midnight/40 to-transparent" />
         
         <Container className="relative h-full flex flex-col justify-end pb-6">
           <BrandBadge className="mb-3 self-start">Entries Open</BrandBadge>
-          <h1 className="text-3xl font-black uppercase tracking-tighter text-brand-midnight sm:text-4xl md:text-5xl lg:text-6xl break-words">
+          <h1 className="text-3xl font-black uppercase tracking-tighter text-brand-midnight sm:text-4xl md:text-5xl lg:text-6xl wrap-break-word">
             {raffle.title}
           </h1>
           <div className="mt-3 flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-brand-midnight/60">
             <div className="flex items-center gap-2">
               <span className="text-brand-secondary">Just</span>
-              <span className="text-lg text-brand-midnight">{formatGBPFromPence(raffle.ticketPricePence)}</span>
+              <span className="text-lg text-brand-midnight">{ticketPriceFormatted}</span>
               <span>per entry</span>
             </div>
           </div>
@@ -81,7 +62,7 @@ export default function RaffleDetailPage({
           <div className="space-y-8">
             {/* Main Image Card */}
             <div className="overflow-hidden rounded-[2.5rem] border border-black/5 bg-white shadow-xl">
-              <div className="relative aspect-[16/10]">
+              <div className="relative aspect-16/10">
                 {raffle.heroImageUrl ? (
                   <Image
                     src={raffle.heroImageUrl}
@@ -135,7 +116,7 @@ export default function RaffleDetailPage({
                   "Draw will be conducted live on our social media channels.",
                 ].map((rule, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm font-medium text-brand-midnight/60">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-brand-accent flex items-center justify-center text-brand-secondary text-[10px] font-bold">
+                    <span className="shrink-0 w-5 h-5 rounded-full bg-brand-accent flex items-center justify-center text-brand-secondary text-[10px] font-bold">
                       {i + 1}
                     </span>
                     {rule}
@@ -178,29 +159,7 @@ export default function RaffleDetailPage({
       </Container>
 
       {/* Mobile Floating CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-brand-primary/10 bg-white/80 p-4 backdrop-blur-lg lg:hidden">
-        <Container>
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-brand-midnight/40">
-                Ticket Price
-              </p>
-              <p className="text-lg font-black text-brand-midnight">
-                {formatGBPFromPence(raffle.ticketPricePence)}
-              </p>
-            </div>
-            <BrandButton
-              fullWidth
-              onClick={() => {
-                const el = document.getElementById("skill-question");
-                el?.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              Enter Now
-            </BrandButton>
-          </div>
-        </Container>
-      </div>
+      <RaffleMobileCTA ticketPriceFormatted={ticketPriceFormatted} />
     </div>
   );
 }

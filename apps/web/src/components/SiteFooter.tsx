@@ -92,7 +92,7 @@ export function SiteFooter() {
                   </svg>
                 )},
               ].map((social) => (
-                <div key={social.name} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#0070e0] transition-colors cursor-pointer border border-white/5" title={social.name}>
+                <div key={social.name} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-secondary transition-colors cursor-pointer border border-white/5" title={social.name}>
                   {social.icon}
                 </div>
               ))}

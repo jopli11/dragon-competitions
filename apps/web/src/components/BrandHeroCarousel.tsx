@@ -129,6 +129,7 @@ export function BrandHeroCarousel() {
               alt={slide.title}
               fill
               priority={index === 0}
+              sizes="100vw"
               className="object-cover"
             />
             <Overlay />

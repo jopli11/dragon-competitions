@@ -144,6 +144,7 @@ export function WinnersSection() {
                   src={winner.image}
                   alt={winner.winner}
                   fill
+                  sizes="(min-width: 1024px) 40vw, 100vw"
                   className="object-cover"
                 />
                 <VerifiedBadge>

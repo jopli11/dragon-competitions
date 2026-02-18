@@ -1,136 +1,6 @@
-"use client";
-
 import { Container } from "@/components/Container";
-import styled from "@emotion/styled";
-import { GradientText, BrandSectionHeading, GlassCard } from "@/lib/styles";
+import { GradientText, BrandSectionHeading } from "@/lib/styles";
 import Image from "next/image";
-
-const WinnersGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 3rem;
-  margin-top: 4rem;
-`;
-
-const WinnerCard = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  background: white;
-  border-radius: 2.5rem;
-  overflow: hidden;
-  border: 1px solid rgba(0, 48, 135, 0.08);
-  box-shadow: 0 20px 40px rgba(0, 48, 135, 0.05);
-  transition: all 0.4s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 30px 60px rgba(0, 48, 135, 0.1);
-    border-color: rgba(0, 112, 224, 0.2);
-  }
-
-  @media (min-width: 1024px) {
-    grid-template-columns: 1fr 1.2fr;
-    min-height: 450px;
-  }
-`;
-
-const ImageSection = styled.div`
-  position: relative;
-  height: 300px;
-  
-  @media (min-width: 1024px) {
-    height: auto;
-  }
-
-  .video-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.2);
-    z-index: 5;
-  }
-
-  .play-button {
-    width: 4.5rem;
-    height: 4.5rem;
-    background: white;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #0070e0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.1);
-    }
-
-    svg {
-      width: 1.5rem;
-      height: 1.5rem;
-      margin-left: 0.25rem;
-    }
-  }
-`;
-
-const VerifiedBadge = styled.div`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10;
-  background: #00b67a;
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.625rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 4px 10px rgba(0, 182, 122, 0.3);
-
-  svg {
-    width: 10px;
-    height: 10px;
-  }
-`;
-
-const ContentSection = styled.div`
-  padding: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  @media (min-width: 1024px) {
-    padding: 4rem;
-  }
-`;
-
-const Quote = styled.blockquote`
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #0a2540;
-  line-height: 1.5;
-  margin-bottom: 2rem;
-  position: relative;
-  font-style: italic;
-
-  &::before {
-    content: '"';
-    font-size: 4rem;
-    color: #0070e0;
-    opacity: 0.1;
-    position: absolute;
-    top: -2rem;
-    left: -1rem;
-    font-family: serif;
-  }
-`;
 
 const winners = [
   {
@@ -164,9 +34,9 @@ const winners = [
 
 export default function WinnersPage() {
   return (
-    <div className="min-h-screen bg-white py-16">
+    <div className="min-h-screen bg-white py-16 sm:py-24">
       <Container>
-        <div className="text-center max-w-3xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
           <BrandSectionHeading>The <GradientText>Hall of Fame</GradientText></BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium text-lg">
             Meet our lucky winners and hear their life-changing stories. 
@@ -174,62 +44,66 @@ export default function WinnersPage() {
           </p>
         </div>
 
-        <WinnersGrid>
+        <div className="grid gap-12 sm:gap-24 grid-cols-1">
           {winners.map((winner, i) => (
-            <WinnerCard key={i}>
-              <ImageSection>
+            <div key={i} className="group grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] bg-white rounded-[2.5rem] sm:rounded-[3.5rem] overflow-hidden border border-brand-primary/5 shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-brand hover:border-brand-secondary/20">
+              <div className="relative h-[300px] lg:h-full min-h-[400px]">
                 <Image
                   src={winner.image}
                   alt={winner.winner}
                   fill
-                  className="object-cover"
+                  sizes="(min-width: 1024px) 45vw, 100vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 {winner.hasVideo && (
-                  <div className="video-overlay">
-                    <button className="play-button" aria-label="Play testimonial video">
-                      <svg fill="currentColor" viewBox="0 0 24 24">
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
+                    <button className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-brand-secondary shadow-2xl transition-transform duration-300 hover:scale-110" aria-label="Play testimonial video">
+                      <svg fill="currentColor" viewBox="0 0 24 24" className="w-8 h-8 ml-1">
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </button>
                   </div>
                 )}
-                <VerifiedBadge>
-                  <svg fill="currentColor" viewBox="0 0 20 20">
+                <div className="absolute top-6 right-6 z-20 bg-[#00b67a] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
+                  <svg fill="currentColor" viewBox="0 0 20 20" className="w-3 h-3">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   Verified Winner
-                </VerifiedBadge>
-              </ImageSection>
+                </div>
+              </div>
               
-              <ContentSection>
-                <div className="mb-6">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary">
+              <div className="p-8 sm:p-16 flex flex-col justify-center bg-white">
+                <div className="mb-8">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-secondary mb-2 block">
                     Winner Story
                   </span>
-                  <h3 className="text-2xl sm:text-3xl font-black text-brand-midnight uppercase tracking-tight mt-1">
+                  <h3 className="text-3xl sm:text-4xl font-black text-brand-midnight uppercase tracking-tighter mt-1">
                     {winner.winner}
                   </h3>
-                  <p className="text-brand-secondary font-bold text-sm mt-1">
+                  <p className="text-brand-secondary font-bold text-base mt-2">
                     Won: {winner.prize}
                   </p>
                 </div>
 
-                <Quote>{winner.quote}</Quote>
+                <blockquote className="text-xl sm:text-2xl font-semibold text-brand-midnight leading-relaxed italic relative mb-10 pl-4 sm:pl-8">
+                  <span className="absolute -top-4 -left-2 text-6xl text-brand-secondary opacity-10 font-serif">"</span>
+                  {winner.quote}
+                </blockquote>
 
-                <div className="flex items-center gap-8 pt-6 border-t border-brand-primary/5">
+                <div className="flex flex-wrap items-center gap-x-12 gap-y-6 pt-10 border-t border-brand-primary/5">
                   <div>
-                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40">Draw Date</span>
-                    <span className="text-sm font-bold text-brand-midnight">{winner.date}</span>
+                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40 tracking-widest mb-1">Draw Date</span>
+                    <span className="text-lg font-bold text-brand-midnight">{winner.date}</span>
                   </div>
                   <div>
-                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40">Winning Ticket</span>
-                    <span className="text-sm font-black text-brand-secondary">#{winner.ticket}</span>
+                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40 tracking-widest mb-1">Winning Ticket</span>
+                    <span className="text-lg font-black text-brand-secondary">#{winner.ticket}</span>
                   </div>
                 </div>
-              </ContentSection>
-            </WinnerCard>
+              </div>
+            </div>
           ))}
-        </WinnersGrid>
+        </div>
       </Container>
     </div>
   );

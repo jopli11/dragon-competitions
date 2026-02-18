@@ -189,14 +189,14 @@ export default function FaqsPage() {
           ))}
         </div>
 
-        <div className="mt-20 rounded-[3rem] text-center bg-gradient-to-br from-brand-primary to-brand-secondary p-12 relative overflow-hidden shadow-2xl">
+        <div className="mt-20 rounded-4xl text-center bg-linear-to-br from-brand-primary to-brand-secondary p-12 relative overflow-hidden shadow-2xl">
           <div className="relative z-10">
             <h3 className="text-2xl font-black uppercase tracking-tight text-white">Still have questions?</h3>
             <p className="mt-4 text-white/60 font-medium">
               Our support team is always here to help you.
             </p>
             <div className="mt-8">
-              <BrandLinkButton variant="secondary" size="lg" href="/contact" className="!bg-white !text-brand-primary hover:!bg-brand-accent">
+              <BrandLinkButton variant="secondary" size="lg" href="/contact" className="bg-white! text-brand-primary! hover:bg-brand-accent!">
                 Contact Support
               </BrandLinkButton>
             </div>

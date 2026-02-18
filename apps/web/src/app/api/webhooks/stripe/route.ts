@@ -88,9 +88,12 @@ export async function POST(request: Request) {
       });
 
       // 5. Send confirmation email (outside transaction)
-      const raffle = await fetchRaffleBySlug(raffleSlug);
+      const [raffle, orderDoc] = await Promise.all([
+        fetchRaffleBySlug(raffleSlug),
+        adminDb.collection("orders").doc(session.id).get(),
+      ]);
+
       if (raffle && session.customer_details?.email) {
-        const orderDoc = await adminDb.collection("orders").doc(session.id).get();
         const orderData = orderDoc.data();
         if (orderData) {
           await sendPurchaseConfirmation({

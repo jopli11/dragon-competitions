@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { css } from "@emotion/react";
 import { ComponentProps } from "react";
 import Link from "next/link";
 import isPropValid from "@emotion/is-prop-valid";
@@ -11,13 +12,7 @@ import isPropValid from "@emotion/is-prop-valid";
 
 const ignoredProps = ["variant", "size", "fullWidth"];
 
-export const BrandButton = styled("button", {
-  shouldForwardProp: (prop) => isPropValid(prop) && !ignoredProps.includes(prop),
-})<{
-  variant?: "primary" | "secondary" | "outline";
-  size?: "sm" | "md" | "lg";
-  fullWidth?: boolean;
-}>`
+const buttonStyles = css`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -27,7 +22,6 @@ export const BrandButton = styled("button", {
   letter-spacing: 0.02em;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
   text-decoration: none;
   position: relative;
   overflow: hidden;
@@ -45,54 +39,6 @@ export const BrandButton = styled("button", {
   &:hover::after {
     opacity: 0.1;
   }
-
-  ${({ variant = "primary" }) => {
-    if (variant === "primary") {
-      return `
-        background: linear-gradient(135deg, #003087 0%, #0070e0 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(0, 48, 135, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 48, 135, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-          color: white;
-        }
-        &:active {
-          transform: translateY(0);
-        }
-      `;
-    }
-    if (variant === "secondary") {
-      return `
-        background: #0a2540;
-        color: white;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        &:hover {
-          background: #113355;
-          transform: translateY(-1px);
-          color: white;
-        }
-      `;
-    }
-    if (variant === "outline") {
-      return `
-        background: transparent;
-        color: #003087;
-        border: 2px solid rgba(0, 48, 135, 0.1);
-        &:hover {
-          background: rgba(0, 48, 135, 0.03);
-          border-color: rgba(0, 48, 135, 0.3);
-          transform: translateY(-1px);
-        }
-      `;
-    }
-  }}
-
-  ${({ size = "md" }) => {
-    if (size === "sm") return "padding: 0.625rem 1.25rem; font-size: 0.75rem;";
-    if (size === "md") return "padding: 0.875rem 1.75rem; font-size: 0.875rem;";
-    if (size === "lg") return "padding: 1.125rem 2.25rem; font-size: 1rem;";
-  }}
 
   &:disabled {
     opacity: 0.5;
@@ -102,95 +48,76 @@ export const BrandButton = styled("button", {
   }
 `;
 
-export const BrandLinkButton = styled(Link, {
-  shouldForwardProp: (prop) => isPropValid(prop) && !ignoredProps.includes(prop),
-})<{
+const getButtonVariant = (variant: "primary" | "secondary" | "outline" = "primary") => {
+  if (variant === "primary") {
+    return css`
+      background: linear-gradient(135deg, #003087 0%, #0070e0 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 48, 135, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 48, 135, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+      &:active {
+        transform: translateY(0);
+      }
+    `;
+  }
+  if (variant === "secondary") {
+    return css`
+      background: #0a2540;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      &:hover {
+        background: #113355;
+        transform: translateY(-1px);
+        color: white;
+      }
+    `;
+  }
+  if (variant === "outline") {
+    return css`
+      background: transparent;
+      color: #003087;
+      border: 2px solid rgba(0, 48, 135, 0.1);
+      &:hover {
+        background: rgba(0, 48, 135, 0.03);
+        border-color: rgba(0, 48, 135, 0.3);
+        transform: translateY(-1px);
+      }
+    `;
+  }
+};
+
+const getButtonSize = (size: "sm" | "md" | "lg" = "md") => {
+  if (size === "sm") return css`padding: 0.625rem 1.25rem; font-size: 0.75rem;`;
+  if (size === "md") return css`padding: 0.875rem 1.75rem; font-size: 0.875rem;`;
+  if (size === "lg") return css`padding: 1.125rem 2.25rem; font-size: 1rem;`;
+};
+
+interface BrandButtonProps {
   variant?: "primary" | "secondary" | "outline";
   size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
-}>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+}
+
+export const BrandButton = styled("button", {
+  shouldForwardProp: (prop) => isPropValid(prop) && !ignoredProps.includes(prop),
+})<BrandButtonProps>`
+  ${buttonStyles}
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  border: none;
+  ${({ variant }) => getButtonVariant(variant)}
+  ${({ size }) => getButtonSize(size)}
+`;
 
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: white;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  &:hover::after {
-    opacity: 0.1;
-  }
-
-  ${({ variant = "primary" }) => {
-    if (variant === "primary") {
-      return `
-        background: linear-gradient(135deg, #003087 0%, #0070e0 100%);
-        color: white;
-        box-shadow: 0 4px 15px rgba(0, 48, 135, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 48, 135, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-          color: white;
-        }
-        &:active {
-          transform: translateY(0);
-        }
-      `;
-    }
-    if (variant === "secondary") {
-      return `
-        background: #0a2540;
-        color: white;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        &:hover {
-          background: #113355;
-          transform: translateY(-1px);
-          color: white;
-        }
-      `;
-    }
-    if (variant === "outline") {
-      return `
-        background: transparent;
-        color: #003087;
-        border: 2px solid rgba(0, 48, 135, 0.1);
-        &:hover {
-          background: rgba(0, 48, 135, 0.03);
-          border-color: rgba(0, 48, 135, 0.3);
-          transform: translateY(-1px);
-        }
-      `;
-    }
-  }}
-
-  ${({ size = "md" }) => {
-    if (size === "sm") return "padding: 0.625rem 1.25rem; font-size: 0.75rem;";
-    if (size === "md") return "padding: 0.875rem 1.75rem; font-size: 0.875rem;";
-    if (size === "lg") return "padding: 1.125rem 2.25rem; font-size: 1rem;";
-  }}
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none !important;
-    box-shadow: none !important;
-  }
+export const BrandLinkButton = styled(Link, {
+  shouldForwardProp: (prop) => isPropValid(prop) && !ignoredProps.includes(prop),
+})<BrandButtonProps>`
+  ${buttonStyles}
+  width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
+  ${({ variant }) => getButtonVariant(variant)}
+  ${({ size }) => getButtonSize(size)}
 `;
 
 export const BrandCard = styled.div`

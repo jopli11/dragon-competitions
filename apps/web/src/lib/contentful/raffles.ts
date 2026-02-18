@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Entry, EntrySkeletonType } from "contentful";
 import { getContentfulPublicClient } from "@/lib/contentful/publicClient";
 import { getContentfulAdminClient } from "@/lib/contentful/adminClient";
@@ -97,7 +98,7 @@ const MOCK_RAFFLES: RaffleDetail[] = [
   }
 ];
 
-export async function fetchLiveRaffles(): Promise<RaffleSummary[]> {
+export const fetchLiveRaffles = cache(async (): Promise<RaffleSummary[]> => {
   const client = getContentfulPublicClient();
   if (!client) {
     // Return mock data if Contentful is not configured
@@ -125,11 +126,11 @@ export async function fetchLiveRaffles(): Promise<RaffleSummary[]> {
   const res = await client.getEntries<RaffleSkeleton>(query as any);
 
   return res.items.map(toSummary);
-}
+});
 
-export async function fetchRaffleBySlug(
+export const fetchRaffleBySlug = cache(async (
   slug: string,
-): Promise<RaffleDetail | null> {
+): Promise<RaffleDetail | null> => {
   const client = getContentfulPublicClient();
   if (!client) {
     // Return mock data if Contentful is not configured
@@ -156,7 +157,7 @@ export async function fetchRaffleBySlug(
     skillQuestion: fields.skillQuestion,
     answerOptions: fields.answerOptions,
   };
-}
+});
 
 export async function fetchRaffleCorrectAnswer(
   slug: string,
