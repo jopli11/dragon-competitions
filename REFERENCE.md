@@ -57,7 +57,7 @@
 
 | Layer | Technology | Version | Purpose |
 |-------|-----------|---------|---------|
-| **Framework** | Next.js (App Router) | 16.1.6 | Server-side rendering, routing, API routes |
+| **Framework** | Next.js (App Router) | 15.1.6 | Server-side rendering, routing, API routes |
 | **UI Library** | React | 19.2.3 | Component-based UI |
 | **Language** | TypeScript | 5.x | Type safety |
 | **Database** | Firebase Firestore | 12.8.0 (client) / 13.6.1 (admin) | NoSQL database for orders, tickets, quiz passes, draw state |
