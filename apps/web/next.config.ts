@@ -18,12 +18,6 @@ const nextConfig: NextConfig = {
     // Explicitly set the root to the project root to avoid incorrect inference
     root: path.resolve(__dirname, "../../"),
   },
-  // Disable Turbopack for production builds to avoid lightningcss binary issues on Render/Vercel
-  experimental: {
-    turbo: {
-      // This ensures we use the stable Webpack-based builder for production
-    }
-  }
 };
 
 export default nextConfig;
