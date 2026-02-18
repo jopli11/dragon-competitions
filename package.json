@@ -13,10 +13,13 @@
     "apps/*"
   ],
   "dependencies": {
+    "@tailwindcss/postcss": "^4",
     "next": "15.1.6",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "tailwindcss": "^4",
-    "@tailwindcss/postcss": "^4"
+    "tailwindcss": "^4"
+  },
+  "devDependencies": {
+    "acorn": "^8.15.0"
   }
 }

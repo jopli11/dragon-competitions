@@ -12,14 +12,21 @@ const firebaseConfig = {
   appId: getOptionalEnv("NEXT_PUBLIC_FIREBASE_APP_ID"),
 };
 
-let app: FirebaseApp;
-let db: Firestore;
-let auth: Auth;
+// @ts-ignore - Firebase types can be tricky in some environments
+let app: FirebaseApp = null as any;
+// @ts-ignore
+let db: Firestore = null as any;
+// @ts-ignore
+let auth: Auth = null as any;
 
 if (typeof window !== "undefined") {
-  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-  db = getFirestore(app);
-  auth = getAuth(app);
+  try {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    db = getFirestore(app);
+    auth = getAuth(app);
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
+  }
 }
 
 export { app, db, auth };
