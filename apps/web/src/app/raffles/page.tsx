@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/Container";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
+import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
 import { isContentfulConfigured } from "@/lib/contentful/publicClient";
 import { BrandButton, BrandSectionHeading, GradientText } from "@/lib/styles";
 
@@ -14,7 +15,10 @@ function formatGBPFromPence(pence: number) {
 }
 
 export default async function RafflesPage() {
-  const raffles = await fetchLiveRaffles();
+  const [raffles, stats] = await Promise.all([
+    fetchLiveRaffles(),
+    getAllRaffleStats()
+  ]);
 
   return (
     <div className="min-h-screen bg-surface-mint py-16">
@@ -29,57 +33,62 @@ export default async function RafflesPage() {
         </div>
 
       <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {raffles.map((r) => (
-          <div
-            key={r.id}
-            className="group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
-          >
-            <Link href={`/raffles/${r.slug}`} className="block">
-              <div className="relative aspect-4/3 overflow-hidden">
-                <div className="absolute top-3 left-3 z-10 rounded-lg bg-brand-secondary/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
-                  Entries Open
+        {raffles.map((r) => {
+          const raffleStats = stats[r.slug] || { ticketsSold: 0 };
+          const progress = Math.min(100, Math.max(2, (raffleStats.ticketsSold / 5000) * 100));
+
+          return (
+            <div
+              key={r.id}
+              className="group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+            >
+              <Link href={`/raffles/${r.slug}`} className="block">
+                <div className="relative aspect-4/3 overflow-hidden">
+                  <div className="absolute top-3 left-3 z-10 rounded-lg bg-brand-secondary/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
+                    Entries Open
+                  </div>
+                  {r.heroImageUrl ? (
+                    <Image
+                      src={r.heroImageUrl}
+                      alt={r.title}
+                      fill
+                      sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-brand-accent" />
+                  )}
                 </div>
-                {r.heroImageUrl ? (
-                  <Image
-                    src={r.heroImageUrl}
-                    alt={r.title}
-                    fill
-                    sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-brand-accent" />
-                )}
-              </div>
-            <div className="p-6 bg-white">
-              <h3 className="text-lg font-bold tracking-tight text-brand-midnight">
-                {r.title}
-              </h3>
-              <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-brand-midnight/40 uppercase">
-                <div className="flex items-center gap-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                  <span>Tickets sold: coming soon</span>
+              <div className="p-6 bg-white">
+                <h3 className="text-lg font-bold tracking-tight text-brand-midnight">
+                  {r.title}
+                </h3>
+                <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-brand-midnight/40 uppercase">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <span>{raffleStats.ticketsSold} Sold</span>
+                  </div>
+                  <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
                 </div>
-                <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
-              </div>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-brand-accent">
-                  <div
-                    className="h-full bg-brand-secondary"
-                    style={{ width: "10%" }}
-                  />
+                  <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-brand-accent">
+                    <div
+                      className="h-full bg-brand-secondary"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <div className="mt-6 text-center">
+                    <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
+                      Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
+                    </p>
+                    <BrandButton fullWidth className="mt-4">
+                      Enter Now
+                    </BrandButton>
+                  </div>
                 </div>
-                <div className="mt-6 text-center">
-                  <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
-                    Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
-                  </p>
-                  <BrandButton fullWidth className="mt-4">
-                    Enter Now
-                  </BrandButton>
-                </div>
-              </div>
-            </Link>
-          </div>
-        ))}
+              </Link>
+            </div>
+          );
+        })}
       </div>
 
       {raffles.length === 0 ? (

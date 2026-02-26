@@ -73,33 +73,55 @@ const CountdownDivider = styled.div`
   }
 `;
 
-export function HomeCountdown() {
+export function HomeCountdown({ endAt }: { endAt?: string }) {
   const [mounted, setMounted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (!endAt) return;
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = new Date(endAt).getTime() - now;
+
+      if (distance < 0) {
+        clearInterval(timer);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000),
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [endAt]);
 
   return (
     <div className="flex justify-center">
       <CountdownContainer>
         <CountdownItem>
-          <span className="value">{mounted ? "0" : "--"}</span>
+          <span className="value">{mounted ? timeLeft.days : "--"}</span>
           <span className="label">Days</span>
         </CountdownItem>
         <CountdownDivider />
         <CountdownItem>
-          <span className="value">{mounted ? "12" : "--"}</span>
+          <span className="value">{mounted ? String(timeLeft.hours).padStart(2, '0') : "--"}</span>
           <span className="label">Hours</span>
         </CountdownItem>
         <CountdownDivider />
         <CountdownItem>
-          <span className="value">{mounted ? "34" : "--"}</span>
+          <span className="value">{mounted ? String(timeLeft.minutes).padStart(2, '0') : "--"}</span>
           <span className="label">Mins</span>
         </CountdownItem>
         <CountdownDivider />
         <CountdownItem>
-          <span className="value">{mounted ? "08" : "--"}</span>
+          <span className="value">{mounted ? String(timeLeft.seconds).padStart(2, '0') : "--"}</span>
           <span className="label">Secs</span>
         </CountdownItem>
         <div className="hidden h-10 w-px bg-white/10 sm:block" />

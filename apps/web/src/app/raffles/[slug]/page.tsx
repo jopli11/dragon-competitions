@@ -4,7 +4,61 @@ import { Container } from "@/components/Container";
 import { SkillQuestionCard } from "@/components/SkillQuestionCard";
 import { RaffleMobileCTA } from "@/components/RaffleMobileCTA";
 import { fetchRaffleBySlug } from "@/lib/contentful/raffles";
+import { getRaffleStats } from "@/lib/firebase/raffle-stats";
 import { BrandBadge, GlassCard, GradientText } from "@/lib/styles";
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
+import { BLOCKS, INLINES } from "@contentful/rich-text-types";
+import { Metadata } from "next";
+
+const RICH_TEXT_OPTIONS = {
+  renderNode: {
+    [BLOCKS.PARAGRAPH]: (node: any, children: any) => (
+      <p className="mb-4 last:mb-0 leading-relaxed">{children}</p>
+    ),
+    [BLOCKS.UL_LIST]: (node: any, children: any) => (
+      <ul className="list-disc pl-5 mb-4 space-y-1">{children}</ul>
+    ),
+    [BLOCKS.OL_LIST]: (node: any, children: any) => (
+      <ol className="list-decimal pl-5 mb-4 space-y-1">{children}</ol>
+    ),
+    [BLOCKS.HEADING_3]: (node: any, children: any) => (
+      <h3 className="text-lg font-bold mt-6 mb-2 text-brand-midnight">{children}</h3>
+    ),
+    [INLINES.HYPERLINK]: (node: any, children: any) => (
+      <a href={node.data.uri} className="text-brand-primary hover:underline" target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    ),
+  },
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const raffle = await fetchRaffleBySlug(slug);
+
+  if (!raffle) return { title: "Raffle Not Found" };
+
+  return {
+    title: raffle.title,
+    description: `Win ${raffle.title} with Coast Competitions. Answer the skill question and enter now for just £${(raffle.ticketPricePence / 100).toFixed(2)}!`,
+    openGraph: {
+      title: `${raffle.title} · Coast Competitions`,
+      description: `Win ${raffle.title} with Coast Competitions.`,
+      images: raffle.heroImageUrl ? [{ url: raffle.heroImageUrl }] : [],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: raffle.title,
+      description: `Win ${raffle.title} with Coast Competitions.`,
+      images: raffle.heroImageUrl ? [raffle.heroImageUrl] : [],
+    },
+  };
+}
 
 export default async function RaffleDetailPage({
   params,
@@ -12,7 +66,10 @@ export default async function RaffleDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const raffle = await fetchRaffleBySlug(slug);
+  const [raffle, stats] = await Promise.all([
+    fetchRaffleBySlug(slug),
+    getRaffleStats(slug)
+  ]);
 
   if (!raffle) notFound();
 
@@ -25,6 +82,7 @@ export default async function RaffleDetailPage({
   }
 
   const ticketPriceFormatted = formatGBPFromPence(raffle.ticketPricePence);
+  const progress = Math.min(100, Math.max(2, (stats.ticketsSold / 5000) * 100));
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -61,7 +119,7 @@ export default async function RaffleDetailPage({
         <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-start">
           <div className="space-y-8">
             {/* Main Image Card */}
-            <div className="overflow-hidden rounded-[2.5rem] border border-black/5 bg-white shadow-xl">
+            <div className="overflow-hidden rounded-4xl border border-black/5 bg-white shadow-xl">
               <div className="relative aspect-16/10">
                 {raffle.heroImageUrl ? (
                   <Image
@@ -76,6 +134,22 @@ export default async function RaffleDetailPage({
                   <div className="h-full w-full bg-black/5" />
                 )}
               </div>
+              
+              {/* Gallery Thumbnails */}
+              {raffle.galleryImageUrls && raffle.galleryImageUrls.length > 0 && (
+                <div className="flex gap-2 p-4 overflow-x-auto bg-brand-accent/20">
+                  {[raffle.heroImageUrl, ...raffle.galleryImageUrls].filter(Boolean).map((url, i) => (
+                    <div key={i} className="relative h-20 aspect-video shrink-0 rounded-xl overflow-hidden border-2 border-white shadow-sm">
+                      <Image
+                        src={url!}
+                        alt={`${raffle.title} gallery ${i}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* About Section */}
@@ -84,11 +158,17 @@ export default async function RaffleDetailPage({
                 About this <GradientText>Raffle</GradientText>
               </h2>
               <div className="mt-6 prose prose-sm max-w-none text-brand-midnight/70">
-                <p className="text-base sm:text-lg leading-relaxed">
-                  Get ready for your chance to win this incredible {raffle.title}. 
-                  This competition is skill-based, meaning you'll need to answer 
-                  the question correctly to be entered into the draw.
-                </p>
+                {raffle.raffleDescription ? (
+                  <div className="text-base leading-relaxed">
+                    {documentToReactComponents(raffle.raffleDescription, RICH_TEXT_OPTIONS)}
+                  </div>
+                ) : (
+                  <p className="text-base sm:text-lg leading-relaxed">
+                    Get ready for your chance to win this incredible {raffle.title}. 
+                    This competition is skill-based, meaning you'll need to answer 
+                    the question correctly to be entered into the draw.
+                  </p>
+                )}
                 
                 <div className="mt-8 grid gap-4 sm:gap-6 sm:grid-cols-2">
                   <div className="rounded-2xl bg-brand-accent p-6">
@@ -100,6 +180,17 @@ export default async function RaffleDetailPage({
                     <p className="text-sm font-medium text-brand-midnight">Receive your ticket numbers via email immediately after a successful entry.</p>
                   </div>
                 </div>
+
+                {raffle.prizeDetails && (
+                  <div className="mt-12">
+                    <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-4">
+                      Prize <GradientText>Details</GradientText>
+                    </h3>
+                    <div className="text-base leading-relaxed">
+                      {documentToReactComponents(raffle.prizeDetails, RICH_TEXT_OPTIONS)}
+                    </div>
+                  </div>
+                )}
               </div>
             </GlassCard>
 
@@ -139,20 +230,20 @@ export default async function RaffleDetailPage({
                 Tickets Sold
               </div>
               <div className="text-3xl font-black text-brand-midnight">
-                -- <span className="text-lg text-brand-midnight/20">/ --</span>
+                {stats.ticketsSold} <span className="text-lg text-brand-midnight/20">/ 5000</span>
               </div>
               <div className="mt-4 h-2 w-full bg-brand-accent rounded-full overflow-hidden">
-                <div className="h-full bg-brand-secondary w-[15%] rounded-full shadow-[0_0_10px_rgba(0,112,224,0.3)]" />
+                <div 
+                  className="h-full bg-brand-secondary rounded-full shadow-[0_0_10px_rgba(0,112,224,0.3)]" 
+                  style={{ width: `${progress}%` }}
+                />
               </div>
               <div className="mt-4 flex items-center justify-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                 <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/60">
-                  5 people entered in the last hour
+                  Real-time entry tracking active
                 </p>
               </div>
-              <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-brand-secondary">
-                Drawing in: 2 days, 14 hours
-              </p>
             </GlassCard>
           </div>
         </div>

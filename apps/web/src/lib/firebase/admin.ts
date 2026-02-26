@@ -1,32 +1,32 @@
 import * as admin from "firebase-admin";
-import { getOptionalEnv } from "@/lib/env";
 
-if (!admin.apps.length) {
-  const projectId = getOptionalEnv("FIREBASE_PROJECT_ID");
-  const clientEmail = getOptionalEnv("FIREBASE_CLIENT_EMAIL");
-  const privateKey = getOptionalEnv("FIREBASE_PRIVATE_KEY")?.replace(/\\n/g, "\n").replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
-  
-  if (projectId && clientEmail && privateKey && privateKey.includes("BEGIN PRIVATE KEY") && process.env.NODE_ENV === "production") {
-    console.log("Firebase Admin: Initializing with Cert Strategy (Production)");
+function initAdmin() {
+  if (admin.apps.length) return;
+
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const rawKey = process.env.FIREBASE_PRIVATE_KEY;
+
+  const privateKey = rawKey
+    ?.replace(/\\n/g, "\n")
+    .replace(/^"(.*)"$/, "$1")
+    .replace(/^'(.*)'$/, "$1");
+
+  if (projectId && clientEmail && privateKey?.includes("BEGIN PRIVATE KEY")) {
     try {
       admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId,
-          clientEmail,
-          privateKey,
-        }),
+        credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
       });
-    } catch (error) {
-      console.error("Firebase Admin Initialization Error:", error);
-      admin.initializeApp({ projectId });
+      return;
+    } catch {
+      // Private key failed to parse — fall through to projectId-only init
     }
-  } else if (projectId) {
-    console.log("Firebase Admin: Initializing with Project ID fallback");
-    admin.initializeApp({ projectId });
-  } else {
-    admin.initializeApp({ projectId: "placeholder-project-id" });
   }
+
+  admin.initializeApp({ projectId: projectId || "coast-competitions" });
 }
+
+initAdmin();
 
 export const adminDb = admin.firestore();
 export const adminAuth = admin.auth();

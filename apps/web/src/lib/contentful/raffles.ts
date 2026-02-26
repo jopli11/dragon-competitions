@@ -20,6 +20,14 @@ type RaffleEntryFields = {
       file?: { url?: string };
     };
   };
+  raffleDescription?: any;
+  prizeDetails?: any;
+  galleryImages?: {
+    fields?: {
+      title?: string;
+      file?: { url?: string };
+    };
+  }[];
 };
 
 type RaffleSkeleton = EntrySkeletonType<RaffleEntryFields, "raffle">;
@@ -38,6 +46,9 @@ export type RaffleDetail = RaffleSummary & {
   startAt: string;
   skillQuestion: string;
   answerOptions: string[];
+  raffleDescription?: any;
+  prizeDetails?: any;
+  galleryImageUrls?: string[];
 };
 
 function toUrlMaybe(url?: string) {
@@ -156,6 +167,9 @@ export const fetchRaffleBySlug = cache(async (
     startAt: fields.startAt,
     skillQuestion: fields.skillQuestion,
     answerOptions: fields.answerOptions,
+    raffleDescription: fields.raffleDescription,
+    prizeDetails: fields.prizeDetails,
+    galleryImageUrls: fields.galleryImages?.map(img => toUrlMaybe(img.fields?.file?.url)).filter(Boolean) as string[],
   };
 });
 

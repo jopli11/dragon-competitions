@@ -3,6 +3,7 @@ import { Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { CookieConsent } from "@/components/CookieConsent";
 import EmotionRegistry from "@/lib/emotion-registry";
 import { AuthProvider } from "@/lib/auth-context";
 
@@ -32,8 +33,9 @@ export default function RootLayout({
           <EmotionRegistry>
             <div className="flex min-h-screen flex-col bg-background text-foreground">
               <SiteHeader />
-              <main className="flex-grow">{children}</main>
+              <main className="grow">{children}</main>
               <SiteFooter />
+              <CookieConsent />
             </div>
           </EmotionRegistry>
         </AuthProvider>

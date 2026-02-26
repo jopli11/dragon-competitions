@@ -34,6 +34,9 @@ export async function POST(request: Request) {
     }
 
     try {
+      // Fetch raffle from Contentful to get the endAt date
+      const contentfulRaffle = await fetchRaffleBySlug(raffleSlug);
+
       // Use a Firestore transaction to allocate ticket numbers and create the order
       await adminDb.runTransaction(async (transaction) => {
         const raffleRef = adminDb.collection("raffles").doc(raffleSlug);
@@ -47,15 +50,19 @@ export async function POST(request: Request) {
         const ticketStart = nextTicketNumber;
         const ticketEnd = nextTicketNumber + quantity - 1;
 
-        // 1. Update raffle counters
-        transaction.set(
-          raffleRef,
-          {
-            nextTicketNumber: ticketEnd + 1,
-            ticketsSold: admin.firestore.FieldValue.increment(quantity),
-          },
-          { merge: true }
-        );
+        // 1. Update raffle counters and mirror endAt from Contentful
+        const updateData: any = {
+          nextTicketNumber: ticketEnd + 1,
+          ticketsSold: admin.firestore.FieldValue.increment(quantity),
+          drawStatus: "pending", // Ensure it's pending so the draw function finds it
+        };
+
+        // Mirror the endAt date if we have it and it's not already set
+        if (contentfulRaffle?.endAt && (!raffleDoc.exists || !raffleDoc.data()?.endAt)) {
+          updateData.endAt = admin.firestore.Timestamp.fromDate(new Date(contentfulRaffle.endAt));
+        }
+
+        transaction.set(raffleRef, updateData, { merge: true });
 
         // 2. Create the order
         const orderRef = adminDb.collection("orders").doc(session.id);

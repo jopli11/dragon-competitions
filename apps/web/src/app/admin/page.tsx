@@ -138,7 +138,7 @@ function AdminPage() {
 
       {activeTab === "raffles" && (
         <section>
-          <div className="overflow-hidden rounded-[2rem] border border-brand-primary/10 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
             <table className="w-full text-left text-sm">
               <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
                 <tr>
@@ -190,7 +190,7 @@ function AdminPage() {
 
       {activeTab === "orders" && (
         <section>
-          <div className="overflow-hidden rounded-[2rem] border border-brand-primary/10 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
             <table className="w-full text-left text-sm">
               <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
                 <tr>
@@ -219,7 +219,7 @@ function AdminPage() {
 
       {activeTab === "winners" && (
         <section>
-          <div className="overflow-hidden rounded-[2rem] border border-brand-primary/10 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
             <table className="w-full text-left text-sm">
               <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
                 <tr>
