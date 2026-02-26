@@ -96,7 +96,7 @@ const faqCategories = [
     title: "General Questions",
     items: [
       {
-        question: "How do Dragon Competitions work?",
+        question: "How do Coast Competitions work?",
         answer: "It's simple! Choose a prize you'd love to win, answer the skill-based qualifying question correctly, and purchase your tickets. Once the countdown ends or all tickets are sold, we perform a live draw to pick the winner.",
       },
       {
@@ -135,7 +135,7 @@ const faqCategories = [
       },
       {
         question: "Do you ever extend draw dates?",
-        answer: "Never. At Dragon Competitions, we pride ourselves on our 'No Extensions' policy. When the timer hits zero, the draw happens, regardless of how many tickets have been sold.",
+        answer: "Never. At Coast Competitions, we pride ourselves on our 'No Extensions' policy. When the timer hits zero, the draw happens, regardless of how many tickets have been sold.",
       },
       {
         question: "How will I know if I've won?",
@@ -158,7 +158,7 @@ export default function FaqsPage() {
         <div className="text-center mb-12">
           <BrandSectionHeading>Frequently Asked <GradientText>Questions</GradientText></BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">
-            Everything you need to know about winning with Dragon.
+            Everything you need to know about winning with Coast.
           </p>
         </div>
 

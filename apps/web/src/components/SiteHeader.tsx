@@ -12,12 +12,12 @@ const HeaderWrapper = styled.header`
   top: 0;
   z-index: 100;
   background: white;
-  color: #0a2540;
+  color: #232F3E;
   height: 4.5rem;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid rgba(0, 48, 135, 0.05);
-  box-shadow: 0 2px 10px rgba(0, 48, 135, 0.03);
+  border-bottom: 1px solid rgba(14, 126, 139, 0.05);
+  box-shadow: 0 2px 10px rgba(14, 126, 139, 0.03);
 
   @media (max-width: 768px) {
     height: 4rem;
@@ -27,10 +27,10 @@ const HeaderWrapper = styled.header`
 const NavLink = styled(Link)`
   font-size: 0.875rem;
   font-weight: 600;
-  color: #0a2540;
+  color: #232F3E;
   transition: color 0.2s;
   &:hover {
-    color: #0070e0;
+    color: #35B1AB;
   }
 `;
 
@@ -44,17 +44,17 @@ const HeaderButton = styled(Link)`
   cursor: pointer;
   padding: 0.5rem 1.5rem;
   font-size: 0.8125rem;
-  background: linear-gradient(135deg, #003087, #0070e0);
+  background: linear-gradient(135deg, #0E7E8B, #35B1AB);
   color: white;
   border: none;
-  box-shadow: 0 4px 15px rgba(0, 48, 135, 0.2);
+  box-shadow: 0 4px 15px rgba(14, 126, 139, 0.2);
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(0, 48, 135, 0.3);
+    box-shadow: 0 6px 20px rgba(14, 126, 139, 0.3);
     color: white;
   }
 
@@ -79,18 +79,18 @@ const MobileMenuOverlay = styled.div<{ isOpen: boolean }>`
 const MobileNavLink = styled(Link)`
   font-size: 1.5rem;
   font-weight: 900;
-  color: #0a2540;
+  color: #232F3E;
   text-transform: uppercase;
   letter-spacing: -0.02em;
   padding: 1.5rem 0;
-  border-bottom: 1px solid rgba(0, 48, 135, 0.05);
+  border-bottom: 1px solid rgba(14, 126, 139, 0.05);
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   &::after {
     content: "→";
-    color: #0070e0;
+    color: #35B1AB;
     font-size: 1.25rem;
   }
 `;
@@ -114,7 +114,7 @@ const HamburgerButton = styled.button<{ isOpen: boolean }>`
   div {
     width: 1.5rem;
     height: 2px;
-    background: #0a2540;
+    background: #232F3E;
     border-radius: 10px;
     transition: all 0.3s linear;
     position: relative;
@@ -162,7 +162,7 @@ export function SiteHeader() {
             <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex items-center justify-center">
               <Image
                 src="/logo.png"
-                alt="Dragon Competitions"
+                alt="Coast Competitions"
                 fill
                 className="object-contain"
                 priority
@@ -170,7 +170,7 @@ export function SiteHeader() {
             </div>
             <div className="flex flex-col justify-center leading-[0.9] -ml-2 sm:-ml-4">
               <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase text-brand-midnight">
-                Dragon
+                Coast
               </span>
               <span className="text-[10px] sm:text-[14px] font-bold tracking-[0.15em] text-brand-secondary uppercase">
                 Competitions
@@ -208,14 +208,14 @@ export function SiteHeader() {
           <div className="relative h-24 w-24 flex items-center justify-center">
             <Image
               src="/logo.png"
-              alt="Dragon Competitions"
+              alt="Coast Competitions"
               fill
               className="object-contain"
             />
           </div>
           <div className="flex flex-col justify-center leading-[0.9] -ml-4">
             <span className="text-4xl font-black tracking-tighter uppercase text-brand-midnight">
-              Dragon
+              Coast
             </span>
             <span className="text-[16px] font-bold tracking-[0.15em] text-brand-secondary uppercase">
               Competitions

@@ -51,12 +51,12 @@ const buttonStyles = css`
 const getButtonVariant = (variant: "primary" | "secondary" | "outline" = "primary") => {
   if (variant === "primary") {
     return css`
-      background: linear-gradient(135deg, #003087 0%, #0070e0 100%);
+      background: linear-gradient(135deg, #0E7E8B 0%, #35B1AB 100%);
       color: white;
-      box-shadow: 0 4px 15px rgba(0, 48, 135, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 15px rgba(14, 126, 139, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0, 48, 135, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 25px rgba(14, 126, 139, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
         color: white;
       }
       &:active {
@@ -66,11 +66,11 @@ const getButtonVariant = (variant: "primary" | "secondary" | "outline" = "primar
   }
   if (variant === "secondary") {
     return css`
-      background: #0a2540;
+      background: #232F3E;
       color: white;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       &:hover {
-        background: #113355;
+        background: #2c3b4d;
         transform: translateY(-1px);
         color: white;
       }
@@ -79,11 +79,11 @@ const getButtonVariant = (variant: "primary" | "secondary" | "outline" = "primar
   if (variant === "outline") {
     return css`
       background: transparent;
-      color: #003087;
-      border: 2px solid rgba(0, 48, 135, 0.1);
+      color: #0E7E8B;
+      border: 2px solid rgba(14, 126, 139, 0.1);
       &:hover {
-        background: rgba(0, 48, 135, 0.03);
-        border-color: rgba(0, 48, 135, 0.3);
+        background: rgba(14, 126, 139, 0.03);
+        border-color: rgba(14, 126, 139, 0.3);
         transform: translateY(-1px);
       }
     `;
@@ -123,15 +123,15 @@ export const BrandLinkButton = styled(Link, {
 export const BrandCard = styled.div`
   background: white;
   border-radius: 2rem;
-  border: 1px solid rgba(0, 48, 135, 0.08);
-  box-shadow: 0 10px 30px -5px rgba(0, 48, 135, 0.05);
+  border: 1px solid rgba(14, 126, 139, 0.08);
+  box-shadow: 0 10px 30px -5px rgba(14, 126, 139, 0.05);
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   &:hover {
     transform: translateY(-8px) scale(1.01);
-    box-shadow: 0 20px 40px -10px rgba(0, 48, 135, 0.12);
-    border-color: rgba(0, 112, 224, 0.2);
+    box-shadow: 0 20px 40px -10px rgba(14, 126, 139, 0.12);
+    border-color: rgba(53, 177, 171, 0.2);
   }
 `;
 
@@ -143,7 +143,7 @@ export const BrandBadge = styled.span`
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #0070e0;
+  background: #35B1AB;
   color: white;
 `;
 
@@ -151,20 +151,20 @@ export const BrandSectionHeading = styled.h2`
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #0a2540;
+  color: #232F3E;
   text-transform: uppercase;
 `;
 
 export const GlassCard = styled.div`
   background: white;
   border-radius: 2rem;
-  border: 1px solid rgba(0, 48, 135, 0.05);
-  box-shadow: 0 10px 30px rgba(0, 48, 135, 0.03);
+  border: 1px solid rgba(14, 126, 139, 0.05);
+  box-shadow: 0 10px 30px rgba(14, 126, 139, 0.03);
   padding: 2rem;
 `;
 
 export const GradientText = styled.span`
-  background: linear-gradient(135deg, #003087 0%, #0070e0 100%);
+  background: linear-gradient(135deg, #0E7E8B 0%, #35B1AB 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 900;

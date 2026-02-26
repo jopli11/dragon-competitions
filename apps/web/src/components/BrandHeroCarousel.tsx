@@ -69,13 +69,13 @@ const Dot = styled.button<{ active: boolean }>`
   width: 0.75rem;
   height: 0.75rem;
   border-radius: 9999px;
-  background: ${({ active }) => (active ? "#0070e0" : "rgba(255, 255, 255, 0.3)")};
+  background: ${({ active }) => (active ? "#0070E0" : "rgba(255, 255, 255, 0.3)")};
   border: none;
   cursor: pointer;
   transition: all 0.2s;
   
   &:hover {
-    background: ${({ active }) => (active ? "#0070e0" : "rgba(255, 255, 255, 0.5)")};
+    background: ${({ active }) => (active ? "#0070E0" : "rgba(255, 255, 255, 0.5)")};
   }
 `;
 
@@ -86,42 +86,29 @@ interface Slide {
   title: string;
 }
 
-const MOCK_SLIDES: Slide[] = [
-  {
-    id: "1",
-    image: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=2000&auto=format&fit=crop",
-    link: "/raffles/win-20000-cash",
-    title: "Win £20,000 Tax Free Cash",
-  },
-  {
-    id: "2",
-    image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=2000&auto=format&fit=crop",
-    link: "/raffles/tesla-model-s",
-    title: "Tesla Model S Plaid",
-  },
-  {
-    id: "3",
-    image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?q=80&w=2000&auto=format&fit=crop",
-    link: "/raffles/ps5-bundle",
-    title: "PS5 Ultimate Bundle",
-  },
-];
+interface BrandHeroCarouselProps {
+  slides: Slide[];
+}
 
-export function BrandHeroCarousel() {
+export function BrandHeroCarousel({ slides }: BrandHeroCarouselProps) {
   const [current, setCurrent] = useState(0);
 
   const next = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % MOCK_SLIDES.length);
-  }, []);
+    if (slides.length <= 1) return;
+    setCurrent((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
 
   useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
-  }, [next]);
+  }, [next, slides.length]);
+
+  if (slides.length === 0) return null;
 
   return (
     <CarouselWrapper>
-      {MOCK_SLIDES.map((slide, index) => (
+      {slides.map((slide, index) => (
         <SlideContainer key={slide.id} active={index === current}>
           <SlideLink href={slide.link}>
             <Image
@@ -144,16 +131,21 @@ export function BrandHeroCarousel() {
         </SlideContainer>
       ))}
       
-      <Controls>
-        {MOCK_SLIDES.map((_, index) => (
-          <Dot
-            key={index}
-            active={index === current}
-            onClick={() => setCurrent(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </Controls>
+      {slides.length > 1 && (
+        <Controls>
+          {slides.map((_, index) => (
+            <Dot
+              key={index}
+              active={index === current}
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrent(index);
+              }}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </Controls>
+      )}
     </CarouselWrapper>
   );
 }

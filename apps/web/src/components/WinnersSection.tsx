@@ -110,7 +110,7 @@ const winners = [
     winner: "Michael Walker",
     date: "Jan 21, 2026",
     ticket: "282262",
-    quote: "I've been entering for 6 months and finally my number came up! The team at Dragon were amazing and the car is even better in person.",
+    quote: "I've been entering for 6 months and finally my number came up! The team at Coast were amazing and the car is even better in person.",
     image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=800&auto=format&fit=crop",
   },
   {
@@ -118,7 +118,7 @@ const winners = [
     winner: "Louise St Louie",
     date: "Jan 20, 2026",
     ticket: "282262",
-    quote: "Absolutely life changing. I never thought I'd actually win, but here I am with my dream car. Thank you Dragon Competitions!",
+    quote: "Absolutely life changing. I never thought I'd actually win, but here I am with my dream car. Thank you Coast Competitions!",
     image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=800&auto=format&fit=crop",
   },
 ];

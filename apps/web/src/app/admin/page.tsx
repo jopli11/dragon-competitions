@@ -5,7 +5,7 @@ export default function AdminPage() {
     <Container className="py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Admin Dashboard</h1>
       <p className="mt-4 text-sm text-foreground/70">
-        Welcome to the Dragon Competitions admin area. This section is for monitoring raffles, orders, and draws.
+        Welcome to the Coast Competitions admin area. This section is for monitoring raffles, orders, and draws.
       </p>
       
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

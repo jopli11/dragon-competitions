@@ -15,8 +15,8 @@ const OptionButton = styled.button<{ active: boolean; isWrong: boolean }>`
       isWrong && active
         ? "#ef4444"
         : active
-        ? "#0070e0"
-        : "rgba(0, 48, 135, 0.1)"};
+        ? "#35B1AB"
+        : "rgba(14, 126, 139, 0.1)"};
   padding: 1rem 1.25rem;
   text-align: left;
   font-size: 0.875rem;
@@ -26,20 +26,20 @@ const OptionButton = styled.button<{ active: boolean; isWrong: boolean }>`
     isWrong && active
       ? "rgba(239, 68, 68, 0.05)"
       : active
-      ? "rgba(0, 112, 224, 0.05)"
+      ? "rgba(53, 177, 171, 0.05)"
       : "white"};
-  color: #0a2540;
+  color: #232F3E;
 
   &:hover {
-    border-color: ${({ active }) => (active ? "#0070e0" : "rgba(0, 112, 224, 0.3)")};
-    background-color: ${({ active }) => (active ? "" : "rgba(0, 112, 224, 0.02)")};
+    border-color: ${({ active }) => (active ? "#35B1AB" : "rgba(53, 177, 171, 0.3)")};
+    background-color: ${({ active }) => (active ? "" : "rgba(53, 177, 171, 0.02)")};
   }
 `;
 
 const QuestionHeading = styled.h2`
   font-size: 1.125rem;
   font-weight: 700;
-  color: #0a2540;
+  color: #232F3E;
   letter-spacing: -0.01em;
 `;
 

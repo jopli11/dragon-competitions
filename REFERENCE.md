@@ -1,4 +1,4 @@
-# Dragon Competitions — Complete Platform Reference
+# Coast Competitions — Complete Platform Reference
 
 > **Last updated:** 12 February 2026
 > **Purpose:** Master reference for tutorials, blog posts, SEO content, and general platform documentation.
@@ -29,12 +29,13 @@
 20. [Environment Configuration](#20-environment-configuration)
 21. [Business Rules & Compliance](#21-business-rules--compliance)
 22. [Feature Status Tracker](#22-feature-status-tracker)
+23. [Remaining Build Items — Road to Launch](#23-remaining-build-items--road-to-launch)
 
 ---
 
 ## 1. Platform Overview
 
-**Dragon Competitions** is a UK-based, skill-based competition and raffle platform. Users browse live competitions, answer a skill-based question to prove eligibility, purchase tickets via Stripe, and are automatically entered into a transparent, cryptographically audited draw when the competition ends.
+**Coast Competitions** is a UK-based, skill-based competition and raffle platform. Users browse live competitions, answer a skill-based question to prove eligibility, purchase tickets via Stripe, and are automatically entered into a transparent, cryptographically audited draw when the competition ends.
 
 ### What Makes It Different
 
@@ -42,12 +43,13 @@
 - **Transparent draws** — Winners are selected using a cryptographically secure random number generator. The seed and total ticket count are stored as an audit trail.
 - **Automated everything** — Draws run automatically via a scheduled Firebase Cloud Function. Confirmation and winner emails are sent instantly via Postmark.
 - **CMS-driven** — All competition content (titles, images, questions, pricing, FAQs) is managed in Contentful, so the team can launch and manage competitions without touching code.
+- **No extensions, ever** — Every draw happens on the stated date regardless of ticket sales. This builds trust and gives entrants better odds.
 
 ### Core Value Proposition
 
 1. Browse competitions with prizes (cars, tech, cash, watches)
 2. Answer a simple skill question
-3. Buy tickets (from £0.99 upward)
+3. Buy tickets (from under £1 upward)
 4. Get entered into a provably fair draw
 5. Winner announced automatically with full transparency
 
@@ -57,7 +59,7 @@
 
 | Layer | Technology | Version | Purpose |
 |-------|-----------|---------|---------|
-| **Framework** | Next.js (App Router) | 15.1.6 | Server-side rendering, routing, API routes |
+| **Framework** | Next.js (App Router) | 16.1.6 | Server-side rendering, routing, API routes |
 | **UI Library** | React | 19.2.3 | Component-based UI |
 | **Language** | TypeScript | 5.x | Type safety |
 | **Database** | Firebase Firestore | 12.8.0 (client) / 13.6.1 (admin) | NoSQL database for orders, tickets, quiz passes, draw state |
@@ -67,6 +69,7 @@
 | **Auth** | Firebase Authentication | (bundled) | User authentication (infrastructure ready) |
 | **Styling** | Emotion CSS-in-JS | 11.14.x | Styled components, CSS prop |
 | **Styling** | Tailwind CSS | 4 | Utility-first CSS framework |
+| **Font** | Nunito Sans | (Google Fonts) | Primary typeface across the site |
 | **Serverless** | Firebase Cloud Functions | 5.0.0 | Automated draw scheduling |
 | **Hosting** | Vercel (target) | — | Next.js deployment |
 
@@ -86,11 +89,11 @@ dragon-competitions/
 │   ├── web/                          # Next.js web application
 │   │   ├── src/
 │   │   │   ├── app/                  # App Router (pages, layouts, API routes)
-│   │   │   │   ├── page.tsx          # Homepage
+│   │   │   │   ├── page.tsx          # Homepage (Server Component, Contentful data)
 │   │   │   │   ├── layout.tsx        # Root layout (header, footer, metadata)
 │   │   │   │   ├── globals.css       # Tailwind + theme variables
 │   │   │   │   ├── about/            # About page
-│   │   │   │   ├── admin/            # Admin dashboard
+│   │   │   │   ├── admin/            # Admin dashboard (placeholder)
 │   │   │   │   ├── contact/          # Contact form
 │   │   │   │   ├── faqs/             # FAQ accordion
 │   │   │   │   ├── privacy/          # Privacy policy
@@ -99,15 +102,17 @@ dragon-competitions/
 │   │   │   │   ├── results/          # Draw results
 │   │   │   │   ├── winners/          # Winners gallery
 │   │   │   │   └── api/              # API routes
-│   │   │   │       ├── checkout/create-session/    # Stripe session creation
-│   │   │   │       ├── raffles/[slug]/check-answer/ # Skill question validation
-│   │   │   │       └── webhooks/stripe/            # Stripe webhook handler
+│   │   │   │       ├── checkout/create-session/
+│   │   │   │       ├── raffles/[slug]/check-answer/
+│   │   │   │       └── webhooks/stripe/
 │   │   │   ├── components/           # Reusable React components
 │   │   │   │   ├── AnimatedIn.tsx
 │   │   │   │   ├── BrandHeroCarousel.tsx
 │   │   │   │   ├── Container.tsx
 │   │   │   │   ├── Countdown.tsx
+│   │   │   │   ├── HomeCountdown.tsx
 │   │   │   │   ├── HowItWorks.tsx
+│   │   │   │   ├── RaffleMobileCTA.tsx
 │   │   │   │   ├── SiteFooter.tsx
 │   │   │   │   ├── SiteHeader.tsx
 │   │   │   │   ├── SkillQuestionCard.tsx
@@ -118,11 +123,13 @@ dragon-competitions/
 │   │   │       ├── firebase/         # Firebase client & admin SDK
 │   │   │       ├── stripe/           # Stripe client
 │   │   │       ├── postmark/         # Email client
-│   │   │       ├── styles.ts         # Emotion styled components
+│   │   │       ├── styles.ts         # Emotion styled components (design system)
 │   │   │       ├── env.ts            # Environment variable helpers
 │   │   │       └── emotion-registry.tsx # Emotion SSR setup
 │   │   ├── contentful/               # CMS migrations & docs
 │   │   ├── public/                   # Static assets
+│   │   │   ├── logo.png             # Coast Competitions logo
+│   │   │   └── wavelogo.png         # Coast Competitions wave logo variant
 │   │   ├── firestore.rules           # Firestore security rules
 │   │   ├── next.config.ts            # Next.js configuration
 │   │   └── package.json
@@ -171,7 +178,7 @@ dragon-competitions/
 ### Firestore Collections
 
 #### `raffles/{raffleId}`
-Tracks raffle state, ticket counters, and draw results.
+Tracks raffle state, ticket counters, and draw results. The document ID is the raffle slug from Contentful.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -197,7 +204,7 @@ Individual ticket entries (subcollection).
 | `createdAt` | Timestamp | When the ticket was created |
 
 #### `orders/{orderId}`
-Purchase records.
+Purchase records. The document ID is the Stripe checkout session ID.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -235,7 +242,7 @@ Short-lived tokens proving the user answered correctly.
 
 ## 5. Content Management (Contentful CMS)
 
-All competition content is managed in Contentful. The team can create, edit, and publish raffles without developer involvement.
+All competition content is managed in Contentful. Non-technical team members can create, edit, and publish raffles without developer involvement.
 
 ### Content Type: `raffle`
 
@@ -285,11 +292,11 @@ All competition content is managed in Contentful. The team can create, edit, and
 
 | Function | Returns | Access | Description |
 |----------|---------|--------|-------------|
-| `fetchLiveRaffles()` | `RaffleSummary[]` | Public | All raffles with status "live" |
+| `fetchLiveRaffles()` | `RaffleSummary[]` | Public | All raffles with status "live", cached with React `cache()` |
 | `fetchRaffleBySlug(slug)` | `RaffleDetail \| null` | Public | Full raffle details (no correct answer) |
 | `fetchRaffleCorrectAnswer(slug)` | `number` | Admin only | Correct answer index for validation |
 
-If Contentful is not configured, all functions fall back to **mock data** so development works without external services.
+If Contentful is not configured, all functions fall back to **mock data** so development works without external services. Mock data includes three sample raffles: "£20,000 Tax Free Cash", "Tesla Model S Plaid", and "PS5 Ultimate Bundle".
 
 ---
 
@@ -299,95 +306,67 @@ If Contentful is not configured, all functions fall back to **mock data** so dev
 
 #### 1. Landing on the Site
 The user arrives at the homepage and sees:
-- A hero carousel showcasing featured competitions
-- A countdown timer for the next big draw
-- A Trustpilot-style trust badge (4.9/5, 1,248 reviews)
-- Category filter buttons (Auto Draw, Instant Wins, Car & Bike, Tax Free Cash, Tech & Watch, Ending Soon)
-- A grid of competition cards
-- A "How It Works" explainer section (6 steps)
-- A recent winners gallery
+- A **hero carousel** showcasing up to 3 live competitions (dynamically fetched from Contentful, with images linking to raffle pages)
+- A **countdown timer** widget (currently shows static placeholder values — needs to be connected to the next ending raffle)
+- A **Trustpilot-style trust badge** (TrustScore 4.9, 1,248 reviews)
+- A **"Current Competitions" grid** showing up to 4 live raffles with title, hero image, price, end date, and "Enter Now" buttons
+- A **"How It Works" explainer** section (6 steps: Register → Pick Competition → Answer Question → Secure Checkout → No Extensions → Watch Draw)
+- A **Recent Winners** section showing winner cards with quotes, ticket numbers, and verified badges
 
 #### 2. Browsing Competitions (`/raffles`)
-The raffles listing page fetches all live competitions from Contentful and displays them in a responsive grid. Each card shows:
-- Hero image
+The raffles listing page (Server Component) fetches all live competitions from Contentful and displays them in a responsive grid. Each card shows:
+- Hero image with "Entries Open" badge
 - Competition title
-- Ticket price (formatted from pence, e.g. "£0.99")
+- Ticket price (formatted from pence, e.g. "18p")
 - End date
-- A progress bar (tickets sold — currently placeholder)
-- A link to the detail page
+- A progress bar (ticket sales — currently placeholder at 10%)
+- An "Enter Now" button
 
 #### 3. Viewing a Competition (`/raffles/[slug]`)
-The raffle detail page loads the full competition from Contentful and displays:
-- **Hero section** with the main image
-- **About section** with the rich text description
-- **Competition rules** and terms
-- **Skill question card** (sidebar on desktop, inline on mobile)
-  - The question text
-  - 2–3 answer options as buttons
-  - A floating "Answer & Enter" CTA on mobile
+The raffle detail page (Server Component with `notFound()` handling) loads the full competition from Contentful and displays:
+- **Blurred hero banner** with the competition image
+- **"Entries Open" badge** and ticket price
+- **Main image card** — full-resolution hero image
+- **About section** — describing the raffle with "Guaranteed Draw" and "Instant Confirmation" feature cards
+- **Competition Rules** — numbered list of entry requirements
+- **Skill question card** (sticky sidebar on desktop)
+- **Ticket sales stats** (placeholder — shows "-- / --" and "5 people entered in the last hour")
+- **Mobile floating CTA** — fixed bottom bar with price and "Enter Now" button (on mobile only)
 
 #### 4. Answering the Skill Question
 When the user selects an answer:
 1. The `SkillQuestionCard` component sends a POST request to `/api/raffles/[slug]/check-answer` with the selected `answerIndex`
 2. The server fetches the correct answer from Contentful using the **admin client** (so the answer is never exposed to the browser)
-3. If **incorrect**: the user sees an error message and can try again
+3. If **incorrect**: the user sees a red error state and can retry
 4. If **correct**: the server creates a **quiz pass** in Firestore (valid for 15 minutes) and returns the `quizPassId`
 5. The `quizPassId` is stored in the browser's `sessionStorage`
-6. The skill question card transitions to show a **ticket quantity selector** (1–100 tickets)
+6. The skill question card transitions to show a **ticket quantity selector** (1–100 tickets) with +/- buttons
 
 #### 5. Selecting Tickets & Checking Out
 1. The user selects how many tickets they want (1–100)
-2. Clicking "Buy Tickets" triggers a POST request to `/api/checkout/create-session` with the `slug`, `quantity`, and `quizPassId`
-3. The server validates:
-   - The quiz pass exists, hasn't been used, hasn't expired, and matches the raffle
-   - The raffle is still live in Contentful
-   - The quantity is within bounds (1–100)
-4. The server creates a **Stripe Checkout Session** with:
-   - Product name = raffle title
-   - Unit price = `ticketPricePence` from Contentful
-   - Quantity = user's selection
-   - Metadata: `raffleSlug`, `quizPassId`, `quantity`
-   - Success URL: `/raffles/[slug]/success?session_id={CHECKOUT_SESSION_ID}`
-   - Cancel URL: `/raffles/[slug]`
-5. The user is **redirected to Stripe's hosted checkout page**
+2. Clicking "Buy tickets now" triggers a POST request to `/api/checkout/create-session` with the `slug`, `quantity`, and `quizPassId`
+3. The server validates the quiz pass and raffle, then creates a **Stripe Checkout Session**
+4. The user is **redirected to Stripe's hosted checkout page**
 
 #### 6. Payment & Fulfillment
 1. The user completes payment on Stripe's checkout page
 2. Stripe sends a `checkout.session.completed` webhook to `/api/webhooks/stripe`
-3. The webhook handler verifies the Stripe signature, then performs an **atomic Firestore transaction**:
-   - Reads the raffle's `nextTicketNumber`
-   - Allocates sequential ticket numbers (e.g. tickets 42–46 for a 5-ticket purchase)
-   - Increments `nextTicketNumber` and `ticketsSold` on the raffle document
-   - Creates an **order** document with email, quantity, amount, ticket range, Stripe payment intent ID
-   - Marks the **quiz pass** as used
-   - Creates individual **ticket** documents in the raffle's tickets subcollection
-4. A **purchase confirmation email** is sent via Postmark with:
-   - The raffle title
-   - The ticket numbers assigned
-   - The order ID
+3. The webhook handler performs an **atomic Firestore transaction**:
+   - Allocates sequential ticket numbers
+   - Creates an order document
+   - Marks the quiz pass as used
+   - Creates individual ticket documents
+4. A **purchase confirmation email** is sent via Postmark
 
 #### 7. Success Page (`/raffles/[slug]/success`)
-After payment, Stripe redirects the user to the success page showing:
-- A confirmation message ("Entry confirmed!")
-- A note that a confirmation email has been sent
-- Links to browse more competitions or return home
+After payment, Stripe redirects the user to the success page showing a confirmation message, a note about the email, and links to browse more competitions.
 
 #### 8. The Automated Draw
 When a competition's `endAt` time passes:
-1. A Firebase Cloud Function (`scheduledDraw`) runs **every minute** and queries Firestore for raffles where `endAt <= now` and `drawStatus == "pending"`
-2. For each ended raffle:
-   - If **no tickets were sold**: marks as completed with `drawResult: "no_tickets_sold"`
-   - If tickets exist: performs a **cryptographically secure draw**:
-     1. Generates a random seed using `crypto.randomBytes(32)`
-     2. Calculates the winning ticket: `(randomNumber % totalTickets) + 1`
-     3. Looks up the winning ticket in Firestore to get the winner's email and order ID
-     4. Updates the raffle document with `drawStatus: "completed"`, `winningTicketNumber`, `winnerEmail`, `winnerOrderId`, `drawnAt`, and `drawAudit`
-     5. Sends a **winner notification email** via Postmark
-
-#### 9. Viewing Results
-- **Results page** (`/results`): Shows recent draw results with prize images, winner names, dates, and winning ticket numbers
-- **Winners page** (`/winners`): A gallery of past winners with verified badges
-- *(Both currently use placeholder/mock data)*
+1. A Firebase Cloud Function (`scheduledDraw`) runs **every minute** and checks for ended raffles
+2. For each ended raffle: performs a **cryptographically secure draw** using `crypto.randomBytes(32)`
+3. Updates the raffle document with winner info and audit trail
+4. Sends a **winner notification email** via Postmark
 
 ---
 
@@ -397,17 +376,17 @@ When a competition's `endAt` time passes:
 
 | Route | Component Type | Description | Data Source |
 |-------|---------------|-------------|-------------|
-| `/` | Client | Homepage — hero carousel, countdown, categories, raffle cards, how it works, winners | Hardcoded placeholders |
+| `/` | Server | Homepage — hero carousel (from CMS), countdown, trust badge, raffle grid, how it works, winners | Contentful (live raffles) |
 | `/raffles` | Server | Live competitions listing grid | Contentful (live raffles) |
-| `/raffles/[slug]` | Client | Competition detail with skill question and checkout | Contentful (raffle by slug) |
+| `/raffles/[slug]` | Server | Competition detail with skill question and checkout | Contentful (raffle by slug) |
 | `/raffles/[slug]/success` | Server | Post-payment confirmation page | None (static) |
-| `/about` | Client | Company story, stats, features, CTA | Static content |
-| `/contact` | Client | Contact form, email, hours, social links | Static content |
+| `/about` | Server | Company story, stats, features, CTA | Static content |
+| `/contact` | Server | Contact form, email, hours, social links | Static content |
 | `/faqs` | Client | Accordion FAQ — 3 categories, 9 questions | Hardcoded FAQs |
 | `/results` | Client | Recent draw results gallery | Mock data |
 | `/winners` | Client | Winners gallery with verified badges | Mock data |
-| `/privacy` | Client | Privacy policy (5 sections) | Static content |
-| `/terms` | Client | Terms & conditions (5 sections) | Static content |
+| `/privacy` | Server | Privacy policy (5 sections) | Static content |
+| `/terms` | Server | Terms & conditions (5 sections) | Static content |
 | `/admin` | Server | Admin dashboard (placeholder) | None (placeholder) |
 
 ### API Routes
@@ -421,11 +400,10 @@ When a competition's `endAt` time passes:
 ### Layout Structure
 
 The root layout (`layout.tsx`) wraps all pages with:
-- `SiteHeader` — sticky navigation with logo, links, login button, CTA
-- `SiteFooter` — links, social icons, age restriction badges (18+, BeGambleAware)
+- `SiteHeader` — sticky white header with Coast Competitions logo + text mark, navigation links, login button, "Enter Now" CTA, mobile hamburger overlay
+- `SiteFooter` — dark navy footer with logo, quick links, support links, social icons, 18+ and BeGambleAware badges
 - Emotion CSS registry for server-side style injection
-- Geist Sans and Geist Mono fonts
-- Global metadata: title template `"%s · Dragon Competitions"`
+- Nunito Sans font loaded via Google Fonts
 
 ---
 
@@ -437,38 +415,25 @@ The root layout (`layout.tsx`) wraps all pages with:
 
 **Request Body:**
 ```json
-{
-  "answerIndex": 0
-}
+{ "answerIndex": 0 }
 ```
 
 **Success Response (correct answer):**
 ```json
-{
-  "isCorrect": true,
-  "quizPassId": "abc123def456"
-}
+{ "isCorrect": true, "quizPassId": "abc123def456" }
 ```
 
 **Success Response (wrong answer):**
 ```json
-{
-  "isCorrect": false
-}
+{ "isCorrect": false }
 ```
 
 **How It Works:**
 1. Extracts `slug` from the URL and `answerIndex` from the body
-2. Calls `fetchRaffleCorrectAnswer(slug)` using the Contentful **admin client** (which has access to the `correctAnswerIndex` field)
+2. Calls `fetchRaffleCorrectAnswer(slug)` using the Contentful **admin client**
 3. Compares the user's answer to the correct answer
-4. If correct, creates a quiz pass in Firestore with:
-   - `raffleSlug`: the raffle's slug
-   - `createdAt`: current timestamp
-   - `expiresAt`: 15 minutes from now
-   - `used`: false
+4. If correct, creates a quiz pass in Firestore (15-minute expiry, `used: false`)
 5. Returns the `quizPassId` to the client
-
-**Security:** The correct answer index is fetched via the admin/server token and **never** sent to the client.
 
 ---
 
@@ -478,28 +443,18 @@ The root layout (`layout.tsx`) wraps all pages with:
 
 **Request Body:**
 ```json
-{
-  "slug": "win-a-bmw-m4",
-  "quantity": 5,
-  "quizPassId": "abc123def456"
-}
+{ "slug": "win-a-bmw-m4", "quantity": 5, "quizPassId": "abc123def456" }
 ```
 
 **Success Response:**
 ```json
-{
-  "url": "https://checkout.stripe.com/c/pay/cs_test_..."
-}
+{ "url": "https://checkout.stripe.com/c/pay/cs_test_..." }
 ```
 
 **Validation Steps:**
 1. Checks all required fields are present
 2. Validates quantity is between 1 and 100
-3. Fetches the quiz pass from Firestore and verifies:
-   - It exists
-   - It hasn't been used (`used === false`)
-   - It matches the raffle slug
-   - It hasn't expired (< 15 minutes old)
+3. Fetches the quiz pass from Firestore and verifies it exists, hasn't been used, matches the raffle slug, and hasn't expired
 4. Fetches the raffle from Contentful and verifies it's live
 5. Creates a Stripe Checkout Session with the raffle's ticket price and the user's quantity
 6. Returns the Stripe checkout URL for redirect
@@ -510,127 +465,73 @@ The root layout (`layout.tsx`) wraps all pages with:
 
 **Purpose:** Handles Stripe webhook events after payment completion.
 
-**Trigger:** Stripe sends this automatically after a successful checkout.
-
 **Handled Event:** `checkout.session.completed`
 
 **Process:**
 1. Verifies the webhook signature using `STRIPE_WEBHOOK_SECRET`
 2. Extracts metadata: `raffleSlug`, `quizPassId`, `quantity`
-3. Runs an **atomic Firestore transaction**:
-   - Reads the raffle document to get `nextTicketNumber`
-   - Allocates ticket numbers: `start = nextTicketNumber`, `end = nextTicketNumber + quantity - 1`
-   - Updates the raffle: `nextTicketNumber += quantity`, `ticketsSold += quantity`
-   - Creates an order document in `orders/`
-   - Marks the quiz pass as `used: true`
-   - Creates individual ticket documents in `raffles/{slug}/tickets/`
+3. Runs an **atomic Firestore transaction** that allocates tickets, creates order, marks quiz pass used, creates individual ticket docs
 4. Sends a purchase confirmation email via Postmark
-
-**Response:**
-```json
-{
-  "received": true
-}
-```
 
 ---
 
 ## 9. Components Reference
 
 ### `BrandHeroCarousel`
-**Purpose:** Auto-advancing hero carousel on the homepage.
-- Cycles through 3 slides every 5 seconds
-- Each slide has an image, title, subtitle, and CTA link
-- Dot navigation at the bottom
-- Responsive aspect ratios: 16:9 on mobile, 21:9 on desktop
-- Overlay gradient for text readability
+Auto-advancing hero carousel. Receives dynamic `slides` array as props (from Contentful data). Each slide has image, title, and link to raffle page. 5-second auto-advance with dot navigation. Responsive: 16:9 on mobile, 21:9 on desktop.
 
 ### `SiteHeader`
-**Purpose:** Sticky site-wide navigation bar.
-- Logo linking to homepage
-- Navigation links: Current Competitions, Draw Results, About, Winners
-- Login button (links to `/login` — not yet implemented)
-- "Enter Now" CTA button
-- Mobile hamburger menu with full-screen overlay
-- Prevents body scroll when mobile menu is open
+Sticky white header with Coast Competitions logo (`/logo.png`) + "Coast / Competitions" text mark. Navigation: Current Competitions, Draw Results, About Us, Winners. Login link (goes to `/login` — not yet implemented). "Enter Now" CTA button. Mobile hamburger overlay with full-screen navigation.
 
 ### `SiteFooter`
-**Purpose:** Site-wide footer.
-- Dragon Competitions logo and description
-- Quick Links: Current Competitions, Draw Results, Winners, About
-- Support Links: FAQs, Contact Us, Terms & Conditions, Privacy Policy
-- Social media icons: Facebook, Instagram, Twitter
-- Age restriction badges: 18+ and BeGambleAware
-- Copyright notice
+Dark navy (`#232F3E`) footer. Coast Competitions logo + description. Quick Links and Support links. Facebook, Instagram, Twitter social icons. 18+ and BeGambleAware compliance badges. Dynamic copyright year.
 
 ### `SkillQuestionCard`
-**Purpose:** The core interactive component — handles the skill question and checkout flow.
-- **Props:** `question` (string), `options` (string array), `slug` (string)
-- **States:**
-  1. **Question mode** — Displays the question with answer buttons
-  2. **Loading** — Shows spinner while validating answer
-  3. **Wrong answer** — Error message, user can retry
-  4. **Correct answer** — Shows ticket quantity selector (1–100) and "Buy Tickets" button
-  5. **Checkout loading** — Spinner while creating Stripe session
-- **Session persistence:** Stores `quizPassId` in `sessionStorage` so it survives page refreshes (within the 15-minute window)
-- **API calls:**
-  - `POST /api/raffles/[slug]/check-answer` — on answer submission
-  - `POST /api/checkout/create-session` — on "Buy Tickets" click
+The core interactive component — handles the skill question and checkout flow. Props: `question`, `options` (string array), `slug`. States: question mode → loading → wrong answer (retry) → correct answer → quantity selector → checkout. Stores `quizPassId` in `sessionStorage`. Makes API calls to check-answer and create-session endpoints.
+
+### `HomeCountdown`
+Countdown widget on the homepage with branded teal gradient background. Currently shows **static placeholder values** (0 days, 12 hours, 34 mins, 08 secs). Includes "Next Draw / Ending Soon" label. Needs to be connected to the actual nearest ending raffle.
 
 ### `Countdown`
-**Purpose:** Live countdown timer to a raffle's end date.
-- **Props:** `endAt` (ISO date string)
-- Updates every second via `setInterval`
-- Displays: days, hours, minutes, seconds
-- Shows "Ended" when the countdown reaches zero
+Generic countdown timer component. Takes `endAt` (ISO date string) prop. Updates every second. Shows days, hours, minutes, seconds. Displays "Ended" when countdown reaches zero. Used on raffle detail pages.
+
+### `RaffleMobileCTA`
+Fixed bottom bar visible only on mobile (`lg:hidden`). Shows ticket price and "Enter Now" button. Smooth-scrolls to the skill question section when tapped.
 
 ### `HowItWorks`
-**Purpose:** 6-step explainer section showing how the platform works.
-- Steps: Register → Pick a Competition → Answer a Question → Secure Checkout → No Extensions → Watch the Draw
-- Dark-themed with gradient backgrounds and step numbers
+6-step process explainer section. Light background with teal accent cards. Steps: Register → Pick Competition → Answer Question → Secure Checkout → No Extensions → Watch Draw. Each card has an icon, step number, title, and description.
 
 ### `WinnersSection`
-**Purpose:** Recent winners showcase on the homepage.
-- 4 winner cards with images, prize names, winner names, dates, ticket numbers
-- Verified badges
-- Hover effects
-- Currently uses mock data
+Recent winners showcase. 2 winner cards with prize images, names, quotes, ticket numbers, dates, and verified badges. Currently uses mock data. Links to `/winners` for full gallery.
 
 ### `TrustpilotBadge`
-**Purpose:** Trust indicator widget.
-- Displays "TrustScore 4.9" with 5 stars and "1,248 reviews"
-- Static/hardcoded values
+Trust indicator widget. Displays "TrustScore 4.9" with 5 stars and "1,248 reviews". Static/hardcoded values.
 
 ### `Container`
-**Purpose:** Responsive max-width wrapper.
-- Centered content with horizontal padding
-- Used throughout the site for consistent layout
+Responsive max-width wrapper with horizontal padding. Used throughout the site for consistent layout.
 
 ### `AnimatedIn`
-**Purpose:** Animation wrapper for scroll-triggered animations.
-- Props: `children`, `delay?`, `className?`
-- Currently renders children statically (animation logic placeholder)
+Animation wrapper. Props: `children`, `delay?`, `className?`. Currently renders children statically (animation logic placeholder).
 
 ---
 
 ## 10. Skill Question System
 
-The skill question system is the legal backbone of Dragon Competitions. Under UK law, competitions must include a genuine element of skill to differentiate them from gambling.
+The skill question system is the legal backbone of Coast Competitions. Under UK law, competitions must include a genuine element of skill.
 
 ### How It Works
 
-1. **Question creation** — Each raffle in Contentful has a `skillQuestion`, `answerOptions` (2–3 options), and `correctAnswerIndex` (0, 1, or 2)
-2. **Client display** — The `SkillQuestionCard` component renders the question and options. The correct answer index is **never** included in the client-side data
-3. **Server validation** — When the user selects an answer, it's sent to `/api/raffles/[slug]/check-answer`. The server fetches the correct answer from Contentful using the admin client and compares
-4. **Quiz pass** — If correct, a quiz pass is created in Firestore with a 15-minute expiry. The `quizPassId` is returned to the client and stored in `sessionStorage`
-5. **Checkout gate** — The `/api/checkout/create-session` endpoint requires a valid, unexpired, unused quiz pass. Users cannot purchase tickets without first answering correctly
+1. **Question creation** — Each raffle in Contentful has a `skillQuestion`, `answerOptions` (2–3 options), and `correctAnswerIndex`
+2. **Client display** — The `SkillQuestionCard` renders the question and options. The correct answer is **never** included in client-side data
+3. **Server validation** — Answer sent to `/api/raffles/[slug]/check-answer`. Server fetches correct answer via admin Contentful client
+4. **Quiz pass** — If correct, a quiz pass is created in Firestore with 15-minute expiry
+5. **Checkout gate** — The checkout endpoint requires a valid, unexpired, unused quiz pass
 
 ### Security Measures
 
-- The `correctAnswerIndex` field in Contentful is **only accessible via the admin/server token**
-- The public Contentful client strips this field from responses
-- Quiz passes expire after **15 minutes** to prevent stockpiling
-- Quiz passes are **single-use** — marked as `used: true` after checkout
+- `correctAnswerIndex` only accessible via admin/server token
+- Quiz passes expire after 15 minutes
+- Quiz passes are single-use
 - Each quiz pass is tied to a specific raffle slug
 
 ---
@@ -639,7 +540,9 @@ The skill question system is the legal backbone of Dragon Competitions. Under UK
 
 ### Integration Overview
 
-Dragon Competitions uses **Stripe Checkout** (hosted payment page) for secure, PCI-compliant payments. No card details ever touch the Dragon Competitions servers.
+Coast Competitions uses **Stripe Checkout** (hosted payment page). No card details ever touch Coast Competitions servers.
+
+**Note:** Stripe integration is code-complete but not yet active. The company is awaiting incorporation before setting up a Stripe account with a business bank account. In the meantime, the system can operate in Stripe test mode for demo competitions.
 
 ### Checkout Session Configuration
 
@@ -654,58 +557,21 @@ Dragon Competitions uses **Stripe Checkout** (hosted payment page) for secure, P
 | Cancel URL | `/raffles/[slug]` |
 | Metadata | `raffleSlug`, `quizPassId`, `quantity` |
 
-### Payment Flow
-
-```
-User answers correctly ──> Gets quizPassId
-         │
-User selects quantity ──> POST /api/checkout/create-session
-         │
-Server validates quiz pass ──> Creates Stripe Checkout Session
-         │
-User redirected to Stripe ──> Completes payment
-         │
-Stripe fires webhook ──> POST /api/webhooks/stripe
-         │
-Server fulfills order ──> Allocates tickets, sends email
-         │
-User redirected to success page
-```
-
-### Webhook Security
-
-- Stripe signs every webhook with a secret
-- The server verifies the signature using `STRIPE_WEBHOOK_SECRET` before processing
-- Only the `checkout.session.completed` event is handled
-
 ---
 
 ## 12. Ticket Allocation System
 
-### How Tickets Are Numbered
-
 Tickets are allocated **sequentially** using an atomic Firestore transaction to prevent race conditions and duplicate numbers.
 
-### The Atomic Transaction
-
 When the Stripe webhook fires:
-
 1. **Read** the raffle document to get `nextTicketNumber` (starts at 1)
-2. **Calculate** the ticket range:
-   - `startTicket = nextTicketNumber`
-   - `endTicket = nextTicketNumber + quantity - 1`
-3. **Update** the raffle document:
-   - `nextTicketNumber = endTicket + 1`
-   - `ticketsSold += quantity`
-4. **Create** the order document with `ticketRange: { start, end }`
-5. **Mark** the quiz pass as used
-6. **Create** individual ticket documents (one per ticket) in the `raffles/{slug}/tickets/` subcollection
+2. **Calculate** the range: `start = nextTicketNumber`, `end = nextTicketNumber + quantity - 1`
+3. **Update** the raffle: `nextTicketNumber = end + 1`, `ticketsSold += quantity`
+4. **Create** order document with `ticketRange: { start, end }`
+5. **Mark** quiz pass as used
+6. **Create** individual ticket documents in `raffles/{slug}/tickets/` subcollection
 
-### Why Atomic Transactions Matter
-
-- Firestore transactions ensure that if two payments complete at the same instant, they will **never** receive the same ticket numbers
-- If any step fails, the entire transaction rolls back
-- This guarantees every ticket number is unique and sequential
+Firestore transactions guarantee no duplicate ticket numbers even under concurrent purchases.
 
 ---
 
@@ -713,30 +579,22 @@ When the Stripe webhook fires:
 
 ### Firebase Cloud Function: `scheduledDraw`
 
-The draw runs automatically — no human intervention needed.
-
 **Schedule:** Every 1 minute via Google Cloud Pub/Sub
 
 **Logic:**
 1. Query Firestore for raffles where `endAt <= now` AND `drawStatus == "pending"`
 2. For each qualifying raffle:
-   - **No tickets sold?** → Mark as completed with `drawResult: "no_tickets_sold"`
-   - **Tickets exist?** → Perform the draw:
-     1. Generate 32 bytes of cryptographically secure randomness (`crypto.randomBytes`)
-     2. Convert to a number and calculate: `winningTicket = (randomNumber % totalTickets) + 1`
-     3. Look up the winning ticket in the `tickets` subcollection
-     4. Update the raffle document with winner information
-     5. Send winner notification email
+   - **No tickets sold?** → Mark completed with `drawResult: "no_tickets_sold"`
+   - **Tickets exist?** → Perform cryptographic draw:
+     1. Generate 4 bytes of cryptographically secure randomness (`crypto.randomBytes(4)`)
+     2. Calculate winning ticket: `(randomNumber % totalTickets) + 1`
+     3. Look up winning ticket in subcollection
+     4. Update raffle with winner info and audit trail
+     5. Send winner notification email via Postmark
 
 ### Audit Trail
 
-Every draw stores:
-- `drawAudit.seed` — The hex-encoded random seed used
-- `drawAudit.totalTickets` — The total number of tickets in the pool
-- `drawnAt` — Exact timestamp of the draw
-- `winningTicketNumber` — The selected ticket
-
-This allows any draw to be independently verified.
+Every draw stores: `drawAudit.seed` (hex-encoded random bytes), `drawAudit.totalTickets`, `drawnAt` timestamp, and `winningTicketNumber`.
 
 ---
 
@@ -745,28 +603,24 @@ This allows any draw to be independently verified.
 ### Email Types
 
 #### 1. Purchase Confirmation
-**Triggered by:** Stripe webhook after successful payment
-**Sent to:** The buyer's email address
-**Contains:**
-- Raffle title
-- Ticket numbers (range, e.g. "42–46")
-- Order ID
-- Thank you message
+- **Trigger:** Stripe webhook after successful payment
+- **To:** Buyer's email address
+- **Contains:** Raffle title, ticket numbers (range), order ID
 
 #### 2. Winner Notification
-**Triggered by:** Scheduled draw Cloud Function
-**Sent to:** The winner's email address
-**Contains:**
-- Congratulations message
-- Winning ticket number
-- Prize details
-- Next steps
+- **Trigger:** Scheduled draw Cloud Function
+- **To:** Winner's email address
+- **Contains:** Congratulations, winning ticket number, next steps
 
 ### Configuration
 
-- **From address:** `noreply@dragoncompetitions.co.uk` (configurable via `POSTMARK_FROM_EMAIL`)
+- **From address:** Configurable via `POSTMARK_FROM_EMAIL` (needs updating to Coast Competitions domain)
 - **Format:** Both HTML and plain text versions
-- **Fallback:** If Postmark is not configured, a warning is logged but the system continues
+- **Fallback:** If Postmark not configured, warning logged and system continues
+
+### Missing: Admin Notification
+
+Currently, **admins are NOT notified** when a draw completes or when a winner is selected. This needs to be added — see [Section 23](#23-remaining-build-items--road-to-launch).
 
 ---
 
@@ -774,11 +628,11 @@ This allows any draw to be independently verified.
 
 ### Current State
 
-- **Firebase Authentication** is configured (both client and admin SDKs) but **no login UI** is implemented yet
-- The `SiteHeader` has a "Login" link pointing to `/login`, but this page doesn't exist
-- The admin dashboard has no authentication gate
+- **Firebase Authentication** is configured (both client and admin SDKs) but **no login/register UI** exists
+- `SiteHeader` has a "Login" link pointing to `/login` — this page doesn't exist yet
+- Admin dashboard has no authentication gate
 
-### Security Measures Already in Place
+### Security Already in Place
 
 | Feature | Implementation |
 |---------|---------------|
@@ -790,50 +644,53 @@ This allows any draw to be independently verified.
 | Firebase Admin SDK | All sensitive writes go through server-side admin SDK |
 | Draw integrity | Cryptographically secure random number generation with audit trail |
 
-### Firestore Security Rules Summary
-
-```
-raffles/{raffleId}          → Allow read (public), deny write (admin SDK only)
-raffles/{id}/entries/{eid}  → Deny all (private)
-orders/{orderId}            → Allow read if auth.uid == data.userId
-quizPasses/{passId}         → Deny all (internal only)
-```
-
 ---
 
 ## 16. Styling & Design System
+
+### Brand Identity
+
+**Coast Competitions** uses a clean, modern coastal theme with teal/mint tones that evoke trust and premium quality.
 
 ### Theme Colors
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `dragon-orange` | `#e5531a` | Primary brand color, CTAs, accents |
-| `charcoal-navy` | `#1f2a33` | Dark backgrounds, text |
-| `warm-off-white` | `#f6f2ed` | Light backgrounds |
-| `dragon-red` | `#c43a12` | Secondary accent, errors |
+| `brand-primary` | `#0E7E8B` | Primary brand teal — buttons, links, accents |
+| `brand-secondary` | `#35B1AB` | Secondary teal — hover states, highlights, badges |
+| `brand-accent` | `#D6F5E9` | Soft mint — backgrounds, feature cards |
+| `brand-midnight` | `#232F3E` | Dark navy — text, footer, headings |
+| `brand-coral` | `#FF7F50` | Coral accent — special highlights |
+| `surface` | `#F8F9FA` | Light gray surface |
+| `surface-mint` | `#F0F8F6` | Mint-tinted surface |
+| `text-mid` | `#708090` | Mid-tone body text |
+
+### Gradient
+
+Primary gradient: `linear-gradient(135deg, #0E7E8B 0%, #35B1AB 100%)` — used on buttons, countdown, CTA sections.
 
 ### Styled Components (Emotion)
 
 | Component | Description |
 |-----------|-------------|
-| `BrandButton` | Primary button with variants (`primary`, `secondary`, `outline`) and sizes (`sm`, `md`, `lg`) |
-| `BrandLinkButton` | Link-styled version of `BrandButton` |
-| `BrandCard` | Card with hover effects and shadows |
-| `BrandBadge` | Orange badge pill |
-| `BrandSectionHeading` | Section heading with consistent typography |
-| `GlassCard` | Glassmorphism-style card with backdrop blur |
-| `GradientText` | Text with gradient color effect |
+| `BrandButton` | Pill button with variants (`primary`, `secondary`, `outline`) and sizes (`sm`, `md`, `lg`). Gradient primary, hover lift. |
+| `BrandLinkButton` | Link-styled version of BrandButton |
+| `BrandCard` | Card with teal-tinted border, hover lift and scale |
+| `BrandBadge` | Teal badge pill |
+| `BrandSectionHeading` | Section heading — bold, uppercase, tracking-tight |
+| `GlassCard` | Clean white card with subtle teal shadow |
+| `GradientText` | Text with brand teal gradient fill |
 
-### Fonts
+### Typography
 
-- **Geist Sans** — Primary font for all body and heading text
-- **Geist Mono** — Monospace font for code or technical content
+- **Primary font:** Nunito Sans (Google Fonts) — loaded via `next/font/google`
+- **Weights used:** 600 (semibold), 700 (bold), 800 (extrabold), 900 (black)
+- **Style:** Heavy uppercase headings, tight tracking, generous weight for impact
 
-### CSS Approach
+### Assets
 
-- **Tailwind CSS 4** for utility classes
-- **Emotion CSS-in-JS** for styled components and dynamic styles
-- Custom CSS variables in `globals.css` for theme tokens
+- `/logo.png` — Coast Competitions logo mark
+- `/wavelogo.png` — Wave variant of the logo
 
 ---
 
@@ -842,17 +699,17 @@ quizPasses/{passId}         → Deny all (internal only)
 ### Current Implementation
 
 - **Root layout metadata:**
-  - Title: `"Dragon Competitions"`
-  - Title template: `"%s · Dragon Competitions"` (pages can override the `%s` portion)
+  - Title: `"Coast Competitions"`
+  - Title template: `"%s · Coast Competitions"`
   - Description: `"Skill-based UK competition raffles with transparent draws and fast entry."`
 
 ### Not Yet Implemented
 
 - Per-page Open Graph and Twitter Card metadata
-- Dynamic metadata for individual raffle pages
+- Dynamic metadata for individual raffle pages (title, image, description from Contentful)
 - `sitemap.xml` generation
 - `robots.txt`
-- Structured data (JSON-LD)
+- Structured data (JSON-LD) — especially for products/offers
 - Canonical URLs
 
 ---
@@ -861,30 +718,16 @@ quizPasses/{passId}         → Deny all (internal only)
 
 ### Current State: Placeholder
 
-The admin page at `/admin` currently shows:
-- **Stats cards** (all showing placeholder values):
-  - Active Raffles: `--`
-  - Total Revenue: `£0.00`
-  - Pending Draws: `--`
-- **Recent Orders table** (empty state)
-
-### Not Yet Implemented
-
-- Authentication/authorization gate
-- Real data fetching from Firestore
-- Raffle management (create, edit, end)
-- Order management
-- Draw management
-- User management
-- Revenue analytics
+The admin page at `/admin` shows:
+- Stats cards (Active Raffles: `--`, Total Revenue: `£0.00`, Pending Draws: `--`)
+- Recent Orders table (empty)
+- No authentication, no data fetching, no functionality
 
 ---
 
 ## 19. Firebase Cloud Functions
 
-### `apps/functions/src/index.ts`
-
-#### `scheduledDraw`
+### `scheduledDraw`
 
 | Property | Value |
 |----------|-------|
@@ -893,11 +736,7 @@ The admin page at `/admin` currently shows:
 | Runtime | Node.js |
 | Dependencies | Firebase Admin SDK, Postmark |
 
-**What it does:**
-1. Queries `raffles` collection for documents where `endAt <= now` and `drawStatus == "pending"`
-2. Performs a provably fair draw for each qualifying raffle
-3. Updates Firestore with winner information and audit trail
-4. Sends winner notification email
+Queries ended raffles, performs cryptographic draw, updates Firestore, sends winner email.
 
 ---
 
@@ -918,8 +757,8 @@ The admin page at `/admin` currently shows:
 | `CONTENTFUL_SPACE_ID` | Contentful space identifier |
 | `CONTENTFUL_ENVIRONMENT` | Environment (default: `master`) |
 | `CONTENTFUL_PUBLIC_TOKEN` | Content Delivery API token (public) |
-| `CONTENTFUL_SERVER_TOKEN` | Content Management API token (server-only, for protected fields) |
-| `CONTENTFUL_MANAGEMENT_TOKEN` | Management API token (for running migrations) |
+| `CONTENTFUL_SERVER_TOKEN` | Content Management API token (server-only) |
+| `CONTENTFUL_MANAGEMENT_TOKEN` | Management API token (for migrations) |
 
 ### Firebase
 
@@ -927,7 +766,7 @@ The admin page at `/admin` currently shows:
 |----------|-------------|
 | `FIREBASE_PROJECT_ID` | Firebase project ID |
 | `FIREBASE_CLIENT_EMAIL` | Service account email |
-| `FIREBASE_PRIVATE_KEY` | Service account private key (with `\n` for newlines) |
+| `FIREBASE_PRIVATE_KEY` | Service account private key |
 | `NEXT_PUBLIC_FIREBASE_API_KEY` | Public Firebase API key |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Public project ID |
@@ -940,14 +779,14 @@ The admin page at `/admin` currently shows:
 | Variable | Description |
 |----------|-------------|
 | `POSTMARK_SERVER_TOKEN` | Postmark API token |
-| `POSTMARK_FROM_EMAIL` | Verified sender (default: `noreply@dragoncompetitions.co.uk`) |
+| `POSTMARK_FROM_EMAIL` | Verified sender (needs updating to Coast Competitions domain) |
 
 ### Graceful Fallbacks
 
-- If **Contentful** isn't configured → mock raffle data is used
-- If **Firebase** isn't configured → placeholder values
-- If **Postmark** isn't configured → warning logged, system continues
-- If **Stripe** isn't configured → checkout creation will fail
+- **Contentful** not configured → mock raffle data (3 sample raffles)
+- **Firebase** not configured → placeholder values
+- **Postmark** not configured → warning logged, system continues
+- **Stripe** not configured → checkout creation will fail
 
 ---
 
@@ -955,12 +794,12 @@ The admin page at `/admin` currently shows:
 
 ### UK Competition Law Compliance
 
-Dragon Competitions operates as a **skill-based competition**, not a lottery or gambling product. This distinction is legally critical:
+Coast Competitions operates as a **skill-based competition**, not a lottery or gambling product.
 
-1. **Skill element required** — Every entrant must correctly answer a question before purchasing tickets. This is enforced server-side and cannot be bypassed.
-2. **No free entry** — The platform currently requires payment. *(Note: UK law may require a free entry route — this is not yet implemented.)*
-3. **Transparent draws** — Winner selection uses cryptographically secure randomness with a full audit trail.
-4. **Age restriction** — The site displays 18+ and BeGambleAware badges in the footer.
+1. **Skill element required** — Every entrant must correctly answer a question before purchasing tickets. Enforced server-side.
+2. **Transparent draws** — Cryptographically secure randomness with full audit trail.
+3. **Age restriction** — 18+ and BeGambleAware badges displayed in footer.
+4. **No extensions** — Draws happen on the stated date regardless of ticket sales.
 
 ### Ticket Rules
 
@@ -978,17 +817,6 @@ Dragon Competitions operates as a **skill-based competition**, not a lottery or 
 | Validity period | 15 minutes |
 | Usage | Single-use only |
 | Scope | Tied to a specific raffle slug |
-| Storage | Firestore (server-managed) |
-
-### Draw Rules
-
-| Rule | Value |
-|------|-------|
-| Trigger | Automatic when `endAt` passes |
-| Frequency check | Every 1 minute |
-| Randomness | `crypto.randomBytes(32)` — cryptographically secure |
-| Audit | Seed + total tickets stored for verification |
-| No tickets | Raffle marked completed with `"no_tickets_sold"` |
 
 ---
 
@@ -996,40 +824,215 @@ Dragon Competitions operates as a **skill-based competition**, not a lottery or 
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Homepage with hero carousel | Complete | Uses mock data for raffle cards |
-| Raffle listing (from CMS) | Complete | Fetches live raffles from Contentful |
-| Raffle detail page | Complete | Full detail with skill question |
-| Skill question validation | Complete | Server-side, secure |
-| Quiz pass system | Complete | 15-min expiry, single-use |
-| Stripe Checkout integration | Complete | Hosted checkout page |
-| Webhook fulfillment | Complete | Atomic ticket allocation |
-| Sequential ticket numbering | Complete | Firestore transactions |
-| Purchase confirmation email | Complete | Via Postmark |
-| Automated draws | Complete | Firebase Cloud Function, every minute |
-| Winner notification email | Complete | Via Postmark |
-| Draw audit trail | Complete | Crypto seed + total tickets |
-| About page | Complete | Static content |
-| Contact page | Complete | Form UI only (no backend) |
-| FAQs page | Complete | Hardcoded accordion |
-| Privacy policy | Complete | Static content |
-| Terms & conditions | Complete | Static content |
-| Results page | Complete | Mock data |
-| Winners page | Complete | Mock data |
-| Contentful migrations | Complete | Initial schema defined |
-| Firestore security rules | Complete | Restrictive access |
-| Admin dashboard | Placeholder | No real data or auth |
-| User authentication UI | Not started | Firebase Auth configured but no login page |
-| Real-time ticket counts | Not started | Placeholder "coming soon" |
-| Dynamic SEO metadata | Not started | Only basic root metadata |
-| Sitemap generation | Not started | — |
-| Contact form backend | Not started | Form prevents default, no submission |
-| Category filtering | Not started | Buttons render but don't filter |
-| Cash alternative display | Not started | Contentful fields exist |
-| Gallery images | Not started | Contentful field exists |
-| Per-raffle FAQs | Not started | Contentful field exists |
-| Free entry route | Not started | May be legally required |
-| Analytics/tracking | Not started | — |
+| Homepage with dynamic hero carousel | **Complete** | Pulls live raffles from Contentful |
+| Homepage raffle grid | **Complete** | Shows up to 4 live raffles from CMS |
+| Raffle listing page | **Complete** | Server Component, Contentful data |
+| Raffle detail page | **Complete** | Server Component, notFound() handling |
+| Skill question validation | **Complete** | Server-side, secure |
+| Quiz pass system | **Complete** | 15-min expiry, single-use |
+| Stripe Checkout integration | **Code complete** | Awaiting company incorporation for live Stripe |
+| Webhook fulfillment | **Complete** | Atomic ticket allocation |
+| Sequential ticket numbering | **Complete** | Firestore transactions |
+| Purchase confirmation email | **Complete** | Via Postmark |
+| Automated draws | **Complete** | Firebase Cloud Function, every minute |
+| Winner notification email | **Complete** | Via Postmark |
+| Draw audit trail | **Complete** | Crypto seed + total tickets |
+| About page | **Complete** | Coast Competitions branding |
+| Contact page | **Complete** | Form UI only (no backend submission) |
+| FAQs page | **Complete** | Hardcoded accordion |
+| Privacy policy | **Complete** | Static content |
+| Terms & conditions | **Complete** | Coast Competitions branding |
+| Contentful CMS integration | **Complete** | Live data on homepage and raffles pages |
+| Contentful migrations | **Complete** | Initial schema defined |
+| Firestore security rules | **Complete** | Restrictive access |
+| Coast Competitions rebrand | **Mostly complete** | Logo, colors, fonts, all pages updated. Email domains still reference old branding |
+| How It Works section | **Complete** | 6-step explainer |
+| Winners section (homepage) | **Complete** | Mock data |
+| Mobile CTA (raffle detail) | **Complete** | Fixed bottom bar |
+| Results page | **Placeholder** | Mock data |
+| Winners page | **Placeholder** | Mock data |
+| Admin dashboard | **Placeholder** | No real data or auth |
+| Homepage countdown timer | **Placeholder** | Shows static values, not connected to real data |
+| Ticket sales progress bars | **Placeholder** | Hardcoded at 10%, not connected to Firestore |
+| "5 people entered" text | **Placeholder** | Static text on raffle detail |
+| User authentication UI | **Not started** | Firebase Auth configured but no login page |
+| Admin notifications (draw complete) | **Not started** | Admins not notified when draws run |
+| Dynamic SEO metadata | **Not started** | Only basic root metadata |
+| Sitemap generation | **Not started** | — |
+| Contact form backend | **Not started** | Form prevents default, no submission |
+| Rich text rendering | **Not started** | Raffle descriptions from Contentful not rendered (generic text shown) |
+| Gallery images | **Not started** | Contentful field exists but not displayed |
+| Per-raffle FAQs | **Not started** | Contentful field exists but not displayed |
+| Cash alternative display | **Not started** | Contentful field exists but not shown |
+| Free entry route | **Not started** | May be legally required under UK law |
+| Cookie consent | **Not started** | Required for GDPR compliance |
+| Error/loading states | **Not started** | No error.tsx, loading.tsx, or not-found.tsx pages |
 
 ---
 
-*This reference document covers every feature, integration, data model, user flow, and business rule in the Dragon Competitions platform as of 12 February 2026. Use it as the single source of truth for all content creation, tutorials, and SEO work.*
+## 23. Remaining Build Items — Road to Launch
+
+### Tier 1: CRITICAL — Must Have Before Any Demo Competitions
+
+These items are needed to run even test/demo competitions and receive proper notifications.
+
+#### 1. Admin Draw Notifications
+**What:** When a draw completes (or fails), the admin team needs to be notified immediately — not just the winner.
+**Why:** Right now only the winner gets an email. Admins have no way of knowing a draw happened unless they check Firestore manually.
+**How:** Add an admin notification email in both the Cloud Function (`scheduledDraw`) and ideally the webhook handler when orders come in. Could be a simple email to a configured admin address, or a Slack/Discord webhook for real-time alerts.
+**Scope:** Small — add a `sendAdminNotification()` function to the Postmark client and call it from the Cloud Function after each draw, and from the webhook after each order.
+
+#### 2. Email Domain Update
+**What:** The Postmark `FROM_EMAIL` still defaults to `noreply@dragoncompetitions.co.uk` in both `apps/web/src/lib/postmark/client.ts` and `apps/functions/src/index.ts`. Contact page also references `support@dragoncompetitions.co.uk`.
+**Why:** Emails will fail or be flagged as spam if sent from an unverified domain.
+**How:** Update hardcoded defaults to the new Coast Competitions domain. Verify the sending domain in Postmark.
+
+#### 3. Connect Homepage Countdown to Real Data
+**What:** The `HomeCountdown` component shows hardcoded static values. It needs to show the actual time until the next ending competition.
+**How:** Pass the `endAt` of the soonest-ending live raffle (from the Contentful data already fetched on the homepage) into the countdown component and use the existing `Countdown` component logic.
+
+#### 4. Raffle `endAt` Mirroring in Firestore
+**What:** The draw Cloud Function queries Firestore for `endAt`, but this field is only set in Contentful. There's currently no mechanism to sync `endAt` from Contentful to Firestore.
+**Why:** Without this, the scheduled draw will never find raffles to draw.
+**How:** Either (a) set `endAt` on the Firestore raffle document when the first ticket is sold (in the webhook), or (b) create a Contentful webhook that syncs raffle data to Firestore, or (c) have the Cloud Function query Contentful instead of Firestore.
+
+#### 5. Email Templates
+**What:** Current emails are bare-bones HTML (`<h1>`, `<p>` tags). They need proper branded templates.
+**Why:** First impression for buyers and winners. Needs to look professional and match Coast Competitions branding.
+**How:** Create proper HTML email templates with the Coast brand colors, logo, and styling. Consider using Postmark templates.
+
+### Tier 2: HIGH PRIORITY — Needed Before Going Live
+
+#### 6. User Authentication (Login/Register)
+**What:** Firebase Auth UI — login page, registration, password reset.
+**Why:** Users need accounts to track their entries, view order history, and for Firestore security rules to work (orders are gated by `userId`).
+**How:** Create `/login` and `/register` pages using Firebase Auth (email/password, potentially Google sign-in). Add auth state to the header. Protect order history.
+
+#### 7. Stripe Account & Live Keys
+**What:** Set up Stripe account with the incorporated company's business bank account. Switch from test keys to live keys.
+**Why:** Can't accept real payments without it.
+**When:** After company incorporation is complete.
+
+#### 8. Real-Time Ticket Count Display
+**What:** Raffle cards and detail pages show placeholder ticket counts. Need to read actual `ticketsSold` from Firestore.
+**Why:** Social proof — showing real ticket sales encourages purchases and builds urgency.
+**How:** Read Firestore raffle doc for `ticketsSold` and display as progress bar. Could use Firestore real-time listeners for live updates.
+
+#### 9. Rich Text Rendering (Contentful)
+**What:** Raffle descriptions, prize details, cash alternative copy, and per-raffle T&Cs are stored as Rich Text in Contentful but not rendered on the detail page. Currently shows generic placeholder text.
+**Why:** Each competition should have unique, detailed descriptions managed by the team in Contentful.
+**How:** Install `@contentful/rich-text-react-renderer` and render the rich text fields in the raffle detail page.
+
+#### 10. Gallery Images
+**What:** Contentful has a `galleryImages` field but the raffle detail page only shows the hero image.
+**Why:** Multiple images showcase the prize better and increase conversion.
+**How:** Fetch gallery images from Contentful and display as a carousel or lightbox gallery on the detail page.
+
+#### 11. Per-Raffle FAQs
+**What:** Contentful has `perRaffleFaqs` linking to `faqItem` entries, but these aren't displayed.
+**Why:** Answers common questions about specific prizes and reduces support load.
+**How:** Fetch linked FAQ items and render as an accordion on the raffle detail page.
+
+#### 12. Contact Form Backend
+**What:** The contact form has a frontend but submitting does nothing.
+**How:** Create an API route that sends the form data via Postmark to the support email, with a confirmation email back to the sender.
+
+#### 13. Cookie Consent Banner
+**What:** GDPR requires explicit consent before setting non-essential cookies.
+**Why:** Legal requirement for UK/EU users.
+**How:** Add a cookie consent banner component that stores consent in localStorage and conditionally loads analytics/tracking.
+
+#### 14. Error & Loading States
+**What:** No `error.tsx`, `loading.tsx`, or `not-found.tsx` pages exist.
+**Why:** Users hitting errors or slow loads see blank pages or browser defaults.
+**How:** Create branded error boundaries, loading skeletons, and a custom 404 page.
+
+#### 15. Dynamic SEO Metadata
+**What:** Individual raffle pages need unique titles, descriptions, and Open Graph images.
+**Why:** Critical for social sharing and search engine visibility.
+**How:** Use Next.js `generateMetadata()` on the raffle detail page to pull title and image from Contentful.
+
+#### 16. Sitemap & robots.txt
+**What:** Auto-generated `sitemap.xml` listing all live raffles, plus a `robots.txt`.
+**Why:** Helps search engines discover and index competition pages.
+**How:** Use Next.js `sitemap.ts` to dynamically generate from Contentful data.
+
+### Tier 3: IMPORTANT — Needed Soon After Launch
+
+#### 17. Real Winners & Results Data
+**What:** Winners and Results pages currently show mock data. Need to pull from Firestore draw results.
+**How:** Query Firestore for completed raffles with winners. Display real winner info (anonymized names), prizes, ticket numbers, dates.
+
+#### 18. Admin Dashboard (Functional)
+**What:** Replace placeholder admin page with real functionality.
+**Features needed:**
+- Auth gate (admin-only access)
+- Active raffles overview with ticket counts and revenue
+- Order list with search/filter
+- Draw status and history
+- Manual draw trigger (emergency)
+- Revenue reporting
+
+#### 19. Free Entry Route
+**What:** UK competition law may require a free postal entry route as an alternative to paid entry.
+**Why:** Legal compliance — some interpretations of UK law require it.
+**How:** Add a free entry mechanism (postal entry form or free entry option) and document it in the T&Cs. Consult a lawyer.
+
+#### 20. Cash Alternative Logic
+**What:** Contentful has fields for cash alternative (enabled flag, amount, copy) but the frontend doesn't display or handle this.
+**Why:** Winners sometimes prefer cash over the physical prize.
+**How:** Display cash alternative option on raffle detail page when enabled. Handle in winner notification.
+
+#### 21. Rate Limiting
+**What:** API routes have no rate limiting.
+**Why:** Prevents abuse of the answer-checking endpoint (brute-force correct answers) and checkout endpoint.
+**How:** Add rate limiting middleware using an in-memory store or Redis.
+
+### Tier 4: NICE TO HAVE — Polish & Growth
+
+#### 22. Analytics & Tracking
+Google Analytics, Facebook Pixel, or similar for tracking conversions, traffic sources, and user behavior.
+
+#### 23. Social Media Links
+Footer and contact page social links go to `#`. Need real Facebook, Instagram, Twitter/X URLs.
+
+#### 24. Trustpilot Integration
+The trust badge is hardcoded. Could integrate with actual Trustpilot API or link to a real Trustpilot profile.
+
+#### 25. Order History / My Tickets
+Authenticated users should be able to view their past orders, ticket numbers, and draw results.
+
+#### 26. Push Notifications
+Notify users when draws are happening, when they win, or when new competitions launch.
+
+#### 27. Referral System
+Refer-a-friend program to drive organic growth.
+
+#### 28. Monitoring & Error Tracking
+Sentry or similar for catching and alerting on production errors.
+
+#### 29. Database Backup Strategy
+Automated Firestore backups to prevent data loss.
+
+#### 30. Performance Optimization
+Lighthouse audit, Core Web Vitals optimization, image optimization review.
+
+---
+
+### Quick Summary: What's Needed for Demo Competitions
+
+To run demo competitions today (with Stripe in test mode):
+
+1. **Fix the Firestore `endAt` sync issue** — draws won't fire without it
+2. **Add admin email notifications** — so you know when draws happen
+3. **Update email domain references** — change from dragoncompetitions.co.uk
+4. **Connect the homepage countdown** — to real raffle end dates
+5. **Deploy Cloud Functions** — so the scheduled draw actually runs
+6. **Verify Postmark sender domain** — so emails actually deliver
+7. **Set up Stripe test mode** — for end-to-end testing
+
+Everything else is either code-complete or can be iterated on after the demo phase.
+
+---
+
+*This reference document covers every feature, integration, data model, user flow, and business rule in the Coast Competitions platform as of 12 February 2026. Use it as the single source of truth for all content creation, tutorials, and SEO work.*

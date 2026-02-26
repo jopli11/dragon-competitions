@@ -4,8 +4,8 @@ import styled from "@emotion/styled";
 import { Container } from "./Container";
 
 const Section = styled.section`
-  background: #0a2540;
-  color: white;
+  background: white;
+  color: #232F3E;
   padding: 4rem 0;
   position: relative;
   overflow: hidden;
@@ -20,7 +20,7 @@ const Section = styled.section`
     inset: 0;
     background: radial-gradient(
       circle at 50% 0%,
-      rgba(0, 112, 224, 0.15),
+      rgba(53, 177, 171, 0.05),
       transparent 70%
     );
     pointer-events: none;
@@ -43,19 +43,20 @@ const Grid = styled.div`
 `;
 
 const StepCard = styled.div`
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: white;
+  border: 1px solid rgba(14, 126, 139, 0.08);
   border-radius: 2rem;
   padding: 2rem;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 10px 30px rgba(14, 126, 139, 0.03);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(0, 112, 224, 0.4);
+    background: white;
+    border-color: rgba(53, 177, 171, 0.3);
     transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(14, 126, 139, 0.08);
   }
 
   &::after {
@@ -65,7 +66,7 @@ const StepCard = styled.div`
     right: 0;
     width: 64px;
     height: 64px;
-    background: linear-gradient(135deg, rgba(0, 112, 224, 0.1), transparent);
+    background: linear-gradient(135deg, rgba(53, 177, 171, 0.05), transparent);
     border-radius: 0 0 0 100%;
   }
 `;
@@ -73,14 +74,14 @@ const StepCard = styled.div`
 const IconWrapper = styled.div`
   width: 3.5rem;
   height: 3.5rem;
-  background: rgba(0, 112, 224, 0.15);
+  background: #D6F5E9;
   border-radius: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  color: #0070e0;
-  border: 1px solid rgba(0, 112, 224, 0.2);
+  color: #35B1AB;
+  border: 1px solid rgba(53, 177, 171, 0.1);
 
   svg {
     width: 1.75rem;
@@ -91,7 +92,7 @@ const IconWrapper = styled.div`
 const StepNumber = styled.span`
   font-size: 0.75rem;
   font-weight: 900;
-  color: #0070e0;
+  color: #35B1AB;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   display: block;
@@ -103,11 +104,11 @@ const StepTitle = styled.h3`
   font-weight: 800;
   margin-bottom: 1rem;
   letter-spacing: -0.01em;
-  color: white;
+  color: #232F3E;
 `;
 
 const StepDescription = styled.p`
-  color: rgba(255, 255, 255, 0.5);
+  color: #708090;
   font-size: 0.875rem;
   line-height: 1.6;
 `;
@@ -116,7 +117,7 @@ const steps = [
   {
     number: "Step 01",
     title: "Register an account",
-    description: "Create your Dragon Competitions account in seconds. We keep your data secure and transparent.",
+    description: "Create your Coast Competitions account in seconds. We keep your data secure and transparent.",
     icon: (
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -183,10 +184,10 @@ export function HowItWorks() {
           <h2 className="text-sm font-black uppercase tracking-[0.3em] text-brand-secondary">
             Process
           </h2>
-          <h3 className="mt-4 text-4xl font-black uppercase tracking-tight sm:text-5xl text-white">
+          <h3 className="mt-4 text-4xl font-black uppercase tracking-tight sm:text-5xl text-brand-midnight">
             How It Works
           </h3>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-white/50">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-brand-midnight/60">
             Winning your dream prize is simple. Follow these 6 steps to enter our skill-based competitions.
           </p>
         </div>

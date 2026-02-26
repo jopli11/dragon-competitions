@@ -17,7 +17,7 @@ export default async function RafflesPage() {
   const raffles = await fetchLiveRaffles();
 
   return (
-    <div className="min-h-screen bg-[#f0f7ff] py-16">
+    <div className="min-h-screen bg-surface-mint py-16">
       <Container>
         <div className="text-center">
           <BrandSectionHeading className="text-brand-midnight!">

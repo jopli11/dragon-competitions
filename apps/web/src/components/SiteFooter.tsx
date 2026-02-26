@@ -6,7 +6,7 @@ import { Container } from "@/components/Container";
 import styled from "@emotion/styled";
 
 const FooterWrapper = styled.footer`
-  background: #0a2540;
+  background: #232F3E;
   color: white;
   padding-top: 4rem;
   padding-bottom: 2rem;
@@ -18,7 +18,7 @@ const FooterLink = styled(Link)`
   font-size: 0.875rem;
   transition: color 0.2s;
   &:hover {
-    color: #0070e0;
+    color: #35B1AB;
   }
 `;
 
@@ -32,14 +32,14 @@ export function SiteFooter() {
               <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex items-center justify-center">
                 <Image
                   src="/logo.png"
-                  alt="Dragon Competitions"
+                  alt="Coast Competitions"
                   fill
                   className="object-contain"
                 />
               </div>
               <div className="flex flex-col justify-center leading-[0.9] -ml-2 sm:-ml-4">
                 <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase">
-                  Dragon
+                  Coast
                 </span>
                 <span className="text-[10px] sm:text-[14px] font-medium tracking-[0.15em] text-brand-secondary uppercase">
                   Competitions
@@ -102,7 +102,7 @@ export function SiteFooter() {
 
         <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-white/5 pt-8 md:flex-row">
           <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} Dragon Competitions. All rights
+            © {new Date().getFullYear()} Coast Competitions. All rights
             reserved.
           </p>
           <div className="flex items-center gap-6">

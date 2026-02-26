@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 
 const CountdownContainer = styled.div`
-  background: linear-gradient(135deg, #003087 0%, #0070e0 100%);
+  background: linear-gradient(135deg, #0E7E8B 0%, #35B1AB 100%);
   border-radius: 1.5rem;
   padding: 1rem 2.5rem;
   display: inline-flex;
@@ -13,7 +13,7 @@ const CountdownContainer = styled.div`
   margin-top: -2.5rem;
   position: relative;
   z-index: 20;
-  box-shadow: 0 15px 35px -8px rgba(0, 48, 135, 0.4);
+  box-shadow: 0 15px 35px -8px rgba(14, 126, 139, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.2);
 
   @media (max-width: 768px) {

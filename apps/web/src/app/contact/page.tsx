@@ -98,7 +98,7 @@ export default function ContactPage() {
 
             <div className="rounded-[2.5rem] bg-linear-to-br from-brand-primary to-brand-secondary p-10 sm:p-12 relative overflow-hidden shadow-2xl border-4 border-white/10">
               <div className="relative z-10">
-                <h3 className="text-2xl font-black uppercase tracking-tight text-white">Follow the Dragon</h3>
+                <h3 className="text-2xl font-black uppercase tracking-tight text-white">Follow the Coast</h3>
                 <p className="mt-4 text-white/70 text-base font-medium leading-relaxed">
                   Join our community on social media for live draws, exclusive offers, and winner announcements.
                 </p>

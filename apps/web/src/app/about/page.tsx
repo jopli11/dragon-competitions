@@ -18,7 +18,7 @@ export default function AboutPage() {
             The Legend
           </span>
           <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-[0.85]">
-            About <GradientText>Dragon</GradientText>
+            About <GradientText>Coast</GradientText>
           </h1>
           <p className="mt-10 text-xl sm:text-2xl text-white/70 max-w-3xl mx-auto font-medium leading-relaxed px-4">
             We're not just another competition site. We're a community-driven platform 
@@ -36,7 +36,7 @@ export default function AboutPage() {
               </h2>
               <div className="mt-10 space-y-8 text-brand-midnight/70 text-lg sm:text-xl leading-relaxed font-medium">
                 <p>
-                  Dragon Competitions was born from a passion for high-performance machinery and the desire to make premium experiences accessible to everyone. We saw a gap in the market for a truly transparent, UK-based platform that puts the community first.
+                  Coast Competitions was born from a passion for high-performance machinery and the desire to make premium experiences accessible to everyone. We saw a gap in the market for a truly transparent, UK-based platform that puts the community first.
                 </p>
                 <p>
                   Every raffle we host is a promise: a promise of a fair draw, a guaranteed winner, and a life-changing moment. We don't do extensions, and we don't do hidden terms. Just pure, skill-based competition.
@@ -88,7 +88,7 @@ export default function AboutPage() {
             <div className="relative aspect-4/5 rounded-[3rem] sm:rounded-[4rem] overflow-hidden shadow-2xl group border-12 border-white">
               <Image
                 src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1000&auto=format&fit=crop"
-                alt="Dragon Competitions Lifestyle"
+                alt="Coast Competitions Lifestyle"
                 fill
                 sizes="(min-width: 1024px) 40vw, 100vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -96,7 +96,7 @@ export default function AboutPage() {
               <div className="absolute inset-0 bg-linear-to-t from-brand-midnight/80 via-brand-midnight/20 to-transparent" />
               <div className="absolute bottom-10 left-10 right-10">
                 <p className="text-white font-black uppercase tracking-[0.3em] text-xs mb-3 opacity-80">Established 2024</p>
-                <h3 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">The Dragon <br />Standard</h3>
+                <h3 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">The Coast <br />Standard</h3>
               </div>
             </div>
             
@@ -125,7 +125,7 @@ export default function AboutPage() {
       <div className="py-24 text-center border-t border-brand-primary/5">
         <Container>
           <p className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-midnight/20">
-            Dragon Competitions • UK Skill-Based Raffles
+            Coast Competitions • UK Skill-Based Raffles
           </p>
         </Container>
       </div>

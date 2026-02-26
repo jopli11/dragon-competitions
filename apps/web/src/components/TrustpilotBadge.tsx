@@ -24,7 +24,7 @@ const Stars = styled.div`
 const Star = styled.div`
   width: 16px;
   height: 16px;
-  background: #00b67a;
+  background: #35B1AB;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,10 +47,10 @@ const Star = styled.div`
 const TrustScore = styled.div`
   font-size: 0.75rem;
   font-weight: 700;
-  color: #1f2a33;
+  color: #232F3E;
 
   span {
-    color: #00b67a;
+    color: #35B1AB;
   }
 `;
 
@@ -60,13 +60,13 @@ const TrustLogo = styled.div`
   gap: 6px;
   font-weight: 800;
   font-size: 0.9375rem;
-  color: #1f2a33;
+  color: #232F3E;
   letter-spacing: -0.02em;
 
   svg {
     width: 18px;
     height: 18px;
-    color: #00b67a;
+    color: #35B1AB;
   }
 `;
 

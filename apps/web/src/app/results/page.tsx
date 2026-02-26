@@ -31,7 +31,7 @@ const mockResults = [
 
 export default function DrawResultsPage() {
   return (
-    <div className="min-h-screen bg-[#f0f7ff] py-16 sm:py-24">
+    <div className="min-h-screen bg-surface-mint py-16 sm:py-24">
       <Container>
         <div className="text-center max-w-2xl mx-auto mb-16">
           <BrandSectionHeading>Draw <GradientText>Results</GradientText></BrandSectionHeading>
