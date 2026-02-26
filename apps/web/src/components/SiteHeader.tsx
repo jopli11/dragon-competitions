@@ -6,6 +6,10 @@ import { Container } from "@/components/Container";
 import styled from "@emotion/styled";
 import { BrandLinkButton } from "@/lib/styles";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import { auth as firebaseAuth } from "@/lib/firebase/client";
+import { signOut } from "firebase/auth";
 
 const HeaderWrapper = styled.header`
   position: sticky;
@@ -137,8 +141,9 @@ const HamburgerButton = styled.button<{ isOpen: boolean }>`
 
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isAdmin } = useAuth();
+  const router = useRouter();
 
-  // Prevent scroll when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -147,11 +152,20 @@ export function SiteHeader() {
     }
   }, [isOpen]);
 
+  const handleLogout = async () => {
+    if (!firebaseAuth) return;
+    await signOut(firebaseAuth);
+    setIsOpen(false);
+    router.push("/");
+    router.refresh();
+  };
+
   const navLinks = [
     { href: "/raffles", label: "Current Competitions" },
     { href: "/results", label: "Draw Results" },
     { href: "/about", label: "About Us" },
     { href: "/winners", label: "Winners" },
+    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
   ];
 
   return (
@@ -187,12 +201,21 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-3 sm:gap-4">
-            <Link
-              href="/login"
-              className="hidden text-sm font-medium text-brand-midnight/80 transition-colors hover:text-brand-primary sm:block"
-            >
-              Login
-            </Link>
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="hidden text-sm font-medium text-brand-midnight/80 transition-colors hover:text-brand-primary sm:block"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden text-sm font-medium text-brand-midnight/80 transition-colors hover:text-brand-primary sm:block"
+              >
+                Login
+              </Link>
+            )}
             <HeaderButton href="/raffles">Enter Now</HeaderButton>
             <HamburgerButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
               <div />
@@ -228,9 +251,18 @@ export function SiteHeader() {
               {link.label}
             </MobileNavLink>
           ))}
-          <MobileNavLink href="/login" onClick={() => setIsOpen(false)}>
-            Login / Register
-          </MobileNavLink>
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className="text-left text-2xl font-black uppercase tracking-tighter text-brand-midnight py-6 border-b border-brand-primary/5"
+            >
+              Logout
+            </button>
+          ) : (
+            <MobileNavLink href="/login" onClick={() => setIsOpen(false)}>
+              Login / Register
+            </MobileNavLink>
+          )}
         </nav>
         <div className="mt-auto">
           <BrandLinkButton fullWidth size="lg" href="/raffles" onClick={() => setIsOpen(false)}>

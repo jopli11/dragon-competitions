@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import EmotionRegistry from "@/lib/emotion-registry";
+import { AuthProvider } from "@/lib/auth-context";
 
 const nunitoSans = Nunito_Sans({
   variable: "--font-nunito-sans",
@@ -27,13 +28,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${nunitoSans.variable} antialiased`}>
-        <EmotionRegistry>
-          <div className="min-h-dvh bg-background text-foreground">
-            <SiteHeader />
-            <main>{children}</main>
-            <SiteFooter />
-          </div>
-        </EmotionRegistry>
+        <AuthProvider>
+          <EmotionRegistry>
+            <div className="flex min-h-screen flex-col bg-background text-foreground">
+              <SiteHeader />
+              <main className="flex-grow">{children}</main>
+              <SiteFooter />
+            </div>
+          </EmotionRegistry>
+        </AuthProvider>
       </body>
     </html>
   );

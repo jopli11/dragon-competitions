@@ -87,16 +87,17 @@ async function performDraw(raffleDoc: admin.firestore.QueryDocumentSnapshot) {
       });
 
       // 4. Send winner email
-      await sendWinnerEmail(winningTicketData.email, raffleData.title, winningTicketNumber);
+      await sendWinnerEmail(winningTicketData.email, raffleData.title, winningTicketNumber, totalTickets);
     });
   } catch (error) {
     console.error(`Draw failed for raffle ${raffleId}:`, error);
   }
 }
 
-async function sendWinnerEmail(email: string, raffleTitle: string, ticketNumber: number) {
+async function sendWinnerEmail(email: string, raffleTitle: string, ticketNumber: number, totalTickets: number) {
   const serverToken = process.env.POSTMARK_SERVER_TOKEN;
-  const fromEmail = process.env.POSTMARK_FROM_EMAIL || "noreply@dragoncompetitions.co.uk";
+  const fromEmail = process.env.POSTMARK_FROM_EMAIL || "noreply@coastcompetitions.co.uk";
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@coastcompetitions.co.uk";
 
   if (!serverToken) {
     console.warn("Postmark not configured in functions. Skipping winner email.");
@@ -106,6 +107,7 @@ async function sendWinnerEmail(email: string, raffleTitle: string, ticketNumber:
   const client = new postmark.ServerClient(serverToken);
 
   try {
+    // 1. Send to Winner
     await client.sendEmail({
       From: fromEmail,
       To: email,
@@ -119,7 +121,23 @@ async function sendWinnerEmail(email: string, raffleTitle: string, ticketNumber:
         <p>We will contact you shortly to arrange your prize delivery or cash alternative.</p>
       `,
     });
+
+    // 2. Send to Admin
+    await client.sendEmail({
+      From: fromEmail,
+      To: adminEmail,
+      Subject: `[ADMIN] Draw Complete: ${raffleTitle}`,
+      TextBody: `The draw for "${raffleTitle}" is complete. Winner: ${email}. Winning Ticket: #${ticketNumber}. Total entries: ${totalTickets}.`,
+      HtmlBody: `
+        <h1>Draw Completed</h1>
+        <p>The automated draw for <strong>${raffleTitle}</strong> has finished.</p>
+        <p><strong>Winner:</strong> ${email}</p>
+        <p><strong>Winning Ticket:</strong> #${ticketNumber}</p>
+        <p><strong>Total Entries:</strong> ${totalTickets}</p>
+        <p>The raffle document in Firestore has been updated with the audit trail.</p>
+      `,
+    });
   } catch (error) {
-    console.error("Error sending winner email:", error);
+    console.error("Error sending draw completion emails:", error);
   }
 }

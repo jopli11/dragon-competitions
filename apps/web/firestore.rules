@@ -2,26 +2,39 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Raffles: Publicly readable for ticket counts and draw status
+    
+    // Admin Users Collection
+    // Allows any authenticated user to check if they are an admin
+    match /admin_users/{email} {
+      allow read: if request.auth != null;
+      allow write: if false; // Admin status can only be changed via Firebase Console or Admin SDK
+    }
+
+    // Raffles Collection
+    // Publicly readable so users can see competition details and stats
     match /raffles/{raffleId} {
       allow read: if true;
-      allow write: if false; // Only via Admin SDK/Cloud Functions
+      allow write: if false; // Writes only allowed via Admin SDK (Stripe Webhook / Cloud Functions)
       
-      match /entries/{entryId} {
-        allow read: if false; // Entries are private
+      // Tickets Subcollection
+      match /tickets/{ticketId} {
+        allow read: if true; // Publicly readable for transparency
         allow write: if false;
       }
     }
 
-    // Orders: Private to the user (if authenticated) or hidden
+    // Orders Collection
+    // Users can only read their own orders based on their authenticated email
     match /orders/{orderId} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow write: if false;
+      allow read: if request.auth != null && request.auth.token.email == resource.data.email;
+      allow write: if false; // Writes only allowed via Admin SDK (Stripe Webhook)
     }
 
-    // Quiz Passes: Short-lived, internal only
+    // Quiz Passes Collection
+    // Private collection used for checkout validation
     match /quizPasses/{passId} {
-      allow read, write: if false;
+      allow read: if false; // Only accessible via Admin SDK
+      allow write: if false;
     }
   }
 }

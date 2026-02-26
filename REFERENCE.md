@@ -851,12 +851,12 @@ Coast Competitions operates as a **skill-based competition**, not a lottery or g
 | Mobile CTA (raffle detail) | **Complete** | Fixed bottom bar |
 | Results page | **Placeholder** | Mock data |
 | Winners page | **Placeholder** | Mock data |
-| Admin dashboard | **Placeholder** | No real data or auth |
+| Admin dashboard | **Complete (Demo Mode)** | Functional UI, needs real data integration |
 | Homepage countdown timer | **Placeholder** | Shows static values, not connected to real data |
 | Ticket sales progress bars | **Placeholder** | Hardcoded at 10%, not connected to Firestore |
 | "5 people entered" text | **Placeholder** | Static text on raffle detail |
-| User authentication UI | **Not started** | Firebase Auth configured but no login page |
-| Admin notifications (draw complete) | **Not started** | Admins not notified when draws run |
+| User authentication UI | **Complete** | Login/Register with Email/Google |
+| Admin notifications (draw complete) | **Complete** | Emails sent via Postmark |
 | Dynamic SEO metadata | **Not started** | Only basic root metadata |
 | Sitemap generation | **Not started** | — |
 | Contact form backend | **Not started** | Form prevents default, no submission |
@@ -876,16 +876,11 @@ Coast Competitions operates as a **skill-based competition**, not a lottery or g
 
 These items are needed to run even test/demo competitions and receive proper notifications.
 
-#### 1. Admin Draw Notifications
-**What:** When a draw completes (or fails), the admin team needs to be notified immediately — not just the winner.
-**Why:** Right now only the winner gets an email. Admins have no way of knowing a draw happened unless they check Firestore manually.
-**How:** Add an admin notification email in both the Cloud Function (`scheduledDraw`) and ideally the webhook handler when orders come in. Could be a simple email to a configured admin address, or a Slack/Discord webhook for real-time alerts.
-**Scope:** Small — add a `sendAdminNotification()` function to the Postmark client and call it from the Cloud Function after each draw, and from the webhook after each order.
+#### 1. Admin Notifications
+**Status:** Complete. Admins are now notified of new orders and completed draws via email.
 
 #### 2. Email Domain Update
-**What:** The Postmark `FROM_EMAIL` still defaults to `noreply@dragoncompetitions.co.uk` in both `apps/web/src/lib/postmark/client.ts` and `apps/functions/src/index.ts`. Contact page also references `support@dragoncompetitions.co.uk`.
-**Why:** Emails will fail or be flagged as spam if sent from an unverified domain.
-**How:** Update hardcoded defaults to the new Coast Competitions domain. Verify the sending domain in Postmark.
+**Status:** Complete. All hardcoded references updated to `coastcompetitions.co.uk`.
 
 #### 3. Connect Homepage Countdown to Real Data
 **What:** The `HomeCountdown` component shows hardcoded static values. It needs to show the actual time until the next ending competition.
@@ -904,9 +899,7 @@ These items are needed to run even test/demo competitions and receive proper not
 ### Tier 2: HIGH PRIORITY — Needed Before Going Live
 
 #### 6. User Authentication (Login/Register)
-**What:** Firebase Auth UI — login page, registration, password reset.
-**Why:** Users need accounts to track their entries, view order history, and for Firestore security rules to work (orders are gated by `userId`).
-**How:** Create `/login` and `/register` pages using Firebase Auth (email/password, potentially Google sign-in). Add auth state to the header. Protect order history.
+**Status:** Complete. Branded Login/Register pages implemented with Email and Google Sign-in.
 
 #### 7. Stripe Account & Live Keys
 **What:** Set up Stripe account with the incorporated company's business bank account. Switch from test keys to live keys.
@@ -964,14 +957,8 @@ These items are needed to run even test/demo competitions and receive proper not
 **How:** Query Firestore for completed raffles with winners. Display real winner info (anonymized names), prizes, ticket numbers, dates.
 
 #### 18. Admin Dashboard (Functional)
-**What:** Replace placeholder admin page with real functionality.
-**Features needed:**
-- Auth gate (admin-only access)
-- Active raffles overview with ticket counts and revenue
-- Order list with search/filter
-- Draw status and history
-- Manual draw trigger (emergency)
-- Revenue reporting
+**Status:** Complete (Demo Mode). The dashboard UI is fully built with stats cards, raffle management tables, and order history. It currently uses mock data because of the Firebase Admin SDK Private Key issue.
+**Action Needed:** Once the Private Key is fixed, switch from `MOCK_STATS` to the `fetchAdminDashboardData` server action.
 
 #### 19. Free Entry Route
 **What:** UK competition law may require a free postal entry route as an alternative to paid entry.

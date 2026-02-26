@@ -4,21 +4,26 @@ import { getOptionalEnv } from "@/lib/env";
 if (!admin.apps.length) {
   const projectId = getOptionalEnv("FIREBASE_PROJECT_ID");
   const clientEmail = getOptionalEnv("FIREBASE_CLIENT_EMAIL");
-  const privateKey = getOptionalEnv("FIREBASE_PRIVATE_KEY")?.replace(/\\n/g, "\n");
-
-  if (projectId && clientEmail && privateKey) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId,
-        clientEmail,
-        privateKey,
-      }),
-    });
+  const privateKey = getOptionalEnv("FIREBASE_PRIVATE_KEY")?.replace(/\\n/g, "\n").replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
+  
+  if (projectId && clientEmail && privateKey && privateKey.includes("BEGIN PRIVATE KEY") && process.env.NODE_ENV === "production") {
+    console.log("Firebase Admin: Initializing with Cert Strategy (Production)");
+    try {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey,
+        }),
+      });
+    } catch (error) {
+      console.error("Firebase Admin Initialization Error:", error);
+      admin.initializeApp({ projectId });
+    }
   } else if (projectId) {
-    // Fallback for local development or build time if projectId is present
+    console.log("Firebase Admin: Initializing with Project ID fallback");
     admin.initializeApp({ projectId });
   } else {
-    // Last resort for build time to avoid crashing
     admin.initializeApp({ projectId: "placeholder-project-id" });
   }
 }
