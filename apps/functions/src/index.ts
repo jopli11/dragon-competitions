@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import * as postmark from "postmark";
 import * as crypto from "node:crypto";
+import { createClient } from "contentful-management";
 
 admin.initializeApp();
 
@@ -16,10 +17,6 @@ export const scheduledDraw = functions.pubsub
   .onRun(async (context) => {
     const now = admin.firestore.Timestamp.now();
 
-    // 1. Find raffles that have ended but haven't been drawn yet
-    // Note: In a real app, you might want to query Contentful for end dates
-    // or keep a mirrored 'endAt' in Firestore for easier querying.
-    // For this implementation, we assume 'raffles' collection has 'endAt'.
     const rafflesToDraw = await db
       .collection("raffles")
       .where("endAt", "<=", now)
@@ -55,6 +52,11 @@ async function performDraw(raffleDoc: admin.firestore.QueryDocumentSnapshot) {
       drawStatus: "completed",
       drawResult: "no_tickets_sold",
     });
+    
+    // Even if no tickets sold, check if we should reoccur
+    if (raffleData.isReoccurring) {
+      await handleReoccurring(raffleId);
+    }
     return;
   }
 
@@ -97,8 +99,91 @@ async function performDraw(raffleDoc: admin.firestore.QueryDocumentSnapshot) {
       // 4. Send winner email
       await sendWinnerEmail(winningTicketData.email, raffleData.title, winningTicketNumber, totalTickets);
     });
+
+    // 5. Handle Reoccurring Raffle
+    if (raffleData.isReoccurring) {
+      await handleReoccurring(raffleId);
+    }
   } catch (error) {
     console.error(`Draw failed for raffle ${raffleId}:`, error);
+  }
+}
+
+/**
+ * Handles the reoccurring logic by creating a new raffle entry in Contentful.
+ * This uses the Contentful Management API to duplicate the existing raffle
+ * with updated dates.
+ */
+async function handleReoccurring(slug: string) {
+  const managementToken = process.env.CONTENTFUL_MANAGEMENT_TOKEN;
+  const spaceId = process.env.CONTENTFUL_SPACE_ID;
+  const environmentId = process.env.CONTENTFUL_ENVIRONMENT || "master";
+
+  if (!managementToken || !spaceId) {
+    console.error("Contentful management credentials missing. Cannot reoccur raffle.");
+    return;
+  }
+
+  try {
+    const client = createClient({ accessToken: managementToken });
+    const space = await client.getSpace(spaceId);
+    const environment = await space.getEnvironment(environmentId);
+
+    // 1. Find the existing entry in Contentful by slug
+    const entries = await environment.getEntries({
+      content_type: "raffle",
+      "fields.slug.en-US": slug,
+      limit: 1,
+    });
+
+    const originalEntry = entries.items[0];
+    if (!originalEntry) {
+      console.error(`Original raffle with slug ${slug} not found in Contentful.`);
+      return;
+    }
+
+    // 2. Calculate new dates (e.g., same duration as original)
+    const originalStart = new Date(originalEntry.fields.startAt["en-US"]);
+    const originalEnd = new Date(originalEntry.fields.endAt["en-US"]);
+    const durationMs = originalEnd.getTime() - originalStart.getTime();
+    
+    const newStart = new Date(); // Starts now
+    const newEnd = new Date(newStart.getTime() + durationMs);
+
+    // 3. Create the new entry (we can't easily "duplicate" via API, so we create new)
+    // We keep most fields but update status and dates.
+    const newFields = { ...originalEntry.fields };
+    newFields.status["en-US"] = "live";
+    newFields.startAt["en-US"] = newStart.toISOString();
+    newFields.endAt["en-US"] = newEnd.toISOString();
+    
+    // Note: We might want to append a version or date to the title/slug if they must be unique,
+    // but usually for reoccurring raffles, the old one is moved to 'ended' status.
+    // Contentful unique validation on slug might trigger if we don't change it.
+    // However, the original raffle's status is likely still 'live' in Contentful until manually changed,
+    // or we can update it here.
+    
+    // Update original to 'ended'
+    originalEntry.fields.status["en-US"] = "ended";
+    await originalEntry.update();
+    await originalEntry.publish();
+
+    // Create new entry
+    // To avoid slug collision, we might need a suffix, but let's assume the user manages slugs
+    // or we append a timestamp.
+    const timestamp = Math.floor(Date.now() / 1000);
+    newFields.slug["en-US"] = `${slug}-${timestamp}`;
+    newFields.title["en-US"] = `${newFields.title["en-US"]} (Round ${timestamp})`;
+
+    const newEntry = await environment.createEntry("raffle", {
+      fields: newFields,
+    });
+    
+    await newEntry.publish();
+    console.log(`Successfully reoccurred raffle ${slug} as ${newFields.slug["en-US"]}`);
+
+  } catch (error) {
+    console.error(`Error in handleReoccurring for ${slug}:`, error);
   }
 }
 
