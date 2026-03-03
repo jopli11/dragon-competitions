@@ -84,8 +84,31 @@ export default async function RaffleDetailPage({
   const ticketPriceFormatted = formatGBPFromPence(raffle.ticketPricePence);
   const progress = Math.min(100, Math.max(2, (stats.ticketsSold / 5000) * 100));
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": raffle.title,
+    "description": raffle.raffleDescription || `Win ${raffle.title} with Coast Competitions.`,
+    "image": raffle.heroImageUrl,
+    "offers": {
+      "@type": "Offer",
+      "price": raffle.ticketPricePence / 100,
+      "priceCurrency": "GBP",
+      "availability": "https://schema.org/InStock",
+      "validThrough": raffle.endAt,
+    },
+    "brand": {
+      "@type": "Brand",
+      "name": "Coast Competitions"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero Section */}
       <div className="relative h-[20vh] min-h-[240px] w-full overflow-hidden bg-brand-midnight">
         {raffle.heroImageUrl && (

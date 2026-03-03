@@ -93,12 +93,13 @@ Any user can take the Seed and the Total Ticket count and run the calculation th
 | GDPR Cookie Consent | **Complete** | LocalStorage-based branded banner |
 | Error & Loading States | **Complete** | Custom skeletons and error boundaries |
 | Dynamic SEO Metadata | **Complete** | Per-raffle titles and OG images |
+| Sitemap & robots.txt | **Complete** | Auto-generated for search engines |
+| Schema.org Structured Data | **Complete** | Product/Offer markup for raffles |
 | Contact Form Backend | **Complete** | Integrated with Postmark & Server Actions |
 | Live vs Auto Draw Flag | **Complete** | Contentful model update & Function logic |
+| Provably Fair Verification Page | **Complete** | Integrated into Draw Results |
+| Reoccurring Raffle Logic | **Complete** | Automated via Cloud Functions |
 | Branded Email Templates | **Not started** | Basic HTML currently used |
-| Sitemap & robots.txt | **Not started** | — |
-| Provably Fair Verification Page | **Pending** | Needs to expose Seed/Logic to users |
-| Reoccurring Raffle Logic | **Pending** | Auto-relisting functionality |
 | Postmark Configuration | **Pending** | Domain verification & API keys needed |
 | Stripe Production Setup | **Pending** | Blocked by Business Bank Account |
 
@@ -106,37 +107,49 @@ Any user can take the Seed and the Total Ticket count and run the calculation th
 
 ## 24. Remaining Build Items — Road to Launch
 
+### CRITICAL: Firebase Functions Configuration
+The following environment variables **MUST** be set in the Firebase Functions config (`firebase functions:config:set`) before the system can process draws or re-list raffles:
+- `CONTENTFUL_MANAGEMENT_TOKEN`: Personal Access Token for the Contentful Management API (Required for **Reoccurring Raffles**).
+- `CONTENTFUL_SPACE_ID`: Your Contentful Space ID.
+- `CONTENTFUL_ENVIRONMENT`: (Optional) Defaults to `master`.
+- `POSTMARK_SERVER_TOKEN`: API key for transactional emails.
+- `POSTMARK_FROM_EMAIL`: The verified sender email (e.g., `noreply@coastcompetitions.co.uk`).
+- `ADMIN_NOTIFICATION_EMAIL`: Where admin draw alerts are sent.
+
 ### Tier 1: CRITICAL — Must Have Before Launch
 
 #### 1. Branded Email Templates
 **What:** Create professional HTML templates with Coast branding in Postmark.
 
-#### 2. Sitemap & robots.txt
-**What:** Auto-generated SEO files for search engine indexing.
+#### 2. Footer Compliance Update
+**What:** Add registered office address, company number, and VAT number (if applicable) to the `SiteFooter`.
+**Why:** Legal requirement in the UK and a critical trust signal for Google SEO.
 
-#### 3. Provably Fair Page (Draw Results)
-**What:** A page explaining the CSPRNG model and allowing users to verify past draws using the stored Seed and Ticket Count.
-
-#### 4. Logo Refresh
+#### 3. Logo Refresh
 **What:** Update the site logo to the final version approved by stakeholders.
 
-#### 5. Postmark Configuration & Domain Verification
+#### 4. Postmark Configuration & Domain Verification
 **What:** Input the production Postmark API key and verify the `coastcompetitions.co.uk` sender domain via DNS.
 **Why:** Critical for email deliverability.
 
-#### 6. Stripe Production Setup
+#### 5. Stripe Production Setup
 **What:** Switch from test mode to live production keys and connect a verified business bank account.
 **Why:** Blocked until company incorporation is finalized.
 
-### Tier 2: HIGH PRIORITY — Post-Launch Polish
+### Tier 2: HIGH PRIORITY — Post-Launch Polish & SEO
 
-#### 7. Reoccurring Raffle Logic
-**What:** Implement the automated re-listing of raffles when they end or fill up.
-
-#### 8. Real Winners & Results Data
+#### 6. Real Winners & Results Data
 **What:** Connect the Results and Winners pages to actual Firestore draw data.
 **How:** Query the `raffles` collection for `drawStatus == "completed"`.
 
+#### 7. "Winner's Story" Blog / Content Automation
+**What:** Implement a system to automatically generate blog posts or news updates when a winner is drawn.
+**Why:** Massive SEO signal for E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness).
+
+#### 8. External Backlink Strategy
+**What:** Submit the site to UK competition directories (The Prize Finder, Loquax, etc.).
+**Why:** High-authority backlinks are the primary driver for ranking in the UK raffle niche.
+
 ---
 
-*This reference document covers every feature, integration, data model, user flow, and business rule in the Coast Competitions platform as of 12 February 2026.*
+*This reference document covers every feature, integration, data model, user flow, and business rule in the Coast Competitions platform as of 3 March 2026.*

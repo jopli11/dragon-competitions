@@ -14,11 +14,48 @@ const nunitoSans = Nunito_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Coast Competitions",
+    default: "Coast Competitions · Win Incredible Prizes & Cash",
     template: "%s · Coast Competitions",
   },
   description:
-    "Skill-based UK competition raffles with transparent draws and fast entry.",
+    "Enter Coast Competitions for your chance to win tax-free cash, luxury cars, and the latest tech. Skill-based UK raffles with transparent draws and guaranteed winners.",
+  keywords: ["raffle", "competitions", "win cash", "UK competitions", "skill-based raffle", "Coast Competitions", "win a car"],
+  authors: [{ name: "Coast Competitions" }],
+  creator: "Coast Competitions",
+  publisher: "Coast Competitions",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://coastcompetitions.co.uk'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "Coast Competitions · Win Incredible Prizes & Cash",
+    description: "Enter Coast Competitions for your chance to win tax-free cash, luxury cars, and the latest tech.",
+    url: 'https://coastcompetitions.co.uk',
+    siteName: 'Coast Competitions',
+    locale: 'en_GB',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Coast Competitions · Win Incredible Prizes & Cash",
+    description: "Enter Coast Competitions for your chance to win tax-free cash, luxury cars, and the latest tech.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
