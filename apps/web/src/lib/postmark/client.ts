@@ -96,3 +96,55 @@ export async function sendAdminDrawNotification({
     console.error("Error sending admin draw notification:", error);
   }
 }
+
+export async function sendContactFormEmail({
+  name,
+  email,
+  subject,
+  message,
+}: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
+  if (!postmarkClient) {
+    console.warn("Postmark not configured. Skipping contact form email.");
+    return;
+  }
+
+  try {
+    // 1. Send to Admin
+    await postmarkClient.sendEmail({
+      From: FROM_EMAIL,
+      To: ADMIN_EMAIL,
+      ReplyTo: email,
+      Subject: `[CONTACT FORM] ${subject}`,
+      TextBody: `New message from ${name} (${email}):\n\n${message}`,
+      HtmlBody: `
+        <h1>New Contact Form Message</h1>
+        <p><strong>From:</strong> ${name} (${email})</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Message:</strong></p>
+        <p style="white-space: pre-wrap;">${message}</p>
+      `,
+    });
+
+    // 2. Send Confirmation to User
+    await postmarkClient.sendEmail({
+      From: FROM_EMAIL,
+      To: email,
+      Subject: `We've received your message - Coast Competitions`,
+      TextBody: `Hi ${name},\n\nThanks for reaching out! We've received your message regarding "${subject}" and our team will get back to you as soon as possible.\n\nBest regards,\nThe Coast Competitions Team`,
+      HtmlBody: `
+        <h1>Message Received</h1>
+        <p>Hi ${name},</p>
+        <p>Thanks for reaching out! We've received your message regarding "<strong>${subject}</strong>" and our team will get back to you as soon as possible.</p>
+        <p>Best regards,<br>The Coast Competitions Team</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Error sending contact form emails:", error);
+    throw error;
+  }
+}

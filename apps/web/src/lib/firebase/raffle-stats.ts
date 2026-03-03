@@ -1,5 +1,5 @@
 import { serverDb } from "@/lib/firebase/server-client";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where, orderBy } from "firebase/firestore";
 
 export async function getRaffleStats(slug: string) {
   try {
@@ -31,5 +31,31 @@ export async function getAllRaffleStats() {
   } catch (error) {
     console.error("Error fetching all raffle stats:", error);
     return {};
+  }
+}
+
+export async function getCompletedDraws() {
+  try {
+    const rafflesRef = collection(serverDb, "raffles");
+    const q = query(
+      rafflesRef,
+      where("drawStatus", "==", "completed"),
+      orderBy("drawnAt", "desc")
+    );
+    const snapshot = await getDocs(q);
+    
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        winnerEmail: data.winnerEmail as string | undefined,
+        winningTicketNumber: data.winningTicketNumber as number | undefined,
+        drawAudit: data.drawAudit as { seed: string; totalTickets: number } | undefined,
+        drawnAt: data.drawnAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching completed draws:", error);
+    return [];
   }
 }

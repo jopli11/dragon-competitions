@@ -1,6 +1,6 @@
 # Coast Competitions — Complete Platform Reference
 
-> **Last updated:** 26 February 2026
+> **Last updated:** 3 March 2026
 > **Purpose:** Master reference for tutorials, blog posts, SEO content, and general platform documentation.
 
 ---
@@ -93,11 +93,11 @@ Any user can take the Seed and the Total Ticket count and run the calculation th
 | GDPR Cookie Consent | **Complete** | LocalStorage-based branded banner |
 | Error & Loading States | **Complete** | Custom skeletons and error boundaries |
 | Dynamic SEO Metadata | **Complete** | Per-raffle titles and OG images |
+| Contact Form Backend | **Complete** | Integrated with Postmark & Server Actions |
+| Live vs Auto Draw Flag | **Complete** | Contentful model update & Function logic |
 | Branded Email Templates | **Not started** | Basic HTML currently used |
-| Contact Form Backend | **Not started** | UI only, needs Postmark integration |
 | Sitemap & robots.txt | **Not started** | — |
 | Provably Fair Verification Page | **Pending** | Needs to expose Seed/Logic to users |
-| Live vs Auto Draw Flag | **Pending** | Contentful model update needed |
 | Reoccurring Raffle Logic | **Pending** | Auto-relisting functionality |
 | Postmark Configuration | **Pending** | Domain verification & API keys needed |
 | Stripe Production Setup | **Pending** | Blocked by Business Bank Account |
@@ -111,36 +111,32 @@ Any user can take the Seed and the Total Ticket count and run the calculation th
 #### 1. Branded Email Templates
 **What:** Create professional HTML templates with Coast branding in Postmark.
 
-#### 2. Contact Form Backend
-**What:** Wire up the "Contact Us" form to send emails via Postmark.
-
-#### 3. Sitemap & robots.txt
+#### 2. Sitemap & robots.txt
 **What:** Auto-generated SEO files for search engine indexing.
 
-#### 4. Provably Fair Page (Draw Results)
+#### 3. Provably Fair Page (Draw Results)
 **What:** A page explaining the CSPRNG model and allowing users to verify past draws using the stored Seed and Ticket Count.
 
-#### 5. Contentful Model Update: Draw Type & Reoccurring
-**What:** Add `drawType` (Auto/Live) and `isReoccurring` flags to the Raffle content type.
-**Why:** To support live stream draws and high-velocity reoccurring prizes.
-
-#### 6. Logo Refresh
+#### 4. Logo Refresh
 **What:** Update the site logo to the final version approved by stakeholders.
 
-#### 7. Postmark Configuration & Domain Verification
+#### 5. Postmark Configuration & Domain Verification
 **What:** Input the production Postmark API key and verify the `coastcompetitions.co.uk` sender domain via DNS.
 **Why:** Critical for email deliverability.
 
-#### 8. Stripe Live Keys & Business Account
+#### 6. Stripe Production Setup
 **What:** Switch from test mode to live production keys and connect a verified business bank account.
 **Why:** Blocked until company incorporation is finalized.
 
 ### Tier 2: HIGH PRIORITY — Post-Launch Polish
 
-#### 9. Real Winners & Results Data
+#### 7. Reoccurring Raffle Logic
+**What:** Implement the automated re-listing of raffles when they end or fill up.
+
+#### 8. Real Winners & Results Data
 **What:** Connect the Results and Winners pages to actual Firestore draw data.
 **How:** Query the `raffles` collection for `drawStatus == "completed"`.
 
 ---
 
-*This reference document covers every feature, integration, data model, user flow, and business rule in the Coast Competitions platform as of 26 February 2026.*
+*This reference document covers every feature, integration, data model, user flow, and business rule in the Coast Competitions platform as of 12 February 2026.*

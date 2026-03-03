@@ -55,6 +55,8 @@ export async function POST(request: Request) {
           nextTicketNumber: ticketEnd + 1,
           ticketsSold: admin.firestore.FieldValue.increment(quantity),
           drawStatus: "pending", // Ensure it's pending so the draw function finds it
+          drawType: contentfulRaffle?.drawType || "auto",
+          isReoccurring: !!contentfulRaffle?.isReoccurring,
         };
 
         // Mirror the endAt date if we have it and it's not already set

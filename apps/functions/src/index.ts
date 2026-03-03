@@ -31,6 +31,14 @@ export const scheduledDraw = functions.pubsub
     }
 
     for (const raffleDoc of rafflesToDraw.docs) {
+      const data = raffleDoc.data();
+      
+      // Skip if drawType is 'live' - these are handled manually by admins
+      if (data.drawType === "live") {
+        console.log(`Skipping automated draw for ${raffleDoc.id} (drawType is 'live')`);
+        continue;
+      }
+
       await performDraw(raffleDoc);
     }
 

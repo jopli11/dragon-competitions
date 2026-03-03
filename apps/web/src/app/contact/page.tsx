@@ -1,7 +1,32 @@
+"use client";
+
 import { Container } from "@/components/Container";
-import { BrandSectionHeading, GradientText } from "@/lib/styles";
+import { BrandSectionHeading, GradientText, BrandButton } from "@/lib/styles";
+import { submitContactForm } from "./actions";
+import { useState } from "react";
 
 export default function ContactPage() {
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function handleSubmit(formData: FormData) {
+    setStatus("loading");
+    setErrorMessage("");
+    
+    try {
+      const result = await submitContactForm(formData);
+      if (result?.error) {
+        setStatus("error");
+        setErrorMessage(result.error);
+      } else {
+        setStatus("success");
+      }
+    } catch (err) {
+      setStatus("error");
+      setErrorMessage("Something went wrong. Please try again.");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white py-16 sm:py-32">
       <Container>
@@ -13,33 +38,63 @@ export default function ContactPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 sm:gap-20">
-          <div className="bg-white rounded-[2.5rem] sm:rounded-[3.5rem] border border-brand-primary/5 shadow-2xl p-8 sm:p-16">
+          <div className="bg-white rounded-4xl border border-brand-primary/5 shadow-2xl p-8 sm:p-16">
             <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-brand-midnight mb-10">
               Send us a <GradientText>Message</GradientText>
             </h2>
-            <form action="#">
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Full Name</label>
-                  <input type="text" id="name" placeholder="John Doe" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all" />
+            
+            {status === "success" ? (
+              <div className="bg-green-50 border border-green-100 rounded-3xl p-8 text-center">
+                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white mx-auto mb-6">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
-                <div className="space-y-2">
-                  <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Email Address</label>
-                  <input type="email" id="email" placeholder="john@example.com" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all" />
+                <h3 className="text-xl font-black text-brand-midnight uppercase tracking-tight mb-2">Message Sent!</h3>
+                <p className="text-brand-midnight/60 font-medium">Thank you for reaching out. We'll get back to you shortly.</p>
+                <button 
+                  onClick={() => setStatus("idle")}
+                  className="mt-8 text-sm font-black uppercase tracking-widest text-brand-primary hover:text-brand-secondary transition-colors"
+                >
+                  Send another message
+                </button>
+              </div>
+            ) : (
+              <form action={handleSubmit}>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Full Name</label>
+                    <input name="name" type="text" id="name" required placeholder="John Doe" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Email Address</label>
+                    <input name="email" type="email" id="email" required placeholder="john@example.com" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all" />
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2 mt-6">
-                <label htmlFor="subject" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Subject</label>
-                <input type="text" id="subject" placeholder="How can we help?" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all" />
-              </div>
-              <div className="space-y-2 mt-6">
-                <label htmlFor="message" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Message</label>
-                <textarea id="message" placeholder="Your message here..." rows={6} className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all resize-none"></textarea>
-              </div>
-              <button type="submit" className="w-full mt-10 bg-brand-primary text-white rounded-full py-5 font-black uppercase tracking-[0.2em] text-sm shadow-xl transition-all duration-300 hover:bg-brand-secondary hover:-translate-y-1 active:translate-y-0">
-                Send Message
-              </button>
-            </form>
+                <div className="space-y-2 mt-6">
+                  <label htmlFor="subject" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Subject</label>
+                  <input name="subject" type="text" id="subject" required placeholder="How can we help?" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all" />
+                </div>
+                <div className="space-y-2 mt-6">
+                  <label htmlFor="message" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Message</label>
+                  <textarea name="message" id="message" required placeholder="Your message here..." rows={6} className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all resize-none"></textarea>
+                </div>
+                
+                {status === "error" && (
+                  <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-bold">
+                    {errorMessage}
+                  </div>
+                )}
+
+                <button 
+                  type="submit" 
+                  disabled={status === "loading"}
+                  className="w-full mt-10 bg-brand-primary text-white rounded-full py-5 font-black uppercase tracking-[0.2em] text-sm shadow-xl transition-all duration-300 hover:bg-brand-secondary hover:-translate-y-1 active:translate-y-0 disabled:opacity-50 disabled:translate-y-0"
+                >
+                  {status === "loading" ? "Sending..." : "Send Message"}
+                </button>
+              </form>
+            )}
           </div>
 
           <div className="space-y-12">
