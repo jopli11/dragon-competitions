@@ -99,9 +99,10 @@ Any user can take the Seed and the Total Ticket count and run the calculation th
 | Live vs Auto Draw Flag | **Complete** | Contentful model update & Function logic |
 | Provably Fair Verification Page | **Complete** | Integrated into Draw Results |
 | Reoccurring Raffle Logic | **Complete** | Automated via Cloud Functions |
+| Footer Compliance Update | **Complete** | Added Company No. 17087259 and address |
 | Branded Email Templates | **Not started** | Basic HTML currently used |
 | Postmark Configuration | **Pending** | Domain verification & API keys needed |
-| Stripe Production Setup | **Pending** | Blocked by Business Bank Account |
+| Stripe Production Setup | **Pending** | Needs account creation & bank connection |
 
 ---
 
@@ -121,32 +122,28 @@ The following environment variables **MUST** be set in the Firebase Functions co
 #### 1. Branded Email Templates
 **What:** Create professional HTML templates with Coast branding in Postmark.
 
-#### 2. Footer Compliance Update
-**What:** Add registered office address, company number, and VAT number (if applicable) to the `SiteFooter`.
-**Why:** Legal requirement in the UK and a critical trust signal for Google SEO.
-
-#### 3. Logo Refresh
+#### 2. Logo Refresh
 **What:** Update the site logo to the final version approved by stakeholders.
 
-#### 4. Postmark Configuration & Domain Verification
+#### 3. Postmark Configuration & Domain Verification
 **What:** Input the production Postmark API key and verify the `coastcompetitions.co.uk` sender domain via DNS.
 **Why:** Critical for email deliverability.
 
-#### 5. Stripe Production Setup
-**What:** Switch from test mode to live production keys and connect a verified business bank account.
-**Why:** Blocked until company incorporation is finalized.
+#### 4. Stripe Production Setup
+**What:** Create the production Stripe account, complete KYC, and connect the new business bank account.
+**Status:** Bank account is ready, account setup pending.
 
 ### Tier 2: HIGH PRIORITY — Post-Launch Polish & SEO
 
-#### 6. Real Winners & Results Data
+#### 5. Real Winners & Results Data
 **What:** Connect the Results and Winners pages to actual Firestore draw data.
 **How:** Query the `raffles` collection for `drawStatus == "completed"`.
 
-#### 7. "Winner's Story" Blog / Content Automation
+#### 6. "Winner's Story" Blog / Content Automation
 **What:** Implement a system to automatically generate blog posts or news updates when a winner is drawn.
 **Why:** Massive SEO signal for E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness).
 
-#### 8. External Backlink Strategy
+#### 7. External Backlink Strategy
 **What:** Submit the site to UK competition directories (The Prize Finder, Loquax, etc.).
 **Why:** High-authority backlinks are the primary driver for ranking in the UK raffle niche.
 

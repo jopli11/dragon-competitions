@@ -37,11 +37,11 @@ export function SiteFooter() {
                   className="object-contain"
                 />
               </div>
-              <div className="flex flex-col justify-center leading-[0.9] -ml-2 sm:-ml-4">
-                <span className="text-xl sm:text-3xl font-black tracking-tighter uppercase">
+              <div className="flex flex-col justify-center leading-[0.8] -ml-2 sm:-ml-4">
+                <span className="text-xl sm:text-3xl font-bold tracking-widest uppercase text-white">
                   Coast
                 </span>
-                <span className="text-[10px] sm:text-[14px] font-medium tracking-[0.15em] text-brand-secondary uppercase">
+                <span className="text-[7px] sm:text-[10px] font-black tracking-[0.22em] uppercase text-white mt-1">
                   Competitions
                 </span>
               </div>
@@ -100,16 +100,21 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-white/5 pt-8 md:flex-row">
-          <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} Coast Competitions. All rights
-            reserved.
-          </p>
+        <div className="mt-16 flex flex-col items-center justify-between gap-8 border-t border-white/5 pt-8 md:flex-row">
+          <div className="flex flex-col gap-2 text-center md:text-left">
+            <p className="text-xs text-white/40">
+              © {new Date().getFullYear()} Coast Competitions. All rights reserved.
+            </p>
+            <p className="text-[10px] leading-relaxed text-white/20 uppercase tracking-wider">
+              COAST COMPETITIONS LTD (Company No. 17087259)<br />
+              Registered Office: 33 Seaview Drive, Ogmore-By-Sea, Bridgend, Wales, CF32 0PB
+            </p>
+          </div>
           <div className="flex items-center gap-6">
-            <span className="text-[10px] font-bold text-white/20 uppercase">
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
               18+ Only
             </span>
-            <span className="text-[10px] font-bold text-white/20 uppercase">
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
               BeGambleAware
             </span>
           </div>
