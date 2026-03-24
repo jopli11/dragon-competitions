@@ -182,11 +182,11 @@ export function SiteHeader() {
                 priority
               />
             </div>
-            <div className="flex flex-col justify-center leading-none -ml-2 sm:-ml-4">
+            <div className="flex flex-col justify-center leading-none -ml-2 sm:-ml-4 -mt-1">
               <span className="text-xl sm:text-3xl font-bold tracking-widest uppercase text-brand-midnight">
                 Coast
               </span>
-              <span className="text-[7px] sm:text-[10px] font-black tracking-[0.22em] uppercase text-brand-midnight mt-0.5">
+              <span className="text-[7px] sm:text-[10px] font-black tracking-[0.22em] uppercase text-brand-midnight mt-0.5 ml-0.5">
                 Competitions
               </span>
             </div>
@@ -236,11 +236,11 @@ export function SiteHeader() {
               className="object-contain"
             />
           </div>
-          <div className="flex flex-col justify-center leading-none -ml-4">
+          <div className="flex flex-col justify-center leading-none -ml-4 -mt-1">
             <span className="text-4xl font-bold tracking-widest uppercase text-brand-midnight">
               Coast
             </span>
-            <span className="text-[12px] font-black tracking-[0.24em] uppercase text-brand-midnight mt-1">
+            <span className="text-[12px] font-black tracking-[0.24em] uppercase text-brand-midnight mt-1 ml-1">
               Competitions
             </span>
           </div>

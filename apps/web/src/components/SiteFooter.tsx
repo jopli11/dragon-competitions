@@ -41,7 +41,7 @@ export function SiteFooter() {
                 <span className="text-xl sm:text-3xl font-bold tracking-widest uppercase text-white">
                   Coast
                 </span>
-                <span className="text-[7px] sm:text-[10px] font-black tracking-[0.22em] uppercase text-white mt-1">
+                <span className="text-[7px] sm:text-[10px] font-black tracking-[0.22em] uppercase text-white mt-1 ml-0.5">
                   Competitions
                 </span>
               </div>
