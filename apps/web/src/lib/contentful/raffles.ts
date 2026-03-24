@@ -12,6 +12,7 @@ type RaffleEntryFields = {
   status: RaffleStatus;
   drawType?: DrawType;
   isReoccurring?: boolean;
+  maxTickets: number;
   startAt: string;
   endAt: string;
   ticketPricePence: number;
@@ -42,6 +43,7 @@ export type RaffleSummary = {
   status: RaffleStatus;
   drawType: DrawType;
   isReoccurring: boolean;
+  maxTickets: number;
   endAt: string;
   ticketPricePence: number;
   heroImageUrl?: string;
@@ -71,6 +73,7 @@ function toSummary(entry: Entry<RaffleSkeleton>): RaffleSummary {
     status: fields.status,
     drawType: fields.drawType || "auto",
     isReoccurring: !!fields.isReoccurring,
+    maxTickets: fields.maxTickets || 5000,
     endAt: fields.endAt,
     ticketPricePence: fields.ticketPricePence,
     heroImageUrl: toUrlMaybe(fields.heroImage?.fields?.file?.url),
@@ -85,6 +88,7 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     status: "live",
     drawType: "auto",
     isReoccurring: false,
+    maxTickets: 5000,
     startAt: new Date().toISOString(),
     endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString(),
     ticketPricePence: 18,
@@ -99,6 +103,7 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     status: "live",
     drawType: "live",
     isReoccurring: false,
+    maxTickets: 1000,
     startAt: new Date().toISOString(),
     endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 5).toISOString(),
     ticketPricePence: 18,
@@ -113,6 +118,7 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     status: "live",
     drawType: "auto",
     isReoccurring: true,
+    maxTickets: 2500,
     startAt: new Date().toISOString(),
     endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(),
     ticketPricePence: 18,
@@ -140,6 +146,7 @@ export const fetchLiveRaffles = cache(async (): Promise<RaffleSummary[]> => {
       "fields.status",
       "fields.drawType",
       "fields.isReoccurring",
+      "fields.maxTickets",
       "fields.endAt",
       "fields.ticketPricePence",
       "fields.heroImage",

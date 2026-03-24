@@ -57,6 +57,19 @@ export async function POST(request: Request) {
       );
     }
 
+    // 2.5 Check ticket availability (Soft Check)
+    const raffleRef = adminDb.collection("raffles").doc(slug);
+    const raffleDoc = await raffleRef.get();
+    const ticketsSold = raffleDoc.exists ? raffleDoc.data()?.ticketsSold || 0 : 0;
+    const maxTickets = raffle.maxTickets || 5000;
+
+    if (ticketsSold + quantity > maxTickets) {
+      return NextResponse.json(
+        { error: "Not enough tickets remaining. Please try a smaller quantity or check back later." },
+        { status: 400 }
+      );
+    }
+
     // 3. Create Stripe Checkout Session
     const baseUrl = getRequiredEnv("NEXT_PUBLIC_BASE_URL");
 
@@ -84,6 +97,8 @@ export async function POST(request: Request) {
         quizPassId: quizPassId,
         quantity: quantity.toString(),
       },
+    }, {
+      idempotencyKey: `checkout_${quizPassId}_${quantity}`,
     });
 
     return NextResponse.json({ url: session.url });

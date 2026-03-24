@@ -82,7 +82,9 @@ export default async function RaffleDetailPage({
   }
 
   const ticketPriceFormatted = formatGBPFromPence(raffle.ticketPricePence);
-  const progress = Math.min(100, Math.max(2, (stats.ticketsSold / 5000) * 100));
+  const maxTickets = raffle.maxTickets || 5000;
+  const progress = Math.min(100, Math.max(2, (stats.ticketsSold / maxTickets) * 100));
+  const isSoldOut = stats.ticketsSold >= maxTickets;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -124,7 +126,9 @@ export default async function RaffleDetailPage({
         <div className="absolute inset-0 bg-linear-to-t from-white via-brand-midnight/40 to-transparent" />
         
         <Container className="relative h-full flex flex-col justify-end pb-6">
-          <BrandBadge className="mb-3 self-start">Entries Open</BrandBadge>
+          <BrandBadge className={`mb-3 self-start ${isSoldOut ? 'bg-red-500 text-white' : ''}`}>
+            {isSoldOut ? 'Sold Out' : 'Entries Open'}
+          </BrandBadge>
           <h1 className="text-3xl font-black uppercase tracking-tighter text-brand-midnight sm:text-4xl md:text-5xl lg:text-6xl wrap-break-word">
             {raffle.title}
           </h1>
@@ -242,18 +246,35 @@ export default async function RaffleDetailPage({
 
           {/* Sticky Sidebar */}
           <div className="lg:sticky lg:top-24 space-y-6">
-            <SkillQuestionCard
-              slug={raffle.slug}
-              question={raffle.skillQuestion}
-              options={raffle.answerOptions}
-            />
+            {!isSoldOut ? (
+              <SkillQuestionCard
+                slug={raffle.slug}
+                question={raffle.skillQuestion}
+                options={raffle.answerOptions}
+              />
+            ) : (
+              <GlassCard className="p-8 text-center border-red-500/20 bg-red-500/5">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Competition Closed</h3>
+                <p className="mt-2 text-sm text-brand-midnight/60">
+                  This raffle has reached its maximum ticket limit and is now closed for entries.
+                </p>
+                <Link href="/raffles" className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-foreground px-8 text-sm font-medium text-background transition-colors hover:bg-foreground/90">
+                  View Other Raffles
+                </Link>
+              </GlassCard>
+            )}
             
             <GlassCard className="text-center py-8">
               <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-midnight/40 mb-2">
                 Tickets Sold
               </div>
               <div className="text-3xl font-black text-brand-midnight">
-                {stats.ticketsSold} <span className="text-lg text-brand-midnight/20">/ 5000</span>
+                {stats.ticketsSold} <span className="text-lg text-brand-midnight/20">/ {maxTickets}</span>
               </div>
               <div className="mt-4 h-2 w-full bg-brand-accent rounded-full overflow-hidden">
                 <div 

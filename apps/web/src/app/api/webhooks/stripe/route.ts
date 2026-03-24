@@ -34,17 +34,57 @@ export async function POST(request: Request) {
     }
 
     try {
-      // Fetch raffle from Contentful to get the endAt date
+      // 0. Idempotency Check
+      const eventRef = adminDb.collection("processed_events").doc(event.id);
+      const eventDoc = await eventRef.get();
+
+      if (eventDoc.exists) {
+        console.log(`Duplicate event ${event.id} received, skipping.`);
+        return NextResponse.json({ received: true, duplicate: true });
+      }
+
+      // Create the event record with status "processing"
+      await eventRef.set({
+        status: "processing",
+        type: event.type,
+        receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+        metadata: {
+          raffleSlug,
+          quizPassId,
+          quantity,
+          sessionId: session.id,
+        }
+      });
+
+      // Audit Log
+      await adminDb.collection("webhook_events").add({
+        eventId: event.id,
+        type: event.type,
+        status: "processing",
+        receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+        sessionId: session.id,
+      });
+
+      // Fetch raffle from Contentful to get the endAt date and maxTickets
       const contentfulRaffle = await fetchRaffleBySlug(raffleSlug);
+      const maxTickets = contentfulRaffle?.maxTickets || 5000;
 
       // Use a Firestore transaction to allocate ticket numbers and create the order
-      await adminDb.runTransaction(async (transaction) => {
+      const result = await adminDb.runTransaction(async (transaction) => {
         const raffleRef = adminDb.collection("raffles").doc(raffleSlug);
         const raffleDoc = await transaction.get(raffleRef);
 
+        let ticketsSold = 0;
         let nextTicketNumber = 1;
         if (raffleDoc.exists) {
-          nextTicketNumber = raffleDoc.data()?.nextTicketNumber || 1;
+          const data = raffleDoc.data();
+          ticketsSold = data?.ticketsSold || 0;
+          nextTicketNumber = data?.nextTicketNumber || 1;
+        }
+
+        // Layer 2: Atomic Cap Check
+        if (ticketsSold + quantity > maxTickets) {
+          return { error: "oversold", maxTickets, ticketsSold };
         }
 
         const ticketStart = nextTicketNumber;
@@ -57,6 +97,7 @@ export async function POST(request: Request) {
           drawStatus: "pending", // Ensure it's pending so the draw function finds it
           drawType: contentfulRaffle?.drawType || "auto",
           isReoccurring: !!contentfulRaffle?.isReoccurring,
+          maxTickets: maxTickets, // Mirror maxTickets as well
         };
 
         // Mirror the endAt date if we have it and it's not already set
@@ -78,6 +119,7 @@ export async function POST(request: Request) {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           stripePaymentIntentId: session.payment_intent,
           quizPassId,
+          status: "completed",
         });
 
         // 3. Mark quiz pass as used
@@ -94,30 +136,74 @@ export async function POST(request: Request) {
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
           });
         }
+
+        return { success: true, ticketRange: { start: ticketStart, end: ticketEnd } };
       });
 
-      // 5. Send confirmation email (outside transaction)
-      const [raffle, orderDoc] = await Promise.all([
-        fetchRaffleBySlug(raffleSlug),
-        adminDb.collection("orders").doc(session.id).get(),
-      ]);
+      // Handle Oversold Case (Layer 3: Auto-Refund)
+      if (result.error === "oversold") {
+        console.warn(`Raffle ${raffleSlug} oversold! Refunding session ${session.id}.`);
+        
+        // 1. Trigger Stripe Refund
+        if (session.payment_intent) {
+          await stripe.refunds.create({
+            payment_intent: session.payment_intent as string,
+            reason: "requested_by_customer", // Best fit for automated out-of-stock
+            metadata: {
+              reason: "oversold",
+              raffleSlug,
+              quantity: quantity.toString(),
+            }
+          });
+        }
 
-      if (raffle && session.customer_details?.email) {
-        const orderData = orderDoc.data();
-        if (orderData) {
+        // 2. Update status in Firestore
+        await eventRef.update({ status: "oversold_refunded" });
+        await adminDb.collection("orders").doc(session.id).set({
+          raffleSlug,
+          email: session.customer_details?.email,
+          quantity,
+          amountTotal: session.amount_total,
+          status: "refunded_oversold",
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        // 3. TODO: Send "Sold Out / Refunded" email via Postmark
+        // await sendSoldOutRefundEmail(...)
+
+        return NextResponse.json({ received: true, status: "oversold_refunded" });
+      }
+
+      // Update event status to completed
+      await eventRef.update({ status: "completed", processedAt: admin.firestore.FieldValue.serverTimestamp() });
+
+      // 5. Send confirmation email (outside transaction)
+      if (contentfulRaffle && session.customer_details?.email && result.success) {
+        try {
           await sendPurchaseConfirmation({
             to: session.customer_details.email,
-            raffleTitle: raffle.title,
-            ticketRange: orderData.ticketRange,
+            raffleTitle: contentfulRaffle.title,
+            ticketRange: result.ticketRange,
             orderId: session.id,
           });
+        } catch (emailErr) {
+          console.error("Failed to send confirmation email, but tickets were allocated:", emailErr);
+          // Don't return 500 here, as the tickets are already allocated.
         }
       }
 
       console.log(`Successfully processed order for raffle ${raffleSlug}`);
     } catch (err: any) {
-      console.error(`Transaction failed: ${err.message}`);
-      return NextResponse.json({ error: "Transaction failed" }, { status: 500 });
+      console.error(`Webhook processing failed: ${err.message}`);
+      // Update event status to failed if we have the event ID
+      if (event.id) {
+        await adminDb.collection("processed_events").doc(event.id).set({
+          status: "failed",
+          error: err.message,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+      }
+      return NextResponse.json({ error: "Processing failed" }, { status: 500 });
     }
   }
 

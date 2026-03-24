@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchRaffleCorrectAnswer } from "@/lib/contentful/raffles";
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb, admin } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 
 export async function POST(
@@ -16,6 +16,54 @@ export async function POST(
         { error: "Invalid answer index" },
         { status: 400 }
       );
+    }
+
+    // 0. Rate Limiting (Simple Firestore-based)
+    // In a real production app, use Redis or a specialized rate limiter
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const rateLimitRef = adminDb.collection("rateLimits").doc(`quiz_${slug}_${ip.replace(/\./g, "_")}`);
+    const rateLimitDoc = await rateLimitRef.get();
+    const now = Date.now();
+
+    if (rateLimitDoc.exists) {
+      const data = rateLimitDoc.data();
+      if (data?.blockedUntil?.toMillis() > now) {
+        return NextResponse.json(
+          { error: "Too many attempts. Please try again in 10 minutes." },
+          { status: 429 }
+        );
+      }
+
+      const attempts = data?.attempts || 0;
+      const lastAttempt = data?.lastAttempt?.toMillis() || 0;
+
+      // Reset if last attempt was more than 10 mins ago
+      if (now - lastAttempt > 10 * 60 * 1000) {
+        await rateLimitRef.set({
+          attempts: 1,
+          lastAttempt: Timestamp.now(),
+        });
+      } else if (attempts >= 5) {
+        // Block for 10 minutes
+        const blockedUntil = new Date(now + 10 * 60 * 1000);
+        await rateLimitRef.update({
+          blockedUntil: Timestamp.fromDate(blockedUntil),
+        });
+        return NextResponse.json(
+          { error: "Too many attempts. Please try again in 10 minutes." },
+          { status: 429 }
+        );
+      } else {
+        await rateLimitRef.update({
+          attempts: admin.firestore.FieldValue.increment(1),
+          lastAttempt: Timestamp.now(),
+        });
+      }
+    } else {
+      await rateLimitRef.set({
+        attempts: 1,
+        lastAttempt: Timestamp.now(),
+      });
     }
 
     // 1. Fetch the correct answer from Contentful (Server-side only)

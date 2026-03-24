@@ -36,5 +36,20 @@ service cloud.firestore {
       allow read: if false; // Only accessible via Admin SDK
       allow write: if false;
     }
+
+    // Webhook Idempotency & Audit Logs
+    // Admin SDK Only
+    match /processed_events/{eventId} {
+      allow read, write: if false;
+    }
+    match /webhook_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    // Rate Limiting
+    // Admin SDK Only
+    match /rateLimits/{limitId} {
+      allow read, write: if false;
+    }
   }
 }

@@ -100,8 +100,9 @@ Any user can take the Seed and the Total Ticket count and run the calculation th
 | Provably Fair Verification Page | **Complete** | Integrated into Draw Results |
 | Reoccurring Raffle Logic | **Complete** | Automated via Cloud Functions |
 | Footer Compliance Update | **Complete** | Added Company No. 17087259 and address |
+| Postmark Configuration | **Complete** | API keys and sender verified |
+| Stripe Production Hardening | **Complete** | Idempotency, atomic cap, auto-refunds |
 | Branded Email Templates | **Not started** | Basic HTML currently used |
-| Postmark Configuration | **Pending** | Domain verification & API keys needed |
 | Stripe Production Setup | **Pending** | Needs account creation & bank connection |
 
 ---
@@ -125,25 +126,21 @@ The following environment variables **MUST** be set in the Firebase Functions co
 #### 2. Logo Refresh
 **What:** Update the site logo to the final version approved by stakeholders.
 
-#### 3. Postmark Configuration & Domain Verification
-**What:** Input the production Postmark API key and verify the `coastcompetitions.co.uk` sender domain via DNS.
-**Why:** Critical for email deliverability.
-
-#### 4. Stripe Production Setup
+#### 3. Stripe Production Setup
 **What:** Create the production Stripe account, complete KYC, and connect the new business bank account.
 **Status:** Bank account is ready, account setup pending.
 
 ### Tier 2: HIGH PRIORITY — Post-Launch Polish & SEO
 
-#### 5. Real Winners & Results Data
+#### 4. Real Winners & Results Data
 **What:** Connect the Results and Winners pages to actual Firestore draw data.
 **How:** Query the `raffles` collection for `drawStatus == "completed"`.
 
-#### 6. "Winner's Story" Blog / Content Automation
+#### 5. "Winner's Story" Blog / Content Automation
 **What:** Implement a system to automatically generate blog posts or news updates when a winner is drawn.
 **Why:** Massive SEO signal for E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness).
 
-#### 7. External Backlink Strategy
+#### 6. External Backlink Strategy
 **What:** Submit the site to UK competition directories (The Prize Finder, Loquax, etc.).
 **Why:** High-authority backlinks are the primary driver for ranking in the UK raffle niche.
 

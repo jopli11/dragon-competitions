@@ -35,17 +35,19 @@ export default async function RafflesPage() {
       <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {raffles.map((r) => {
           const raffleStats = stats[r.slug] || { ticketsSold: 0 };
-          const progress = Math.min(100, Math.max(2, (raffleStats.ticketsSold / 5000) * 100));
+          const maxTickets = r.maxTickets || 5000;
+          const progress = Math.min(100, Math.max(2, (raffleStats.ticketsSold / maxTickets) * 100));
+          const isSoldOut = raffleStats.ticketsSold >= maxTickets;
 
           return (
             <div
               key={r.id}
-              className="group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+              className={`group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl ${isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
             >
               <Link href={`/raffles/${r.slug}`} className="block">
                 <div className="relative aspect-4/3 overflow-hidden">
-                  <div className="absolute top-3 left-3 z-10 rounded-lg bg-brand-secondary/90 px-2 py-1 text-[10px] font-bold text-white uppercase">
-                    Entries Open
+                  <div className={`absolute top-3 left-3 z-10 rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
+                    {isSoldOut ? 'Sold Out' : 'Entries Open'}
                   </div>
                   {r.heroImageUrl ? (
                     <Image
@@ -65,8 +67,8 @@ export default async function RafflesPage() {
                 </h3>
                 <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-brand-midnight/40 uppercase">
                   <div className="flex items-center gap-1.5">
-                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                    <span>{raffleStats.ticketsSold} Sold</span>
+                    <div className={`h-1.5 w-1.5 rounded-full ${isSoldOut ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
+                    <span>{raffleStats.ticketsSold} / {maxTickets} Sold</span>
                   </div>
                   <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
                 </div>
@@ -80,8 +82,8 @@ export default async function RafflesPage() {
                     <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
                       Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
                     </p>
-                    <BrandButton fullWidth className="mt-4">
-                      Enter Now
+                    <BrandButton fullWidth className="mt-4" variant={isSoldOut ? "outline" : "default"}>
+                      {isSoldOut ? "View Results" : "Enter Now"}
                     </BrandButton>
                   </div>
                 </div>
