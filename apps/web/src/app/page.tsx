@@ -108,7 +108,7 @@ export default async function Home() {
                       <p className="text-[10px] font-black text-brand-midnight/50 uppercase tracking-[0.2em] mb-4">
                         Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
                       </p>
-                      <BrandButton fullWidth variant={isSoldOut ? "outline" : "default"}>
+                      <BrandButton fullWidth variant={isSoldOut ? "outline" : "primary"}>
                         {isSoldOut ? "View Results" : "Enter Now"}
                       </BrandButton>
                     </div>

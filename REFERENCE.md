@@ -48,6 +48,34 @@
 
 ---
 
+## 11. Payment & Checkout (Stripe)
+
+Coast Competitions uses **Stripe Checkout** for all payments. The integration is hardened for production with idempotency, concurrency protection, and automated error handling.
+
+### Webhook Configuration
+The platform requires a Stripe Webhook to be configured in the Stripe Dashboard pointing to:
+`https://www.coastcompetitions.com/api/webhooks/stripe`
+
+**Required Events:**
+1. `checkout.session.completed` — Primary trigger for ticket allocation.
+2. `checkout.session.expired` — Cleans up abandoned quiz passes.
+3. `charge.refunded` — Automatically voids tickets associated with a refund.
+4. `payment_intent.payment_failed` — Logs payment failures for customer support.
+
+### Concurrency & Inventory Protection
+To prevent overselling during high-traffic "last minute" rushes, the system uses a three-layer guard:
+1. **Soft Check**: Pre-checkout availability check in the `create-session` API.
+2. **Hard Guard**: Atomic Firestore transaction inside the webhook ensures only the first writer wins the race for the last tickets.
+3. **Auto-Refund**: If a user pays but tickets are gone (due to a race condition), the system automatically triggers a Stripe refund and notifies the user.
+
+---
+
+## 12. Ticket Allocation System
+
+Tickets are allocated sequentially starting from 1. The allocation is authoritative and happens within a Firestore transaction to ensure no two users ever receive the same ticket number.
+
+---
+
 ## 13. Automated Draw System
 
 ### Draw Types

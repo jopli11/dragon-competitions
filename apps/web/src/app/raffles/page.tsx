@@ -82,7 +82,7 @@ export default async function RafflesPage() {
                     <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
                       Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
                     </p>
-                    <BrandButton fullWidth className="mt-4" variant={isSoldOut ? "outline" : "default"}>
+                    <BrandButton fullWidth className="mt-4" variant={isSoldOut ? "outline" : "primary"}>
                       {isSoldOut ? "View Results" : "Enter Now"}
                     </BrandButton>
                   </div>

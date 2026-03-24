@@ -23,6 +23,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  // 0. Idempotency Check
+  const eventRef = adminDb.collection("processed_events").doc(event.id);
+  const eventDoc = await eventRef.get();
+
+  if (eventDoc.exists) {
+    console.log(`Duplicate event ${event.id} received, skipping.`);
+    return NextResponse.json({ received: true, duplicate: true });
+  }
+
+  // Create the event record with status "processing"
+  await eventRef.set({
+    status: "processing",
+    type: event.type,
+    receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  // Audit Log
+  await adminDb.collection("webhook_events").add({
+    eventId: event.id,
+    type: event.type,
+    status: "processing",
+    receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const { raffleSlug, quizPassId, quantity: quantityStr } = session.metadata || {};
@@ -30,39 +54,19 @@ export async function POST(request: Request) {
 
     if (!raffleSlug || !quizPassId || quantity <= 0) {
       console.error("Missing metadata in checkout session");
+      await eventRef.update({ status: "failed", error: "Missing metadata" });
       return NextResponse.json({ error: "Missing metadata" }, { status: 400 });
     }
 
     try {
-      // 0. Idempotency Check
-      const eventRef = adminDb.collection("processed_events").doc(event.id);
-      const eventDoc = await eventRef.get();
-
-      if (eventDoc.exists) {
-        console.log(`Duplicate event ${event.id} received, skipping.`);
-        return NextResponse.json({ received: true, duplicate: true });
-      }
-
-      // Create the event record with status "processing"
-      await eventRef.set({
-        status: "processing",
-        type: event.type,
-        receivedAt: admin.firestore.FieldValue.serverTimestamp(),
+      // Update event record with metadata
+      await eventRef.update({
         metadata: {
           raffleSlug,
           quizPassId,
           quantity,
           sessionId: session.id,
         }
-      });
-
-      // Audit Log
-      await adminDb.collection("webhook_events").add({
-        eventId: event.id,
-        type: event.type,
-        status: "processing",
-        receivedAt: admin.firestore.FieldValue.serverTimestamp(),
-        sessionId: session.id,
       });
 
       // Fetch raffle from Contentful to get the endAt date and maxTickets
@@ -168,9 +172,6 @@ export async function POST(request: Request) {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
 
-        // 3. TODO: Send "Sold Out / Refunded" email via Postmark
-        // await sendSoldOutRefundEmail(...)
-
         return NextResponse.json({ received: true, status: "oversold_refunded" });
       }
 
@@ -188,23 +189,68 @@ export async function POST(request: Request) {
           });
         } catch (emailErr) {
           console.error("Failed to send confirmation email, but tickets were allocated:", emailErr);
-          // Don't return 500 here, as the tickets are already allocated.
         }
       }
 
       console.log(`Successfully processed order for raffle ${raffleSlug}`);
     } catch (err: any) {
       console.error(`Webhook processing failed: ${err.message}`);
-      // Update event status to failed if we have the event ID
-      if (event.id) {
-        await adminDb.collection("processed_events").doc(event.id).set({
-          status: "failed",
-          error: err.message,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-      }
+      await eventRef.update({ status: "failed", error: err.message });
       return NextResponse.json({ error: "Processing failed" }, { status: 500 });
     }
+  } else if (event.type === "checkout.session.expired") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const { quizPassId } = session.metadata || {};
+    if (quizPassId) {
+      // Mark quiz pass as expired/unused if session was never completed
+      await adminDb.collection("quizPasses").doc(quizPassId).update({
+        status: "expired_checkout",
+        expiredAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+    await eventRef.update({ status: "completed_expired", sessionId: session.id });
+    console.log(`Checkout session ${session.id} expired.`);
+  } else if (event.type === "charge.refunded") {
+    const charge = event.data.object as Stripe.Charge;
+    const paymentIntentId = charge.payment_intent as string;
+
+    if (paymentIntentId) {
+      // Find the order associated with this payment intent
+      const ordersSnapshot = await adminDb
+        .collection("orders")
+        .where("stripePaymentIntentId", "==", paymentIntentId)
+        .limit(1)
+        .get();
+
+      if (!ordersSnapshot.empty) {
+        const orderDoc = ordersSnapshot.docs[0];
+        const orderData = orderDoc.data();
+        const raffleSlug = orderData.raffleSlug;
+        const { start, end } = orderData.ticketRange || {};
+
+        await adminDb.runTransaction(async (transaction) => {
+          // 1. Mark order as refunded
+          transaction.update(orderDoc.ref, { status: "refunded", refundedAt: admin.firestore.FieldValue.serverTimestamp() });
+
+          // 2. Void individual tickets
+          if (raffleSlug && start !== undefined && end !== undefined) {
+            for (let i = start; i <= end; i++) {
+              const ticketRef = adminDb.collection("raffles").doc(raffleSlug).collection("tickets").doc(i.toString());
+              transaction.update(ticketRef, { status: "voided", voidedAt: admin.firestore.FieldValue.serverTimestamp() });
+            }
+          }
+        });
+        console.log(`Order ${orderDoc.id} and its tickets have been voided due to refund.`);
+      }
+    }
+    await eventRef.update({ status: "completed_refunded" });
+  } else if (event.type === "payment_intent.payment_failed") {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    console.warn(`Payment failed for PaymentIntent ${paymentIntent.id}: ${paymentIntent.last_payment_error?.message}`);
+    await eventRef.update({ status: "completed_failed", error: paymentIntent.last_payment_error?.message });
+  } else {
+    // Unhandled event type
+    await eventRef.update({ status: "ignored", type: event.type });
   }
 
   return NextResponse.json({ received: true });

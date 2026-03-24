@@ -146,7 +146,7 @@ export const fetchLiveRaffles = cache(async (): Promise<RaffleSummary[]> => {
       "fields.status",
       "fields.drawType",
       "fields.isReoccurring",
-      "fields.maxTickets",
+      // "fields.maxTickets", // Temporarily commented out until migration is applied in Contentful
       "fields.endAt",
       "fields.ticketPricePence",
       "fields.heroImage",
