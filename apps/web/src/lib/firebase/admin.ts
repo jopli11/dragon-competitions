@@ -14,15 +14,18 @@ function initAdmin() {
 
   if (projectId && clientEmail && privateKey?.includes("BEGIN PRIVATE KEY")) {
     try {
+      console.log("Initializing Firebase Admin with Service Account...");
       admin.initializeApp({
         credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
       });
       return;
-    } catch {
-      // Private key failed to parse — fall through to projectId-only init
+    } catch (err: any) {
+      console.error("Firebase Service Account init failed:", err.message);
+      // Fall through
     }
   }
 
+  console.log("Initializing Firebase Admin with Project ID only (ADC)...");
   admin.initializeApp({ projectId: projectId || "coast-competitions" });
 }
 
