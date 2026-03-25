@@ -11,6 +11,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export const stripe = new Stripe(secretKey, {
-  apiVersion: "2024-12-18" as any,
+  apiVersion: "2025-01-27.ac" as any,
   typescript: true,
 });
