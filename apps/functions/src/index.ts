@@ -95,7 +95,8 @@ async function performDraw(raffleDoc: admin.firestore.QueryDocumentSnapshot) {
       const winningTicketNumber = (randomNumber % totalTickets) + 1;
 
       // 2. Find the winning ticket/order
-      const ticketQuery = await db
+      // First, try the individual tickets collection (for small orders)
+      let ticketQuery = await db
         .collection("raffles")
         .doc(raffleId)
         .collection("tickets")
@@ -103,12 +104,38 @@ async function performDraw(raffleDoc: admin.firestore.QueryDocumentSnapshot) {
         .limit(1)
         .get();
 
-      if (ticketQuery.empty) {
-        throw new Error(`Winning ticket #${winningTicketNumber} not found`);
+      let winningTicketData: any = null;
+
+      if (!ticketQuery.empty) {
+        winningTicketData = ticketQuery.docs[0].data();
+      } else {
+        // If not found, look in the orders collection (for large orders where individual docs were skipped)
+        console.log(`Ticket #${winningTicketNumber} not found in sub-collection. Searching orders...`);
+        const orderQuery = await db
+          .collection("orders")
+          .where("raffleSlug", "==", raffleId)
+          .where("ticketRange.start", "<=", winningTicketNumber)
+          .get();
+        
+        // Firestore doesn't support range checks on two different fields in a simple way here,
+        // so we filter for end range in memory (usually only 1-2 orders will match the start range)
+        const winningOrderDoc = orderQuery.docs.find(doc => {
+          const range = doc.data().ticketRange;
+          return range && range.end >= winningTicketNumber;
+        });
+
+        if (winningOrderDoc) {
+          const orderData = winningOrderDoc.data();
+          winningTicketData = {
+            email: orderData.email,
+            orderId: winningOrderDoc.id,
+          };
+        }
       }
 
-      const winningTicketDoc = ticketQuery.docs[0];
-      const winningTicketData = winningTicketDoc.data();
+      if (!winningTicketData) {
+        throw new Error(`Winning ticket #${winningTicketNumber} not found in tickets or orders`);
+      }
 
       // 3. Record the draw result
       transaction.update(raffleDoc.ref, {

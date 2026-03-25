@@ -45,21 +45,23 @@ export async function getAdminStats() {
 
     // 4. Get Winners
     const winners: any[] = [];
+    // Simplified query to avoid requiring a composite index immediately
     const winnersSnapshot = await adminDb
       .collection("raffles")
       .where("drawStatus", "==", "completed")
-      .where("winningTicketNumber", ">", 0)
       .get();
 
     winnersSnapshot.forEach(doc => {
       const data = doc.data();
-      winners.push({
-        id: doc.id,
-        name: data.winnerEmail || "Unknown",
-        prize: data.title,
-        date: data.drawnAt?.toDate?.()?.toLocaleDateString("en-GB") || "Unknown",
-        ticket: data.winningTicketNumber
-      });
+      if (data.winningTicketNumber > 0) {
+        winners.push({
+          id: doc.id,
+          name: data.winnerEmail || "Unknown",
+          prize: data.title,
+          date: data.drawnAt?.toDate?.()?.toLocaleDateString("en-GB") || "Unknown",
+          ticket: data.winningTicketNumber
+        });
+      }
     });
 
     return {
