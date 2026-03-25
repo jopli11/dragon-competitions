@@ -1,20 +1,40 @@
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import * as postmark from "postmark";
 import * as crypto from "node:crypto";
 import { createClient } from "contentful-management";
+import { defineJsonSecret, defineSecret } from "firebase-functions/params";
 
 admin.initializeApp();
 
 const db = admin.firestore();
 
+// Define Secrets using the new params API
+const runtimeConfig = defineJsonSecret("RUNTIME_CONFIG");
+const postmarkToken = defineSecret("POSTMARK_SERVER_TOKEN");
+const contentfulToken = defineSecret("CONTENTFUL_MANAGEMENT_TOKEN");
+
 /**
  * Scheduled function to run every minute and check for ended raffles
  * that need a draw.
  */
-export const scheduledDraw = functions.pubsub
+export const scheduledDraw = functions.runWith({
+  secrets: [runtimeConfig, postmarkToken, contentfulToken]
+}).pubsub
   .schedule("every 1 minutes")
-  .onRun(async (context) => {
+  .onRun(async (context: any) => {
+    // Access values via .value()
+    const config = runtimeConfig.value();
+    process.env.CONTENTFUL_SPACE_ID = config.contentful?.space_id;
+    process.env.CONTENTFUL_ENVIRONMENT = config.contentful?.environment;
+    process.env.POSTMARK_FROM_EMAIL = config.postmark?.from_email;
+    process.env.ADMIN_NOTIFICATION_EMAIL = config.admin?.notification_email;
+    
+    // Secrets are also available in process.env automatically when bound
+    // but we can also use .value() for clarity if needed.
+    process.env.POSTMARK_SERVER_TOKEN = postmarkToken.value();
+    process.env.CONTENTFUL_MANAGEMENT_TOKEN = contentfulToken.value();
+
     const now = admin.firestore.Timestamp.now();
 
     const rafflesToDraw = await db

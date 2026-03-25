@@ -34,20 +34,37 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.scheduledDraw = void 0;
-const functions = __importStar(require("firebase-functions"));
+const functions = __importStar(require("firebase-functions/v1"));
 const admin = __importStar(require("firebase-admin"));
 const postmark = __importStar(require("postmark"));
 const crypto = __importStar(require("node:crypto"));
 const contentful_management_1 = require("contentful-management");
+const params_1 = require("firebase-functions/params");
 admin.initializeApp();
 const db = admin.firestore();
+// Define Secrets using the new params API
+const runtimeConfig = (0, params_1.defineJsonSecret)("RUNTIME_CONFIG");
+const postmarkToken = (0, params_1.defineSecret)("POSTMARK_SERVER_TOKEN");
+const contentfulToken = (0, params_1.defineSecret)("CONTENTFUL_MANAGEMENT_TOKEN");
 /**
  * Scheduled function to run every minute and check for ended raffles
  * that need a draw.
  */
-exports.scheduledDraw = functions.pubsub
+exports.scheduledDraw = functions.runWith({
+    secrets: [runtimeConfig, postmarkToken, contentfulToken]
+}).pubsub
     .schedule("every 1 minutes")
     .onRun(async (context) => {
+    // Access values via .value()
+    const config = runtimeConfig.value();
+    process.env.CONTENTFUL_SPACE_ID = config.contentful?.space_id;
+    process.env.CONTENTFUL_ENVIRONMENT = config.contentful?.environment;
+    process.env.POSTMARK_FROM_EMAIL = config.postmark?.from_email;
+    process.env.ADMIN_NOTIFICATION_EMAIL = config.admin?.notification_email;
+    // Secrets are also available in process.env automatically when bound
+    // but we can also use .value() for clarity if needed.
+    process.env.POSTMARK_SERVER_TOKEN = postmarkToken.value();
+    process.env.CONTENTFUL_MANAGEMENT_TOKEN = contentfulToken.value();
     const now = admin.firestore.Timestamp.now();
     const rafflesToDraw = await db
         .collection("raffles")
