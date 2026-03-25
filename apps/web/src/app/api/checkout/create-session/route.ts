@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (quantity < 1 || quantity > 100) {
+    if (quantity < 1) {
       return NextResponse.json(
         { error: "Invalid ticket quantity" },
         { status: 400 }

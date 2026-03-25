@@ -134,8 +134,18 @@ export default function DashboardPage() {
                   {orders.map((order) => (
                     <tr key={order.id} className="hover:bg-brand-accent/5 transition-colors">
                       <td className="px-8 py-6">
-                        <div className="font-bold text-brand-midnight uppercase tracking-tight">{order.raffleSlug.replace(/-/g, ' ')}</div>
-                        <div className="text-[10px] font-mono text-brand-midnight/30">ID: {order.id.slice(0, 8)}...</div>
+                        <Link 
+                          href={`/raffles/${order.raffleSlug}`}
+                          className="group inline-flex flex-col"
+                        >
+                          <div className="font-bold text-brand-midnight uppercase tracking-tight group-hover:text-brand-primary transition-colors flex items-center gap-2">
+                            {order.raffleSlug.replace(/-/g, ' ')}
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                            </svg>
+                          </div>
+                          <div className="text-[10px] font-mono text-brand-midnight/30">ID: {order.id.slice(0, 8)}...</div>
+                        </Link>
                       </td>
                       <td className="px-8 py-6">
                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-accent text-xs font-black text-brand-midnight">

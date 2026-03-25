@@ -131,7 +131,7 @@ export function SkillQuestionCard({
   const router = useRouter();
 
   const remainingTickets = Math.max(0, maxTickets - ticketsSold);
-  const maxPurchase = Math.min(100, remainingTickets);
+  const maxPurchase = remainingTickets;
 
   useEffect(() => {
     const savedPass = sessionStorage.getItem(`quiz_pass_${slug}`);
