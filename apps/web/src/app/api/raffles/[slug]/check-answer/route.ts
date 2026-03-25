@@ -98,11 +98,11 @@ export async function POST(
       isCorrect: true,
       quizPassId: passRef.id,
     });
-  } catch (error) {
-    console.error("Error checking answer:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+    } catch (error: any) {
+      console.error("Error checking answer:", error);
+      return NextResponse.json(
+        { error: "Internal server error", message: error.message, stack: error.stack },
+        { status: 500 }
+      );
+    }
 }

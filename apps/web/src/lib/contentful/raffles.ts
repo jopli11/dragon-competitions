@@ -204,19 +204,35 @@ export async function fetchRaffleCorrectAnswer(
     return 1;
   }
 
-  const query = {
-    content_type: "raffle",
-    "fields.slug": slug,
-    limit: 1,
-    select: "fields.correctAnswerIndex",
-  };
+    const query = {
+      content_type: "raffle",
+      "fields.slug": slug,
+      limit: 1,
+    };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const res = await client.getEntries<RaffleSkeleton>(query as any);
-  const entry = res.items[0];
-  if (!entry) return null;
+    console.log(`Fetching correct answer for slug: ${slug} using Admin Client`);
+    const adminClient = getContentfulAdminClient();
+    if (!adminClient) {
+      console.error("Admin client not initialized - check CONTENTFUL_SERVER_TOKEN");
+      return null;
+    }
 
-  const fields = entry.fields as unknown as { correctAnswerIndex: number };
-  return fields.correctAnswerIndex;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res = await adminClient.getEntries<RaffleSkeleton>(query as any);
+      console.log(`Contentful response items length: ${res.items.length}`);
+      const entry = res.items[0];
+      if (!entry) {
+        console.error(`No raffle entry found for slug: ${slug}`);
+        return null;
+      }
+
+      const fields = entry.fields as unknown as { correctAnswerIndex: number };
+      console.log(`Correct answer index found: ${fields.correctAnswerIndex}`);
+      return fields.correctAnswerIndex;
+    } catch (cfError: any) {
+      console.error("Contentful API call failed:", cfError.message, cfError.stack);
+      throw cfError;
+    }
 }
 
