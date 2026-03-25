@@ -131,14 +131,20 @@ export async function POST(request: Request) {
         transaction.update(passRef, { used: true });
 
         // 4. Create individual ticket entries (optional, but good for quick lookups)
-        for (let i = ticketStart; i <= ticketEnd; i++) {
-          const ticketRef = raffleRef.collection("tickets").doc(i.toString());
-          transaction.set(ticketRef, {
-            ticketNumber: i,
-            orderId: session.id,
-            email: session.customer_details?.email,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
+        // Note: We skip this for large orders to prevent OOM errors and stay within transaction limits.
+        // The order document itself contains the range, which is sufficient.
+        if (quantity <= 100) {
+          for (let i = ticketStart; i <= ticketEnd; i++) {
+            const ticketRef = raffleRef.collection("tickets").doc(i.toString());
+            transaction.set(ticketRef, {
+              ticketNumber: i,
+              orderId: session.id,
+              email: session.customer_details?.email,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+        } else {
+          console.log(`Large order (${quantity} tickets) detected. Skipping individual ticket document creation to save memory.`);
         }
 
         return { success: true, ticketRange: { start: ticketStart, end: ticketEnd } };
@@ -233,7 +239,7 @@ export async function POST(request: Request) {
           transaction.update(orderDoc.ref, { status: "refunded", refundedAt: admin.firestore.FieldValue.serverTimestamp() });
 
           // 2. Void individual tickets
-          if (raffleSlug && start !== undefined && end !== undefined) {
+          if (raffleSlug && start !== undefined && end !== undefined && (end - start) <= 100) {
             for (let i = start; i <= end; i++) {
               const ticketRef = adminDb.collection("raffles").doc(raffleSlug).collection("tickets").doc(i.toString());
               transaction.update(ticketRef, { status: "voided", voidedAt: admin.firestore.FieldValue.serverTimestamp() });
