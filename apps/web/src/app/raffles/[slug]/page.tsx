@@ -252,6 +252,9 @@ export default async function RaffleDetailPage({
                 slug={raffle.slug}
                 question={raffle.skillQuestion}
                 options={raffle.answerOptions}
+                ticketPricePence={raffle.ticketPricePence}
+                maxTickets={maxTickets}
+                ticketsSold={stats.ticketsSold}
               />
             ) : (
               <GlassCard className="p-8 text-center border-red-500/20 bg-red-500/5">
