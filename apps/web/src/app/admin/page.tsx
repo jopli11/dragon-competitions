@@ -240,7 +240,7 @@ function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/5">
-                {stats.winners.map((winner: any) => (
+                {(stats.winners || []).map((winner: any) => (
                   <tr key={winner.id}>
                     <td className="px-8 py-4 font-bold text-brand-midnight">{winner.name}</td>
                     <td className="px-8 py-4 font-medium text-brand-midnight">{winner.prize}</td>

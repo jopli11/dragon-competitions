@@ -43,12 +43,32 @@ export async function getAdminStats() {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
+    // 4. Get Winners
+    const winners: any[] = [];
+    const winnersSnapshot = await adminDb
+      .collection("raffles")
+      .where("drawStatus", "==", "completed")
+      .where("winningTicketNumber", ">", 0)
+      .get();
+
+    winnersSnapshot.forEach(doc => {
+      const data = doc.data();
+      winners.push({
+        id: doc.id,
+        name: data.winnerEmail || "Unknown",
+        prize: data.title,
+        date: data.drawnAt?.toDate?.()?.toLocaleDateString("en-GB") || "Unknown",
+        ticket: data.winningTicketNumber
+      });
+    });
+
     return {
       activeRaffles,
       totalRevenuePence,
       pendingDraws,
       recentOrders: sortedOrders.slice(0, 10),
       raffles: raffles,
+      winners: winners,
     };
   } catch (error) {
     console.error("Error fetching admin stats:", error);
