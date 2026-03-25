@@ -6,6 +6,9 @@ import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
 import { isContentfulConfigured } from "@/lib/contentful/publicClient";
 import { BrandButton, BrandSectionHeading, GradientText } from "@/lib/styles";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function formatGBPFromPence(pence: number) {
   if (pence < 100) return `${pence}p`;
   return new Intl.NumberFormat("en-GB", {

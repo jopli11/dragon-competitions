@@ -1,4 +1,4 @@
-import { serverDb } from "@/lib/firebase/server-client";
+import { db } from "@/lib/firebase/client";
 import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore";
 
 export interface UserOrder {
@@ -12,8 +12,13 @@ export interface UserOrder {
 }
 
 export async function getUserOrders(email: string) {
+  if (!db) {
+    console.error("Firestore not initialized on client");
+    return [];
+  }
+
   try {
-    const ordersRef = collection(serverDb, "orders");
+    const ordersRef = collection(db, "orders");
     const q = query(
       ordersRef,
       where("email", "==", email),
@@ -41,8 +46,13 @@ export async function getUserOrders(email: string) {
 }
 
 export async function getUserWins(email: string) {
+  if (!db) {
+    console.error("Firestore not initialized on client");
+    return [];
+  }
+
   try {
-    const rafflesRef = collection(serverDb, "raffles");
+    const rafflesRef = collection(db, "raffles");
     const q = query(
       rafflesRef,
       where("winnerEmail", "==", email),

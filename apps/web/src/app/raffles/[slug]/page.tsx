@@ -11,6 +11,9 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import { BLOCKS, INLINES } from "@contentful/rich-text-types";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const RICH_TEXT_OPTIONS = {
   renderNode: {
     [BLOCKS.PARAGRAPH]: (node: any, children: any) => (

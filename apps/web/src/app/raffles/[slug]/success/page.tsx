@@ -99,55 +99,74 @@ export default async function SuccessPage({
     );
   }
 
+  const ticketCount = orderData.ticketRange.end - orderData.ticketRange.start + 1;
+
   return (
     <Container className="py-20 text-center">
       <AnimatedIn>
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 text-green-500">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="h-8 w-8"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4.5 12.75l6 6 9-13.5"
-            />
-          </svg>
-        </div>
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight">
-          Payment Successful!
-        </h1>
-        <div className="mt-6 p-6 bg-foreground/5 rounded-2xl max-w-sm mx-auto">
-          <p className="text-xs uppercase tracking-widest text-foreground/40 font-bold">Your Tickets</p>
-          <div className="mt-2 text-4xl font-black tracking-tighter">
-            {orderData.ticketRange.start === orderData.ticketRange.end 
-              ? `#${orderData.ticketRange.start}`
-              : `#${orderData.ticketRange.start} - #${orderData.ticketRange.end}`}
+        <div className="max-w-lg mx-auto">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-500/10 text-green-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="h-10 w-10"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4.5 12.75l6 6 9-13.5"
+              />
+            </svg>
           </div>
-          <p className="mt-4 text-sm text-foreground/60">
-            Order ID: <span className="font-mono text-xs">{session_id.slice(-12)}</span>
+
+          <h1 className="mt-8 text-4xl font-black uppercase tracking-tight text-brand-midnight">
+            You're In!
+          </h1>
+          <p className="mt-2 text-sm text-brand-midnight/50 font-medium">
+            Payment confirmed. Good luck!
           </p>
-        </div>
-        <p className="mt-6 text-sm text-foreground/70">
-          You will receive a confirmation email shortly. Good luck!
-        </p>
-        <div className="mt-10 flex flex-col items-center gap-4">
-          <Link
-            href="/raffles"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-8 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
-          >
-            Browse more raffles
-          </Link>
-          <Link
-            href="/"
-            className="text-sm font-medium text-foreground/60 hover:text-foreground"
-          >
-            Back to home
-          </Link>
+
+          <div className="mt-10 rounded-3xl border border-brand-primary/10 bg-white p-8 shadow-xl">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-midnight/40">Your Tickets</p>
+            <div className="mt-3 text-5xl font-black tracking-tighter text-brand-midnight">
+              {orderData.ticketRange.start === orderData.ticketRange.end 
+                ? `#${orderData.ticketRange.start}`
+                : `#${orderData.ticketRange.start} — #${orderData.ticketRange.end}`}
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-6">
+              <div className="text-center">
+                <p className="text-2xl font-black text-brand-secondary">{ticketCount}</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-brand-midnight/30">{ticketCount === 1 ? 'Entry' : 'Entries'}</p>
+              </div>
+              <div className="h-8 w-px bg-brand-primary/10" />
+              <div className="text-center">
+                <p className="text-[10px] font-bold text-brand-midnight/40 uppercase tracking-wider">Order</p>
+                <p className="font-mono text-xs font-bold text-brand-midnight/60">{session_id.slice(-12)}</p>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-6 text-xs text-brand-midnight/40 font-medium">
+            A confirmation email with your ticket details is on its way.
+          </p>
+
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/raffles"
+              className="inline-flex h-12 w-full sm:w-auto items-center justify-center rounded-full bg-linear-to-r from-brand-primary to-brand-secondary px-10 text-sm font-black uppercase tracking-wider text-white shadow-lg shadow-brand-primary/20 transition-all hover:scale-105"
+            >
+              Enter Another Raffle
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex h-12 w-full sm:w-auto items-center justify-center rounded-full border-2 border-brand-primary/10 bg-white px-10 text-sm font-black uppercase tracking-wider text-brand-midnight transition-all hover:border-brand-primary/30 hover:bg-brand-accent/20"
+            >
+              View My Dashboard
+            </Link>
+          </div>
         </div>
       </AnimatedIn>
     </Container>

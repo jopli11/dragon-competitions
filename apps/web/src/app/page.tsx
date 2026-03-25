@@ -9,6 +9,8 @@ import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
 import dynamic from "next/dynamic";
 
+export const revalidate = 0;
+
 const HowItWorks = dynamic(() => import("@/components/HowItWorks").then(m => m.HowItWorks));
 const WinnersSection = dynamic(() => import("@/components/WinnersSection").then(m => m.WinnersSection));
 

@@ -4,6 +4,9 @@ import Image from "next/image";
 import { getCompletedDraws } from "@/lib/firebase/raffle-stats";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function DrawResultsPage() {
   const [completedDraws, allRaffles] = await Promise.all([
     getCompletedDraws(),
