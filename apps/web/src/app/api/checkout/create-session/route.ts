@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const passData = passDoc.data();
     if (passData?.raffleSlug !== slug || passData?.used) {
       return NextResponse.json(
-        { error: "Quiz pass already used or invalid for this raffle" },
+        { error: "Quiz pass already used" },
         { status: 403 }
       );
     }

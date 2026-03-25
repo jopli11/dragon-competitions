@@ -208,7 +208,14 @@ export function SkillQuestionCard({
         window.location.href = data.url;
       }
     } catch (err: any) {
-      setError(err.message);
+      const msg = err.message.toLowerCase();
+      if (msg.includes("expired") || msg.includes("invalid") || msg.includes("used")) {
+        sessionStorage.removeItem(`quiz_pass_${slug}`);
+        setQuizPassId(null);
+        setError("Your quiz session has ended. Please answer the question again to continue.");
+      } else {
+        setError(err.message);
+      }
       setLoading(false);
     }
   }
