@@ -19,12 +19,19 @@ function AdminPage() {
 
   useEffect(() => {
     async function loadData() {
-      const { fetchAdminDashboardData } = await import("./actions");
-      const result = await fetchAdminDashboardData();
-      if (result.success) {
-        setStats(result.data);
+      try {
+        const { fetchAdminDashboardData } = await import("./actions");
+        const result = await fetchAdminDashboardData();
+        if (result && result.success) {
+          setStats(result.data);
+        } else {
+          console.error("Failed to fetch admin data:", result?.error);
+        }
+      } catch (error) {
+        console.error("Error loading admin data:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadData();
   }, []);

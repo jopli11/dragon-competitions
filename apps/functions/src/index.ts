@@ -111,17 +111,15 @@ async function performDraw(raffleDoc: admin.firestore.QueryDocumentSnapshot) {
       } else {
         // If not found, look in the orders collection (for large orders where individual docs were skipped)
         console.log(`Ticket #${winningTicketNumber} not found in sub-collection. Searching orders...`);
+        // Use a simpler query to avoid requiring a composite index
         const orderQuery = await db
           .collection("orders")
           .where("raffleSlug", "==", raffleId)
-          .where("ticketRange.start", "<=", winningTicketNumber)
           .get();
         
-        // Firestore doesn't support range checks on two different fields in a simple way here,
-        // so we filter for end range in memory (usually only 1-2 orders will match the start range)
         const winningOrderDoc = orderQuery.docs.find(doc => {
           const range = doc.data().ticketRange;
-          return range && range.end >= winningTicketNumber;
+          return range && range.start <= winningTicketNumber && range.end >= winningTicketNumber;
         });
 
         if (winningOrderDoc) {
