@@ -3,9 +3,17 @@ import { adminDb } from "@/lib/firebase/admin";
 export async function getAdminStats() {
   try {
     // 1. Get Active Raffles count from Firestore
-    // Note: We're assuming Firestore has raffle docs with status mirrored or we just count all docs in 'raffles'
     const rafflesSnapshot = await adminDb.collection("raffles").get();
     const activeRaffles = rafflesSnapshot.size;
+    const raffles: any[] = [];
+    rafflesSnapshot.forEach(doc => {
+      const data = doc.data();
+      raffles.push({
+        id: doc.id,
+        ...data,
+        endAt: data.endAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      });
+    });
 
     // 2. Get Total Revenue from Orders
     const ordersSnapshot = await adminDb.collection("orders").get();
@@ -14,6 +22,7 @@ export async function getAdminStats() {
 
     ordersSnapshot.forEach((doc) => {
       const data = doc.data();
+      // amountTotal is already the full order total in pence
       totalRevenuePence += data.amountTotal || 0;
       orders.push({
         id: doc.id,
@@ -32,13 +41,14 @@ export async function getAdminStats() {
     // Sort orders by date descending
     const sortedOrders = orders.sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    ).slice(0, 10);
+    );
 
     return {
       activeRaffles,
       totalRevenuePence,
       pendingDraws,
-      recentOrders: sortedOrders,
+      recentOrders: sortedOrders.slice(0, 10),
+      raffles: raffles,
     };
   } catch (error) {
     console.error("Error fetching admin stats:", error);

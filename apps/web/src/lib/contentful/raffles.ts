@@ -138,6 +138,7 @@ export const fetchLiveRaffles = cache(async (): Promise<RaffleSummary[]> => {
   const query = {
     content_type: "raffle",
     "fields.status": "live",
+    "fields.endAt[gte]": new Date().toISOString(),
     order: ["fields.endAt"],
     select: [
       "sys.id",

@@ -3,27 +3,7 @@
 import { Container } from "@/components/Container";
 import { withAdminAuth } from "@/components/withAdminAuth";
 import { BrandSectionHeading, GradientText, BrandButton } from "@/lib/styles";
-import { useState } from "react";
-
-// Temporary mock data for when the Admin SDK is unavailable
-const MOCK_STATS = {
-  activeRaffles: 3,
-  totalRevenuePence: 5400,
-  pendingDraws: 1,
-  recentOrders: [
-    { id: "cs_test_a1b2c3d4", email: "joel@qzee.app", raffleSlug: "win-20000-cash", quantity: 5, amountTotal: 90, createdAt: new Date().toISOString() },
-    { id: "cs_test_e5f6g7h8", email: "customer@example.com", raffleSlug: "tesla-model-s", quantity: 1, amountTotal: 18, createdAt: new Date(Date.now() - 3600000).toISOString() }
-  ],
-  raffles: [
-    { id: "1", title: "£20,000 Tax Free Cash", slug: "win-20000-cash", ticketsSold: 450, totalTickets: 5000, endAt: "2026-02-20T18:00:00Z", status: "live" },
-    { id: "2", title: "Tesla Model S Plaid", slug: "tesla-model-s", ticketsSold: 120, totalTickets: 10000, endAt: "2026-02-25T20:00:00Z", status: "live" },
-    { id: "3", title: "PS5 Ultimate Bundle", slug: "ps5-bundle", ticketsSold: 89, totalTickets: 1000, endAt: "2026-02-15T12:00:00Z", status: "live" }
-  ],
-  winners: [
-    { id: "w1", name: "Michael Walker", prize: "Tesla Model S Plaid", date: "2026-01-21", ticket: "282262" },
-    { id: "w2", name: "Louise St Louie", prize: "BMW M5 Competition", date: "2026-01-20", ticket: "282262" }
-  ]
-};
+import { useState, useEffect } from "react";
 
 function formatGBPFromPence(pence: number) {
   return new Intl.NumberFormat("en-GB", {
@@ -34,7 +14,37 @@ function formatGBPFromPence(pence: number) {
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "raffles" | "orders" | "winners" | "settings">("overview");
-  const stats = MOCK_STATS;
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      const { fetchAdminDashboardData } = await import("./actions");
+      const result = await fetchAdminDashboardData();
+      if (result.success) {
+        setStats(result.data);
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Container className="py-16 min-h-[60vh]">
+        <div className="animate-pulse space-y-8">
+          <div className="h-12 w-64 bg-brand-accent rounded-xl" />
+          <div className="grid gap-6 sm:grid-cols-3">
+            <div className="h-32 bg-brand-accent rounded-3xl" />
+            <div className="h-32 bg-brand-accent rounded-3xl" />
+            <div className="h-32 bg-brand-accent rounded-3xl" />
+          </div>
+        </div>
+      </Container>
+    );
+  }
+
+  if (!stats) return null;
 
   const tabs = [
     { id: "overview", label: "Overview" },
