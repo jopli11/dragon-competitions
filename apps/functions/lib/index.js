@@ -160,7 +160,9 @@ async function performDraw(raffleDoc) {
                 },
             });
             // 4. Send winner email
-            await sendWinnerEmail(winningTicketData.email, raffleData.title, winningTicketNumber, totalTickets);
+            // Use the title from raffleData to ensure it's not undefined
+            const raffleTitle = raffleData.title || raffleId;
+            await sendWinnerEmail(winningTicketData.email, raffleTitle, winningTicketNumber, totalTickets);
         });
         // 5. Handle Reoccurring Raffle
         if (raffleData.isReoccurring) {
