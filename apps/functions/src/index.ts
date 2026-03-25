@@ -30,16 +30,14 @@ export const scheduledDraw = functions.runWith({
     process.env.POSTMARK_FROM_EMAIL = config.postmark?.from_email;
     process.env.ADMIN_NOTIFICATION_EMAIL = config.admin?.notification_email;
     
-    // Secrets are also available in process.env automatically when bound
-    // but we can also use .value() for clarity if needed.
     process.env.POSTMARK_SERVER_TOKEN = postmarkToken.value();
     process.env.CONTENTFUL_MANAGEMENT_TOKEN = contentfulToken.value();
 
     const now = admin.firestore.Timestamp.now();
 
+    // Fetch all raffles that are pending a draw
     const rafflesToDraw = await db
       .collection("raffles")
-      .where("endAt", "<=", now)
       .where("drawStatus", "==", "pending")
       .get();
 
@@ -50,12 +48,21 @@ export const scheduledDraw = functions.runWith({
     for (const raffleDoc of rafflesToDraw.docs) {
       const data = raffleDoc.data();
       
-      // Skip if drawType is 'live' - these are handled manually by admins
+      // 1. Check if it should be drawn
+      const isExpired = data.endAt && data.endAt.toDate() <= now.toDate();
+      const isSoldOut = data.ticketsSold >= (data.maxTickets || 0) && (data.maxTickets || 0) > 0;
+
+      if (!isExpired && !isSoldOut) {
+        continue; // Not ready for draw yet
+      }
+
+      // 2. Skip if drawType is 'live' - these are handled manually by admins
       if (data.drawType === "live") {
         console.log(`Skipping automated draw for ${raffleDoc.id} (drawType is 'live')`);
         continue;
       }
 
+      console.log(`Triggering draw for ${raffleDoc.id} (Reason: ${isSoldOut ? 'Sold Out' : 'Expired'})`);
       await performDraw(raffleDoc);
     }
 
