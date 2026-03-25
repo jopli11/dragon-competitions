@@ -111,7 +111,7 @@ function AdminPage() {
             <div className="rounded-[2.5rem] border border-brand-primary/5 bg-white p-8 shadow-sm">
               <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-6">Live Raffles</h3>
               <div className="space-y-4">
-                {stats.raffles.slice(0, 3).map(raffle => (
+                {stats.raffles.slice(0, 3).map((raffle: any) => (
                   <div key={raffle.id} className="flex items-center justify-between p-4 rounded-2xl bg-brand-accent/20">
                     <div>
                       <div className="font-bold text-sm text-brand-midnight">{raffle.title}</div>
@@ -131,7 +131,7 @@ function AdminPage() {
             <div className="rounded-[2.5rem] border border-brand-primary/5 bg-white p-8 shadow-sm">
               <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-6">Recent Orders</h3>
               <div className="space-y-4">
-                {stats.recentOrders.map(order => (
+                {stats.recentOrders.map((order: any) => (
                   <div key={order.id} className="flex items-center justify-between p-4 rounded-2xl border border-brand-primary/5">
                     <div>
                       <div className="font-bold text-sm text-brand-midnight">{order.email}</div>
@@ -160,7 +160,7 @@ function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/5">
-                {stats.raffles.map((raffle) => (
+                {stats.raffles.map((raffle: any) => (
                   <tr key={raffle.id}>
                     <td className="px-8 py-4">
                       <div className="font-bold text-brand-midnight">{raffle.title}</div>
@@ -212,7 +212,7 @@ function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/5">
-                {stats.recentOrders.map((order) => (
+                {stats.recentOrders.map((order: any) => (
                   <tr key={order.id}>
                     <td className="px-8 py-4 font-mono text-[10px] text-brand-midnight/60">{order.id}</td>
                     <td className="px-8 py-4 font-medium text-brand-midnight">{order.email}</td>
@@ -240,7 +240,7 @@ function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/5">
-                {stats.winners.map((winner) => (
+                {stats.winners.map((winner: any) => (
                   <tr key={winner.id}>
                     <td className="px-8 py-4 font-bold text-brand-midnight">{winner.name}</td>
                     <td className="px-8 py-4 font-medium text-brand-midnight">{winner.prize}</td>
