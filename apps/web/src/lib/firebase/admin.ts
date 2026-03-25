@@ -10,13 +10,24 @@ function initAdmin() {
   const privateKey = rawKey
     ?.replace(/\\n/g, "\n")
     .replace(/^"(.*)"$/, "$1")
-    .replace(/^'(.*)'$/, "$1");
+    .replace(/^'(.*)'$/, "$1")
+    .trim();
 
   if (projectId && clientEmail && privateKey?.includes("BEGIN PRIVATE KEY")) {
     try {
       console.log("Initializing Firebase Admin with Service Account...");
+      
+      // Ensure the key is properly formatted for the SDK
+      const formattedKey = privateKey.includes("\n") 
+        ? privateKey 
+        : privateKey.replace(/ /g, "\n"); // Fallback if newlines were lost
+
       admin.initializeApp({
-        credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
+        credential: admin.credential.cert({ 
+          projectId, 
+          clientEmail, 
+          privateKey: formattedKey 
+        }),
       });
       return;
     } catch (err: any) {
