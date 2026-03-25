@@ -165,6 +165,7 @@ export function SiteHeader() {
     { href: "/results", label: "Draw Results" },
     { href: "/about", label: "About Us" },
     { href: "/winners", label: "Winners" },
+    ...(user ? [{ href: "/dashboard", label: "My Dashboard" }] : []),
     ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
   ];
 

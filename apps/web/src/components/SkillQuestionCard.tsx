@@ -177,6 +177,13 @@ export function SkillQuestionCard({
   async function handleCheckout() {
     if (!quizPassId || loading) return;
 
+    // Check if user is logged in
+    const { auth: firebaseAuth } = await import("@/lib/firebase/client");
+    if (!firebaseAuth?.currentUser) {
+      router.push(`/login?redirect=/raffles/${slug}`);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
