@@ -73,6 +73,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing metadata" }, { status: 400 });
     }
 
+    if (!session.customer_details?.email) {
+      console.error("Missing customer email in checkout session");
+      await eventRef.update({ status: "failed", error: "Missing customer email" });
+      return NextResponse.json({ error: "Missing customer email" }, { status: 400 });
+    }
+
     try {
       // Update event record with metadata
       await eventRef.update({
@@ -122,10 +128,11 @@ export async function POST(request: Request) {
         const updateData: any = {
           nextTicketNumber: ticketEnd + 1,
           ticketsSold: admin.firestore.FieldValue.increment(quantity),
-          drawStatus: "pending", // Ensure it's pending so the draw function finds it
+          drawStatus: "pending",
           drawType: contentfulRaffle?.drawType || "auto",
           isReoccurring: !!contentfulRaffle?.isReoccurring,
-          maxTickets: maxTickets, // Mirror maxTickets as well
+          maxTickets: maxTickets,
+          title: contentfulRaffle?.title || raffleSlug,
         };
 
         // Mirror the endAt date if we have it and it's not already set

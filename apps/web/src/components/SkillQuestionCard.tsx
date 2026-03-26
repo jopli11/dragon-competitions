@@ -177,9 +177,9 @@ export function SkillQuestionCard({
   async function handleCheckout() {
     if (!quizPassId || loading) return;
 
-    // Check if user is logged in
     const { auth: firebaseAuth } = await import("@/lib/firebase/client");
-    if (!firebaseAuth?.currentUser) {
+    const user = firebaseAuth?.currentUser;
+    if (!user) {
       router.push(`/login?redirect=/raffles/${slug}`);
       return;
     }
@@ -188,13 +188,6 @@ export function SkillQuestionCard({
     setError(null);
 
     try {
-      const { auth: firebaseAuth } = await import("@/lib/firebase/client");
-      const user = firebaseAuth?.currentUser;
-      if (!user) {
-        router.push(`/login?redirect=/raffles/${slug}`);
-        return;
-      }
-
       const idToken = await user.getIdToken();
 
       const res = await fetch("/api/checkout/create-session", {
@@ -240,7 +233,21 @@ export function SkillQuestionCard({
   }
 
   const totalPricePence = quantity * ticketPricePence;
-  const sliderPercentage = ((quantity - 1) / (maxPurchase - 1)) * 100;
+  const sliderPercentage = maxPurchase <= 1 ? 100 : ((quantity - 1) / (maxPurchase - 1)) * 100;
+
+  if (quizPassId && remainingTickets === 0) {
+    return (
+      <section className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Sold Out</h2>
+        <p className="mt-2 text-sm text-brand-midnight/50">All tickets for this raffle have been sold. Check back for future raffles!</p>
+      </section>
+    );
+  }
 
   if (quizPassId) {
     return (
