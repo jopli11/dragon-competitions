@@ -1,7 +1,7 @@
 import { cache } from "react";
 import type { Entry, EntrySkeletonType } from "contentful";
 import { getContentfulPublicClient } from "@/lib/contentful/publicClient";
-import { getContentfulAdminClient } from "@/lib/contentful/adminClient";
+import { adminGetEntries } from "@/lib/contentful/adminClient";
 
 type RaffleStatus = "draft" | "live" | "awaitingDraw" | "ended";
 type DrawType = "auto" | "live";
@@ -253,42 +253,29 @@ export const fetchEndedRaffles = cache(async (): Promise<EndedRaffleSummary[]> =
 export async function fetchRaffleCorrectAnswer(
   slug: string,
 ): Promise<number | null> {
-  const client = getContentfulAdminClient();
-  if (!client) {
-    console.error("Admin client not initialized - check CONTENTFUL_SERVER_TOKEN");
-    return null;
-  }
-
-  const query = {
+  try {
+    const result = await adminGetEntries({
       content_type: "raffle",
       "fields.slug": slug,
       limit: 1,
-    };
+    });
 
-    console.log(`Fetching correct answer for slug: ${slug} using Admin Client`);
-    const adminClient = getContentfulAdminClient();
-    if (!adminClient) {
-      console.error("Admin client not initialized - check CONTENTFUL_SERVER_TOKEN");
+    if (!result || result.items.length === 0) {
+      console.error(`No raffle entry found for slug: ${slug}`);
       return null;
     }
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const res = await adminClient.getEntries<RaffleSkeleton>(query as any);
-      const entry = res.items[0];
-      if (!entry) {
-        console.error(`No raffle entry found for slug: ${slug}`);
-        return null;
-      }
+    const fields = result.items[0].fields as Record<string, any>;
+    const correctAnswerIndex = fields.correctAnswerIndex;
 
-      const fields = entry.fields as unknown as { correctAnswerIndex: number };
-      if (process.env.NODE_ENV !== "production") {
-        console.log(`Correct answer index found: ${fields.correctAnswerIndex}`);
-      }
-      return fields.correctAnswerIndex;
-    } catch (cfError: any) {
-      console.error("Contentful API call failed:", cfError.message, cfError.stack);
-      throw cfError;
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Correct answer index found: ${correctAnswerIndex}`);
     }
+
+    return typeof correctAnswerIndex === "number" ? correctAnswerIndex : null;
+  } catch (cfError: any) {
+    console.error("Contentful API call failed:", cfError.message);
+    throw cfError;
+  }
 }
 
