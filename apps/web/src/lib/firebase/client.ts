@@ -24,21 +24,25 @@ let db: Firestore = null as any;
 // @ts-ignore
 let auth: Auth = null as any;
 
-if (typeof window !== "undefined") {
-  try {
-    if (!getApps().length) {
-      console.log("Initializing Firebase with config:", {
-        projectId: firebaseConfig.projectId,
-        authDomain: firebaseConfig.authDomain
-      });
-      app = initializeApp(firebaseConfig);
-    } else {
-      app = getApp();
-    }
-    db = getFirestore(app);
-    auth = getAuth(app);
-    console.log("Firebase Auth initialized successfully");
-  } catch (error) {
+  if (typeof window !== "undefined") {
+    try {
+      if (!getApps().length) {
+        if (process.env.NODE_ENV !== "production") {
+          console.log("Initializing Firebase with config:", {
+            projectId: firebaseConfig.projectId,
+            authDomain: firebaseConfig.authDomain
+          });
+        }
+        app = initializeApp(firebaseConfig);
+      } else {
+        app = getApp();
+      }
+      db = getFirestore(app);
+      auth = getAuth(app);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Firebase Auth initialized successfully");
+      }
+    } catch (error) {
     console.error("Firebase initialization error:", error);
   }
 }

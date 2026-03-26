@@ -188,9 +188,21 @@ export function SkillQuestionCard({
     setError(null);
 
     try {
+      const { auth: firebaseAuth } = await import("@/lib/firebase/client");
+      const user = firebaseAuth?.currentUser;
+      if (!user) {
+        router.push(`/login?redirect=/raffles/${slug}`);
+        return;
+      }
+
+      const idToken = await user.getIdToken();
+
       const res = await fetch("/api/checkout/create-session", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
         body: JSON.stringify({
           slug,
           quantity,

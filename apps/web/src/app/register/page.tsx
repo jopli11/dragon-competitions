@@ -16,7 +16,9 @@ function RegisterContent() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/";
+  const rawRedirect = searchParams.get("redirect") || "/";
+  // Security: Ensure redirect is a relative path starting with / and not //
+  const redirect = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/";
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();

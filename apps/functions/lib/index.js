@@ -108,61 +108,83 @@ async function performDraw(raffleDoc) {
     try {
         await db.runTransaction(async (transaction) => {
             // 1. Select a winner using cryptographically secure randomness
-            const randomBytes = crypto.randomBytes(4);
-            const randomNumber = randomBytes.readUInt32BE(0);
-            const winningTicketNumber = (randomNumber % totalTickets) + 1;
-            // 2. Find the winning ticket/order
-            // First, try the individual tickets collection (for small orders)
-            let ticketQuery = await db
-                .collection("raffles")
-                .doc(raffleId)
-                .collection("tickets")
-                .where("ticketNumber", "==", winningTicketNumber)
-                .limit(1)
-                .get();
+            let winningTicketNumber;
             let winningTicketData = null;
-            if (!ticketQuery.empty) {
-                winningTicketData = ticketQuery.docs[0].data();
-            }
-            else {
-                // If not found, look in the orders collection (for large orders where individual docs were skipped)
-                console.log(`Ticket #${winningTicketNumber} not found in sub-collection. Searching orders...`);
-                // Use a simpler query to avoid requiring a composite index
-                const orderQuery = await db
-                    .collection("orders")
-                    .where("raffleSlug", "==", raffleId)
-                    .get();
-                const winningOrderDoc = orderQuery.docs.find(doc => {
-                    const range = doc.data().ticketRange;
-                    return range && range.start <= winningTicketNumber && range.end >= winningTicketNumber;
-                });
-                if (winningOrderDoc) {
-                    const orderData = winningOrderDoc.data();
+            let attempts = 0;
+            const maxAttempts = 10;
+            while (attempts < maxAttempts) {
+                attempts++;
+                const randomBytes = crypto.randomBytes(4);
+                const randomNumber = randomBytes.readUInt32BE(0);
+                winningTicketNumber = (randomNumber % totalTickets) + 1;
+                // 2. Find the winning ticket/order
+                // First, try the individual tickets collection (for small orders)
+                const ticketRef = db
+                    .collection("raffles")
+                    .doc(raffleId)
+                    .collection("tickets")
+                    .doc(winningTicketNumber.toString());
+                const ticketDoc = await transaction.get(ticketRef);
+                if (ticketDoc.exists) {
+                    const data = ticketDoc.data();
+                    if (data?.status === "voided") {
+                        console.log(`Ticket #${winningTicketNumber} is voided, re-drawing...`);
+                        continue;
+                    }
                     winningTicketData = {
-                        email: orderData.email,
-                        orderId: winningOrderDoc.id,
+                        email: data?.email,
+                        orderId: data?.orderId,
                     };
                 }
+                else {
+                    // If not found in tickets, look in the orders collection (for large orders)
+                    // Note: We use a plain get here because we can't easily query inside a transaction for multiple docs
+                    // but we will verify the order status once found.
+                    const orderQuery = await db
+                        .collection("orders")
+                        .where("raffleSlug", "==", raffleId)
+                        .get();
+                    const winningOrderDoc = orderQuery.docs.find(doc => {
+                        const range = doc.data().ticketRange;
+                        return range && range.start <= winningTicketNumber && range.end >= winningTicketNumber;
+                    });
+                    if (winningOrderDoc) {
+                        const orderData = winningOrderDoc.data();
+                        if (orderData.status === "refunded" || orderData.status === "refunded_oversold" || orderData.status === "refunded_pass_reuse") {
+                            console.log(`Order ${winningOrderDoc.id} for ticket #${winningTicketNumber} is refunded, re-drawing...`);
+                            continue;
+                        }
+                        winningTicketData = {
+                            email: orderData.email,
+                            orderId: winningOrderDoc.id,
+                        };
+                    }
+                }
+                if (winningTicketData) {
+                    // 3. Record the draw result
+                    transaction.update(raffleDoc.ref, {
+                        drawStatus: "completed",
+                        winningTicketNumber,
+                        winnerEmail: winningTicketData.email,
+                        winnerOrderId: winningTicketData.orderId,
+                        drawnAt: admin.firestore.FieldValue.serverTimestamp(),
+                        drawAudit: {
+                            seed: randomBytes.toString("hex"),
+                            totalTickets,
+                            attempts,
+                        },
+                    });
+                    // 4. Send winner email
+                    const raffleTitle = raffleData.title || raffleId;
+                    // We'll move the email send outside the transaction to avoid holding it open
+                    return { email: winningTicketData.email, title: raffleTitle, ticket: winningTicketNumber };
+                }
             }
-            if (!winningTicketData) {
-                throw new Error(`Winning ticket #${winningTicketNumber} not found in tickets or orders`);
+            throw new Error(`Failed to find a valid winner after ${maxAttempts} attempts`);
+        }).then(async (result) => {
+            if (result && result.email) {
+                await sendWinnerEmail(result.email, result.title, result.ticket, totalTickets);
             }
-            // 3. Record the draw result
-            transaction.update(raffleDoc.ref, {
-                drawStatus: "completed",
-                winningTicketNumber,
-                winnerEmail: winningTicketData.email,
-                winnerOrderId: winningTicketData.orderId,
-                drawnAt: admin.firestore.FieldValue.serverTimestamp(),
-                drawAudit: {
-                    seed: randomBytes.toString("hex"),
-                    totalTickets,
-                },
-            });
-            // 4. Send winner email
-            // Use the title from raffleData to ensure it's not undefined
-            const raffleTitle = raffleData.title || raffleId;
-            await sendWinnerEmail(winningTicketData.email, raffleTitle, winningTicketNumber, totalTickets);
         });
         // 5. Handle Reoccurring Raffle
         if (raffleData.isReoccurring) {

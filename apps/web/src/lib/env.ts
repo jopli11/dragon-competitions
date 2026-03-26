@@ -8,7 +8,8 @@ export function getRequiredEnv(key: string) {
   if (!value) {
     // During build time, we might not have all env vars.
     // We return a placeholder to avoid crashing the build if we're in a build-like environment.
-    if (process.env.NODE_ENV === "production" || process.env.CI) {
+    // Next.js sets NEXT_PHASE during build.
+    if (process.env.NEXT_PHASE === "phase-production-build" || process.env.CI) {
       return `PLACEHOLDER_${key}`;
     }
     throw new Error(`Missing required environment variable: ${key}`);

@@ -28,11 +28,26 @@ export async function POST(request: Request) {
   const eventDoc = await eventRef.get();
 
   if (eventDoc.exists) {
-    console.log(`Duplicate event ${event.id} received, skipping.`);
-    return NextResponse.json({ received: true, duplicate: true });
+    const data = eventDoc.data();
+    // Only skip if status is a terminal state (completed, failed, ignored, etc.)
+    // If it's still "processing", check how long it's been.
+    if (data?.status !== "processing") {
+      console.log(`Duplicate event ${event.id} with terminal status ${data?.status}, skipping.`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    // If status is "processing", allow retry if it's been more than 5 minutes
+    const receivedAt = data.receivedAt?.toMillis() || 0;
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+    if (receivedAt > fiveMinutesAgo) {
+      console.log(`Event ${event.id} is still being processed (received < 5 mins ago), skipping.`);
+      return NextResponse.json({ received: true, processing: true });
+    }
+    
+    console.log(`Event ${event.id} was stuck in "processing" for > 5 mins, allowing retry.`);
   }
 
-  // Create the event record with status "processing"
+  // Create or update the event record with status "processing"
   await eventRef.set({
     status: "processing",
     type: event.type,
@@ -76,7 +91,16 @@ export async function POST(request: Request) {
       // Use a Firestore transaction to allocate ticket numbers and create the order
       const result = await adminDb.runTransaction(async (transaction) => {
         const raffleRef = adminDb.collection("raffles").doc(raffleSlug);
-        const raffleDoc = await transaction.get(raffleRef);
+        const passRef = adminDb.collection("quizPasses").doc(quizPassId);
+        
+        const [raffleDoc, passDoc] = await Promise.all([
+          transaction.get(raffleRef),
+          transaction.get(passRef)
+        ]);
+
+        if (!passDoc.exists || passDoc.data()?.used) {
+          return { error: "pass_already_used" };
+        }
 
         let ticketsSold = 0;
         let nextTicketNumber = 1;
@@ -127,7 +151,6 @@ export async function POST(request: Request) {
         });
 
         // 3. Mark quiz pass as used
-        const passRef = adminDb.collection("quizPasses").doc(quizPassId);
         transaction.update(passRef, { used: true });
 
         // 4. Create individual ticket entries (optional, but good for quick lookups)
@@ -151,8 +174,8 @@ export async function POST(request: Request) {
       });
 
       // Handle Oversold Case (Layer 3: Auto-Refund)
-      if (result.error === "oversold") {
-        console.warn(`Raffle ${raffleSlug} oversold! Refunding session ${session.id}.`);
+      if (result.error === "oversold" || result.error === "pass_already_used") {
+        console.warn(`Raffle ${raffleSlug} checkout failed! Reason: ${result.error}. Refunding session ${session.id}.`);
         
         // 1. Trigger Stripe Refund
         if (session.payment_intent) {
@@ -160,7 +183,7 @@ export async function POST(request: Request) {
             payment_intent: session.payment_intent as string,
             reason: "requested_by_customer", // Best fit for automated out-of-stock
             metadata: {
-              reason: "oversold",
+              reason: result.error,
               raffleSlug,
               quantity: quantity.toString(),
             }
@@ -168,17 +191,17 @@ export async function POST(request: Request) {
         }
 
         // 2. Update status in Firestore
-        await eventRef.update({ status: "oversold_refunded" });
+        await eventRef.update({ status: result.error === "oversold" ? "oversold_refunded" : "pass_reuse_refunded" });
         await adminDb.collection("orders").doc(session.id).set({
           raffleSlug,
           email: session.customer_details?.email,
           quantity,
           amountTotal: session.amount_total,
-          status: "refunded_oversold",
+          status: result.error === "oversold" ? "refunded_oversold" : "refunded_pass_reuse",
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         });
 
-        return NextResponse.json({ received: true, status: "oversold_refunded" });
+        return NextResponse.json({ received: true, status: result.error === "oversold" ? "oversold_refunded" : "pass_reuse_refunded" });
       }
 
       // Update event status to completed

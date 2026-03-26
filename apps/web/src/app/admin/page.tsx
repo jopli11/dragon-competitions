@@ -4,6 +4,7 @@ import { Container } from "@/components/Container";
 import { withAdminAuth } from "@/components/withAdminAuth";
 import { BrandSectionHeading, GradientText, BrandButton } from "@/lib/styles";
 import { useState, useEffect } from "react";
+import { auth } from "@/lib/firebase/client";
 
 function formatGBPFromPence(pence: number) {
   return new Intl.NumberFormat("en-GB", {
@@ -20,8 +21,16 @@ function AdminPage() {
   useEffect(() => {
     async function loadData() {
       try {
+        const user = auth?.currentUser;
+        if (!user) {
+          console.error("No authenticated user found");
+          setLoading(false);
+          return;
+        }
+
+        const idToken = await user.getIdToken();
         const { fetchAdminDashboardData } = await import("./actions");
-        const result = await fetchAdminDashboardData();
+        const result = await fetchAdminDashboardData(idToken);
         if (result && result.success) {
           setStats(result.data);
         } else {

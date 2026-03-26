@@ -201,11 +201,11 @@ export async function fetchRaffleCorrectAnswer(
 ): Promise<number | null> {
   const client = getContentfulAdminClient();
   if (!client) {
-    // Return mock correct answer (index 1 for Paris/Tesla/Sony)
-    return 1;
+    console.error("Admin client not initialized - check CONTENTFUL_SERVER_TOKEN");
+    return null;
   }
 
-    const query = {
+  const query = {
       content_type: "raffle",
       "fields.slug": slug,
       limit: 1,
@@ -221,7 +221,6 @@ export async function fetchRaffleCorrectAnswer(
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = await adminClient.getEntries<RaffleSkeleton>(query as any);
-      console.log(`Contentful response items length: ${res.items.length}`);
       const entry = res.items[0];
       if (!entry) {
         console.error(`No raffle entry found for slug: ${slug}`);
@@ -229,7 +228,9 @@ export async function fetchRaffleCorrectAnswer(
       }
 
       const fields = entry.fields as unknown as { correctAnswerIndex: number };
-      console.log(`Correct answer index found: ${fields.correctAnswerIndex}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`Correct answer index found: ${fields.correctAnswerIndex}`);
+      }
       return fields.correctAnswerIndex;
     } catch (cfError: any) {
       console.error("Contentful API call failed:", cfError.message, cfError.stack);

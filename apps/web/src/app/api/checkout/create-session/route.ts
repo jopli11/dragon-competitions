@@ -1,11 +1,30 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe/client";
 import { fetchRaffleBySlug } from "@/lib/contentful/raffles";
-import { adminDb } from "@/lib/firebase/admin";
+import { adminDb, adminAuth } from "@/lib/firebase/admin";
 import { getRequiredEnv } from "@/lib/env";
 
 export async function POST(request: Request) {
   try {
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const idToken = authHeader.split("Bearer ")[1];
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const userEmail = decodedToken.email;
+
+    if (!userEmail) {
+      return NextResponse.json(
+        { error: "Invalid token: missing email" },
+        { status: 401 }
+      );
+    }
+
     const { slug, quantity, quizPassId } = await request.json();
 
     if (!slug || !quantity || !quizPassId) {
@@ -15,7 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (quantity < 1) {
+    if (!Number.isInteger(quantity) || quantity < 1) {
       return NextResponse.json(
         { error: "Invalid ticket quantity" },
         { status: 400 }
@@ -98,7 +117,7 @@ export async function POST(request: Request) {
         quantity: quantity.toString(),
       },
     }, {
-      idempotencyKey: `checkout_${quizPassId}_${quantity}`,
+      idempotencyKey: `checkout_${quizPassId}`,
     });
 
     return NextResponse.json({ url: session.url });

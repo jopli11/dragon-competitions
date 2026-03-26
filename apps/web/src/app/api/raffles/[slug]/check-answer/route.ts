@@ -20,7 +20,7 @@ export async function POST(
 
     // 0. Rate Limiting (Simple Firestore-based)
     // In a real production app, use Redis or a specialized rate limiter
-    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
     const rateLimitRef = adminDb.collection("rateLimits").doc(`quiz_${slug}_${ip.replace(/\./g, "_")}`);
     const rateLimitDoc = await rateLimitRef.get();
     const now = Date.now();
@@ -76,6 +76,10 @@ export async function POST(
       );
     }
 
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Correct answer check for ${slug}: ${answerIndex} vs ${correctAnswerIndex}`);
+    }
+
     const isCorrect = answerIndex === correctAnswerIndex;
 
     if (!isCorrect) {
@@ -101,7 +105,7 @@ export async function POST(
     } catch (error: any) {
       console.error("Error checking answer:", error);
       return NextResponse.json(
-        { error: "Internal server error", message: error.message, stack: error.stack },
+        { error: "Internal server error" },
         { status: 500 }
       );
     }

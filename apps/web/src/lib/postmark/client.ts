@@ -4,6 +4,15 @@ import { getRequiredEnv, getOptionalEnv } from "@/lib/env";
 const serverToken = getOptionalEnv("POSTMARK_SERVER_TOKEN");
 export const postmarkClient = serverToken ? new postmark.ServerClient(serverToken) : null;
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export const FROM_EMAIL = getOptionalEnv("POSTMARK_FROM_EMAIL") || "noreply@coastcompetitions.co.uk";
 export const ADMIN_EMAIL = getOptionalEnv("ADMIN_NOTIFICATION_EMAIL") || "admin@coastcompetitions.co.uk";
 
@@ -38,9 +47,9 @@ export async function sendPurchaseConfirmation({
       HtmlBody: `
         <h1>Entry Confirmation</h1>
         <p>Thank you for your purchase!</p>
-        <p>You have been entered into the <strong>${raffleTitle}</strong> raffle.</p>
+        <p>You have been entered into the <strong>${escapeHtml(raffleTitle)}</strong> raffle.</p>
         <p><strong>Your ticket numbers:</strong> ${rangeStr}</p>
-        <p>Order ID: ${orderId}</p>
+        <p>Order ID: ${escapeHtml(orderId)}</p>
         <p>Good luck!</p>
       `,
     });
@@ -53,10 +62,10 @@ export async function sendPurchaseConfirmation({
       TextBody: `New order received for "${raffleTitle}". Customer: ${to}. Tickets: ${rangeStr}. Order ID: ${orderId}`,
       HtmlBody: `
         <h1>New Order Received</h1>
-        <p>A new purchase has been made for <strong>${raffleTitle}</strong>.</p>
-        <p><strong>Customer:</strong> ${to}</p>
+        <p>A new purchase has been made for <strong>${escapeHtml(raffleTitle)}</strong>.</p>
+        <p><strong>Customer:</strong> ${escapeHtml(to)}</p>
         <p><strong>Tickets:</strong> ${rangeStr}</p>
-        <p><strong>Order ID:</strong> ${orderId}</p>
+        <p><strong>Order ID:</strong> ${escapeHtml(orderId)}</p>
       `,
     });
   } catch (error) {
@@ -85,8 +94,8 @@ export async function sendAdminDrawNotification({
       TextBody: `The draw for "${raffleTitle}" is complete. Winner: ${winnerEmail}. Winning Ticket: #${winningTicket}. Total entries: ${totalTickets}.`,
       HtmlBody: `
         <h1>Draw Completed</h1>
-        <p>The automated draw for <strong>${raffleTitle}</strong> has finished.</p>
-        <p><strong>Winner:</strong> ${winnerEmail}</p>
+        <p>The automated draw for <strong>${escapeHtml(raffleTitle)}</strong> has finished.</p>
+        <p><strong>Winner:</strong> ${escapeHtml(winnerEmail)}</p>
         <p><strong>Winning Ticket:</strong> #${winningTicket}</p>
         <p><strong>Total Entries:</strong> ${totalTickets}</p>
         <p>The raffle document has been updated with the audit trail.</p>
@@ -123,10 +132,10 @@ export async function sendContactFormEmail({
       TextBody: `New message from ${name} (${email}):\n\n${message}`,
       HtmlBody: `
         <h1>New Contact Form Message</h1>
-        <p><strong>From:</strong> ${name} (${email})</p>
-        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>From:</strong> ${escapeHtml(name)} (${escapeHtml(email)})</p>
+        <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
         <p><strong>Message:</strong></p>
-        <p style="white-space: pre-wrap;">${message}</p>
+        <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
       `,
     });
 
@@ -138,8 +147,8 @@ export async function sendContactFormEmail({
       TextBody: `Hi ${name},\n\nThanks for reaching out! We've received your message regarding "${subject}" and our team will get back to you as soon as possible.\n\nBest regards,\nThe Coast Competitions Team`,
       HtmlBody: `
         <h1>Message Received</h1>
-        <p>Hi ${name},</p>
-        <p>Thanks for reaching out! We've received your message regarding "<strong>${subject}</strong>" and our team will get back to you as soon as possible.</p>
+        <p>Hi ${escapeHtml(name)},</p>
+        <p>Thanks for reaching out! We've received your message regarding "<strong>${escapeHtml(subject)}</strong>" and our team will get back to you as soon as possible.</p>
         <p>Best regards,<br>The Coast Competitions Team</p>
       `,
     });
