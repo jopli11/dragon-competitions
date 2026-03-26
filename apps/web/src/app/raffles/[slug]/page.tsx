@@ -89,6 +89,8 @@ export default async function RaffleDetailPage({
   const maxTickets = raffle.maxTickets || 5000;
   const progress = Math.min(100, Math.max(2, (stats.ticketsSold / maxTickets) * 100));
   const isSoldOut = stats.ticketsSold >= maxTickets;
+  const isAwaitingDraw = raffle.status === "awaitingDraw";
+  const isEnded = raffle.status === "ended";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -130,8 +132,8 @@ export default async function RaffleDetailPage({
         <div className="absolute inset-0 bg-linear-to-t from-white via-brand-midnight/40 to-transparent" />
         
         <Container className="relative h-full flex flex-col justify-end pb-6">
-          <BrandBadge className={`mb-3 self-start ${isSoldOut ? 'bg-red-500 text-white' : ''}`}>
-            {isSoldOut ? 'Sold Out' : 'Entries Open'}
+          <BrandBadge className={`mb-3 self-start ${isAwaitingDraw ? 'bg-amber-500 text-white' : isEnded ? 'bg-gray-500 text-white' : isSoldOut ? 'bg-red-500 text-white' : ''}`}>
+            {isAwaitingDraw ? 'Awaiting Live Draw' : isEnded ? 'Draw Complete' : isSoldOut ? 'Sold Out' : 'Entries Open'}
           </BrandBadge>
           <h1 className="text-3xl font-black uppercase tracking-tighter text-brand-midnight sm:text-4xl md:text-5xl lg:text-6xl wrap-break-word">
             {raffle.title}
@@ -250,7 +252,37 @@ export default async function RaffleDetailPage({
 
           {/* Sticky Sidebar */}
           <div className="lg:sticky lg:top-24 space-y-6">
-            {!isSoldOut ? (
+            {isAwaitingDraw ? (
+              <GlassCard className="p-8 text-center border-amber-500/20 bg-amber-50">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Awaiting Live Draw</h3>
+                <p className="mt-2 text-sm text-brand-midnight/60">
+                  All tickets have been sold. The winner will be selected during a live draw event — follow our social channels for the announcement.
+                </p>
+                <Link href="/results" className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-amber-500 px-8 text-sm font-bold text-white transition-colors hover:bg-amber-600">
+                  View Draw Results
+                </Link>
+              </GlassCard>
+            ) : isEnded ? (
+              <GlassCard className="p-8 text-center border-gray-300/30 bg-gray-50">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-gray-500 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Draw Complete</h3>
+                <p className="mt-2 text-sm text-brand-midnight/60">
+                  This competition has been drawn. Check the results page to see the winner.
+                </p>
+                <Link href="/results" className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-foreground px-8 text-sm font-bold text-background transition-colors hover:bg-foreground/90">
+                  View Draw Results
+                </Link>
+              </GlassCard>
+            ) : !isSoldOut ? (
               <SkillQuestionCard
                 slug={raffle.slug}
                 question={raffle.skillQuestion}

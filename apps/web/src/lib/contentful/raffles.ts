@@ -3,7 +3,7 @@ import type { Entry, EntrySkeletonType } from "contentful";
 import { getContentfulPublicClient } from "@/lib/contentful/publicClient";
 import { getContentfulAdminClient } from "@/lib/contentful/adminClient";
 
-type RaffleStatus = "draft" | "live" | "ended";
+type RaffleStatus = "draft" | "live" | "awaitingDraw" | "ended";
 type DrawType = "auto" | "live";
 
 type RaffleEntryFields = {
@@ -32,6 +32,9 @@ type RaffleEntryFields = {
       file?: { url?: string };
     };
   }[];
+  winnerDisplayName?: string;
+  winnerTicketNumber?: number;
+  drawDate?: string;
 };
 
 type RaffleSkeleton = EntrySkeletonType<RaffleEntryFields, "raffle">;
@@ -56,6 +59,17 @@ export type RaffleDetail = RaffleSummary & {
   raffleDescription?: any;
   prizeDetails?: any;
   galleryImageUrls?: string[];
+};
+
+export type EndedRaffleSummary = {
+  id: string;
+  title: string;
+  slug: string;
+  heroImageUrl?: string;
+  drawType: DrawType;
+  winnerDisplayName?: string;
+  winnerTicketNumber?: number;
+  drawDate?: string;
 };
 
 function toUrlMaybe(url?: string) {
@@ -194,6 +208,46 @@ export const fetchRaffleBySlug = cache(async (
     prizeDetails: fields.prizeDetails,
     galleryImageUrls: fields.galleryImages?.map(img => toUrlMaybe(img.fields?.file?.url)).filter(Boolean) as string[],
   };
+});
+
+export const fetchEndedRaffles = cache(async (): Promise<EndedRaffleSummary[]> => {
+  const client = getContentfulPublicClient();
+  if (!client) {
+    return [];
+  }
+
+  const query = {
+    content_type: "raffle",
+    "fields.status": "ended",
+    order: ["-fields.drawDate", "-sys.updatedAt"],
+    select: [
+      "sys.id",
+      "fields.title",
+      "fields.slug",
+      "fields.drawType",
+      "fields.heroImage",
+      "fields.winnerDisplayName",
+      "fields.winnerTicketNumber",
+      "fields.drawDate",
+    ].join(","),
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const res = await client.getEntries<RaffleSkeleton>(query as any);
+
+  return res.items.map((entry) => {
+    const fields = entry.fields as unknown as RaffleEntryFields;
+    return {
+      id: entry.sys.id,
+      title: fields.title,
+      slug: fields.slug,
+      heroImageUrl: toUrlMaybe(fields.heroImage?.fields?.file?.url),
+      drawType: fields.drawType || "auto",
+      winnerDisplayName: fields.winnerDisplayName,
+      winnerTicketNumber: fields.winnerTicketNumber,
+      drawDate: fields.drawDate,
+    };
+  });
 });
 
 export async function fetchRaffleCorrectAnswer(

@@ -17,6 +17,11 @@ function AdminPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "raffles" | "orders" | "winners" | "settings">("overview");
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [lookupSlug, setLookupSlug] = useState("");
+  const [lookupTicket, setLookupTicket] = useState("");
+  const [lookupResult, setLookupResult] = useState<any>(null);
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -44,6 +49,53 @@ function AdminPage() {
     }
     loadData();
   }, []);
+
+  async function handleExportTickets(raffleSlug: string) {
+    setExportLoading(raffleSlug);
+    try {
+      const user = auth?.currentUser;
+      if (!user) return;
+      const idToken = await user.getIdToken();
+      const res = await fetch(`/api/admin/export-tickets?raffleSlug=${encodeURIComponent(raffleSlug)}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${raffleSlug}-tickets.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export error:", err);
+      alert("Failed to export tickets. Please try again.");
+    } finally {
+      setExportLoading(null);
+    }
+  }
+
+  async function handleLookupTicket() {
+    if (!lookupSlug || !lookupTicket) return;
+    setLookupLoading(true);
+    setLookupResult(null);
+    try {
+      const user = auth?.currentUser;
+      if (!user) return;
+      const idToken = await user.getIdToken();
+      const res = await fetch(
+        `/api/admin/lookup-ticket?raffleSlug=${encodeURIComponent(lookupSlug)}&ticketNumber=${encodeURIComponent(lookupTicket)}`,
+        { headers: { Authorization: `Bearer ${idToken}` } }
+      );
+      const data = await res.json();
+      setLookupResult(data);
+    } catch (err) {
+      console.error("Lookup error:", err);
+      setLookupResult({ error: "Lookup failed" });
+    } finally {
+      setLookupLoading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -199,12 +251,34 @@ function AdminPage() {
                       {new Date(raffle.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
                     <td className="px-8 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-green-100 text-green-700">
-                        {raffle.status}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                        raffle.drawStatus === "completed" ? "bg-gray-100 text-gray-700" :
+                        raffle.status === "awaitingDraw" ? "bg-amber-100 text-amber-700" :
+                        raffle.isSoldOut ? "bg-red-100 text-red-700" :
+                        "bg-green-100 text-green-700"
+                      }`}>
+                        {raffle.drawStatus === "completed" ? "Drawn" :
+                         raffle.status === "awaitingDraw" ? "Awaiting Draw" :
+                         raffle.isSoldOut ? "Sold Out" :
+                         raffle.status || "Live"}
                       </span>
                     </td>
-                    <td className="px-8 py-4 text-right">
-                      <button className="text-brand-primary font-bold text-xs hover:underline">Manage</button>
+                    <td className="px-8 py-4 text-right space-x-2">
+                      {(raffle.isSoldOut || raffle.drawStatus === "completed") && (
+                        <button
+                          onClick={() => handleExportTickets(raffle.slug || raffle.id)}
+                          disabled={exportLoading === (raffle.slug || raffle.id)}
+                          className="text-brand-primary font-bold text-xs hover:underline disabled:opacity-50"
+                        >
+                          {exportLoading === (raffle.slug || raffle.id) ? "Exporting..." : "Export Tickets"}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => { setLookupSlug(raffle.slug || raffle.id); setActiveTab("settings"); }}
+                        className="text-brand-primary font-bold text-xs hover:underline"
+                      >
+                        Lookup
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -272,6 +346,58 @@ function AdminPage() {
 
       {activeTab === "settings" && (
         <div className="max-w-2xl space-y-8">
+          {/* Ticket Lookup Tool */}
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
+            <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-2">Ticket Lookup</h3>
+            <p className="text-xs text-brand-midnight/50 mb-6">Look up the owner of a specific ticket number. Use this after a live draw to identify the winner.</p>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Raffle Slug</label>
+                  <select
+                    value={lookupSlug}
+                    onChange={(e) => setLookupSlug(e.target.value)}
+                    className="w-full bg-white border border-brand-primary/10 rounded-2xl px-6 py-4 text-brand-midnight font-medium"
+                  >
+                    <option value="">Select raffle...</option>
+                    {stats.raffles.map((r: any) => (
+                      <option key={r.id} value={r.slug || r.id}>{r.title || r.id}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Ticket Number</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={lookupTicket}
+                    onChange={(e) => setLookupTicket(e.target.value)}
+                    placeholder="e.g. 1234"
+                    className="w-full bg-white border border-brand-primary/10 rounded-2xl px-6 py-4 text-brand-midnight font-medium"
+                  />
+                </div>
+              </div>
+              <BrandButton size="sm" onClick={handleLookupTicket} disabled={lookupLoading || !lookupSlug || !lookupTicket}>
+                {lookupLoading ? "Looking up..." : "Lookup Ticket"}
+              </BrandButton>
+
+              {lookupResult && (
+                <div className={`mt-4 rounded-2xl p-6 ${lookupResult.found ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
+                  {lookupResult.found ? (
+                    <div className="space-y-2">
+                      <div className="text-xs font-bold uppercase tracking-widest text-green-700">Ticket #{lookupResult.ticketNumber} Owner</div>
+                      <div className="text-lg font-black text-brand-midnight">{lookupResult.email}</div>
+                      <div className="text-xs text-brand-midnight/50">Order: {lookupResult.orderId} &middot; Status: {lookupResult.status}</div>
+                    </div>
+                  ) : (
+                    <div className="text-sm font-bold text-red-700">{lookupResult.message || lookupResult.error || "Ticket not found"}</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Site Settings */}
           <div className="rounded-3xl border border-brand-primary/10 bg-white p-8 shadow-sm">
             <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-6">Site Settings</h3>
             <div className="space-y-6">

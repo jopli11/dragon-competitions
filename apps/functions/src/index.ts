@@ -56,9 +56,13 @@ export const scheduledDraw = functions.runWith({
         continue; // Not ready for draw yet
       }
 
-      // 2. Skip if drawType is 'live' - these are handled manually by admins
+      // 2. If drawType is 'live', don't auto-draw — but sync sold-out status to Contentful
       if (data.drawType === "live") {
-        console.log(`Skipping automated draw for ${raffleDoc.id} (drawType is 'live')`);
+        if (isSoldOut && !data.contentfulArchived) {
+          console.log(`Live-draw raffle ${raffleDoc.id} is sold out — syncing awaitingDraw to Contentful`);
+          await markAwaitingDrawInContentful(raffleDoc.id);
+          await raffleDoc.ref.update({ contentfulArchived: true });
+        }
         continue;
       }
 
@@ -177,12 +181,113 @@ async function performDraw(raffleDoc: admin.firestore.QueryDocumentSnapshot) {
       }
     });
 
-    // 5. Handle Reoccurring Raffle
+    // 5. Handle post-draw CMS sync
     if (raffleData.isReoccurring) {
       await handleReoccurring(raffleId);
+    } else {
+      // Archive non-reoccurring raffle in Contentful with winner data
+      const freshDoc = await raffleDoc.ref.get();
+      const fresh = freshDoc.data();
+      const maskedEmail = maskEmail(fresh?.winnerEmail || "");
+      await archiveRaffleInContentful(raffleId, {
+        winnerDisplayName: maskedEmail,
+        winnerTicketNumber: fresh?.winningTicketNumber,
+        drawDate: new Date().toISOString(),
+      });
     }
   } catch (error) {
     console.error(`Draw failed for raffle ${raffleId}:`, error);
+  }
+}
+
+function maskEmail(email: string): string {
+  if (!email || !email.includes("@")) return "Anonymous";
+  const [local, domain] = email.split("@");
+  const visible = local.slice(0, 3);
+  return `${visible}***@${domain}`;
+}
+
+function getContentfulClient() {
+  const managementToken = process.env.CONTENTFUL_MANAGEMENT_TOKEN;
+  const spaceId = process.env.CONTENTFUL_SPACE_ID;
+  const environmentId = process.env.CONTENTFUL_ENVIRONMENT || "master";
+
+  if (!managementToken || !spaceId) {
+    return null;
+  }
+
+  return { managementToken, spaceId, environmentId };
+}
+
+async function getContentfulEntry(slug: string) {
+  const config = getContentfulClient();
+  if (!config) {
+    console.error("Contentful management credentials missing.");
+    return null;
+  }
+
+  const client = createClient({ accessToken: config.managementToken });
+  const space = await client.getSpace(config.spaceId);
+  const environment = await space.getEnvironment(config.environmentId);
+
+  const entries = await environment.getEntries({
+    content_type: "raffle",
+    "fields.slug.en-US": slug,
+    limit: 1,
+  });
+
+  return entries.items[0] || null;
+}
+
+/**
+ * Sets a raffle's Contentful status to "awaitingDraw" when a live-draw
+ * raffle sells out. The admin will manually draw and update to "ended".
+ */
+async function markAwaitingDrawInContentful(slug: string) {
+  try {
+    const entry = await getContentfulEntry(slug);
+    if (!entry) {
+      console.error(`Raffle ${slug} not found in Contentful for awaitingDraw sync.`);
+      return;
+    }
+
+    entry.fields.status["en-US"] = "awaitingDraw";
+    const updated = await entry.update();
+    await updated.publish();
+    console.log(`Contentful: ${slug} status set to awaitingDraw`);
+  } catch (error) {
+    console.error(`Error setting awaitingDraw for ${slug}:`, error);
+  }
+}
+
+/**
+ * Archives a raffle in Contentful by setting status to "ended" and
+ * optionally populating winner display fields (for auto draws).
+ */
+async function archiveRaffleInContentful(
+  slug: string,
+  winnerData?: { winnerDisplayName: string; winnerTicketNumber: number; drawDate: string }
+) {
+  try {
+    const entry = await getContentfulEntry(slug);
+    if (!entry) {
+      console.error(`Raffle ${slug} not found in Contentful for archival.`);
+      return;
+    }
+
+    entry.fields.status["en-US"] = "ended";
+
+    if (winnerData) {
+      entry.fields.winnerDisplayName = { "en-US": winnerData.winnerDisplayName };
+      entry.fields.winnerTicketNumber = { "en-US": winnerData.winnerTicketNumber };
+      entry.fields.drawDate = { "en-US": winnerData.drawDate };
+    }
+
+    const updated = await entry.update();
+    await updated.publish();
+    console.log(`Contentful: ${slug} archived as ended${winnerData ? " with winner data" : ""}`);
+  } catch (error) {
+    console.error(`Error archiving raffle ${slug} in Contentful:`, error);
   }
 }
 
@@ -192,21 +297,17 @@ async function performDraw(raffleDoc: admin.firestore.QueryDocumentSnapshot) {
  * with updated dates.
  */
 async function handleReoccurring(slug: string) {
-  const managementToken = process.env.CONTENTFUL_MANAGEMENT_TOKEN;
-  const spaceId = process.env.CONTENTFUL_SPACE_ID;
-  const environmentId = process.env.CONTENTFUL_ENVIRONMENT || "master";
-
-  if (!managementToken || !spaceId) {
+  const config = getContentfulClient();
+  if (!config) {
     console.error("Contentful management credentials missing. Cannot reoccur raffle.");
     return;
   }
 
   try {
-    const client = createClient({ accessToken: managementToken });
-    const space = await client.getSpace(spaceId);
-    const environment = await space.getEnvironment(environmentId);
+    const client = createClient({ accessToken: config.managementToken });
+    const space = await client.getSpace(config.spaceId);
+    const environment = await space.getEnvironment(config.environmentId);
 
-    // 1. Find the existing entry in Contentful by slug
     const entries = await environment.getEntries({
       content_type: "raffle",
       "fields.slug.en-US": slug,
@@ -219,35 +320,28 @@ async function handleReoccurring(slug: string) {
       return;
     }
 
-    // 2. Calculate new dates (e.g., same duration as original)
     const originalStart = new Date(originalEntry.fields.startAt["en-US"]);
     const originalEnd = new Date(originalEntry.fields.endAt["en-US"]);
     const durationMs = originalEnd.getTime() - originalStart.getTime();
     
-    const newStart = new Date(); // Starts now
+    const newStart = new Date();
     const newEnd = new Date(newStart.getTime() + durationMs);
 
-    // 3. Create the new entry (we can't easily "duplicate" via API, so we create new)
-    // We keep most fields but update status and dates.
     const newFields = { ...originalEntry.fields };
     newFields.status["en-US"] = "live";
     newFields.startAt["en-US"] = newStart.toISOString();
     newFields.endAt["en-US"] = newEnd.toISOString();
+    // Clear winner fields for the new round
+    delete newFields.winnerDisplayName;
+    delete newFields.winnerTicketNumber;
+    delete newFields.drawDate;
     
-    // Note: We might want to append a version or date to the title/slug if they must be unique,
-    // but usually for reoccurring raffles, the old one is moved to 'ended' status.
-    // Contentful unique validation on slug might trigger if we don't change it.
-    // However, the original raffle's status is likely still 'live' in Contentful until manually changed,
-    // or we can update it here.
-    
-    // Update original to 'ended'
+    // Archive original as ended
     originalEntry.fields.status["en-US"] = "ended";
     await originalEntry.update();
     await originalEntry.publish();
 
-    // Create new entry
-    // To avoid slug collision, we might need a suffix, but let's assume the user manages slugs
-    // or we append a timestamp.
+    // Create new entry with unique slug
     const timestamp = Math.floor(Date.now() / 1000);
     newFields.slug["en-US"] = `${slug}-${timestamp}`;
     newFields.title["en-US"] = `${newFields.title["en-US"]} (Round ${timestamp})`;
@@ -258,7 +352,6 @@ async function handleReoccurring(slug: string) {
     
     await newEntry.publish();
     console.log(`Successfully reoccurred raffle ${slug} as ${newFields.slug["en-US"]}`);
-
   } catch (error) {
     console.error(`Error in handleReoccurring for ${slug}:`, error);
   }
