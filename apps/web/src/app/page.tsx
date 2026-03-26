@@ -40,8 +40,9 @@ export default async function Home() {
   // Take only the first 4 for the landing page grid
   const featuredRaffles = raffles.slice(0, 4);
 
-  // Find the raffle ending soonest for the countdown
-  const nextEndingRaffle = [...raffles].sort((a, b) => 
+  // Find the raffle ending soonest for the countdown (exclude awaitingDraw raffles)
+  const activeRaffles = raffles.filter(r => r.status !== "awaitingDraw");
+  const nextEndingRaffle = [...activeRaffles].sort((a, b) => 
     new Date(a.endAt).getTime() - new Date(b.endAt).getTime()
   )[0];
 
@@ -66,16 +67,17 @@ export default async function Home() {
             const maxTickets = r.maxTickets || 5000;
             const progress = Math.min(100, Math.max(2, (raffleStats.ticketsSold / maxTickets) * 100));
             const isSoldOut = raffleStats.ticketsSold >= maxTickets;
+            const isAwaitingDraw = r.status === "awaitingDraw";
 
             return (
               <div
                 key={r.id}
-                className={`group overflow-hidden rounded-[2.5rem] border border-brand-primary/10 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
+                className={`group overflow-hidden rounded-[2.5rem] border border-brand-primary/10 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${isAwaitingDraw ? 'border-amber-300/40' : isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
               >
                 <Link href={`/raffles/${r.slug}`} className="block">
                   <div className="relative aspect-4/3 overflow-hidden">
-                    <div className={`absolute top-4 left-4 z-10 rounded-lg px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider shadow-lg ${isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
-                      {isSoldOut ? 'Sold Out' : 'Entries Open'}
+                    <div className={`absolute top-4 left-4 z-10 rounded-lg px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider shadow-lg ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
+                      {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
                     </div>
                     {r.heroImageUrl ? (
                       <Image
@@ -95,23 +97,31 @@ export default async function Home() {
                     </h3>
                     <div className="mt-4 flex items-center justify-between text-[11px] font-extrabold text-brand-midnight/40 uppercase tracking-wider">
                       <div className="flex items-center gap-1.5">
-                        <div className={`h-1.5 w-1.5 rounded-full ${isSoldOut ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
-                        <span>{raffleStats.ticketsSold} / {maxTickets} Sold</span>
+                        <div className={`h-1.5 w-1.5 rounded-full ${isAwaitingDraw ? 'bg-amber-500 animate-pulse' : isSoldOut ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
+                        <span>{isAwaitingDraw ? 'Sold Out · Draw Pending' : `${raffleStats.ticketsSold} / ${maxTickets} Sold`}</span>
                       </div>
-                      <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+                      {!isAwaitingDraw && (
+                        <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+                      )}
                     </div>
                     <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-brand-accent/50 border border-brand-primary/5">
                       <div
-                        className="h-full bg-brand-secondary rounded-full shadow-[0_0_8px_rgba(0,112,224,0.4)]"
-                        style={{ width: `${progress}%` }}
+                        className={`h-full rounded-full ${isAwaitingDraw ? 'bg-amber-500' : 'bg-brand-secondary shadow-[0_0_8px_rgba(0,112,224,0.4)]'}`}
+                        style={{ width: `${isAwaitingDraw ? 100 : progress}%` }}
                       />
                     </div>
                     <div className="mt-8 text-center">
-                      <p className="text-[10px] font-black text-brand-midnight/50 uppercase tracking-[0.2em] mb-4">
-                        Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
-                      </p>
-                      <BrandButton fullWidth variant={isSoldOut ? "outline" : "primary"}>
-                        {isSoldOut ? "View Results" : "Enter Now"}
+                      {isAwaitingDraw ? (
+                        <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-4">
+                          Live draw coming soon
+                        </p>
+                      ) : (
+                        <p className="text-[10px] font-black text-brand-midnight/50 uppercase tracking-[0.2em] mb-4">
+                          Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
+                        </p>
+                      )}
+                      <BrandButton fullWidth variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
+                        {isAwaitingDraw ? "View Details" : isSoldOut ? "View Results" : "Enter Now"}
                       </BrandButton>
                     </div>
                   </div>

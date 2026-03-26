@@ -41,16 +41,17 @@ export default async function RafflesPage() {
           const maxTickets = r.maxTickets || 5000;
           const progress = Math.min(100, Math.max(2, (raffleStats.ticketsSold / maxTickets) * 100));
           const isSoldOut = raffleStats.ticketsSold >= maxTickets;
+          const isAwaitingDraw = r.status === "awaitingDraw";
 
           return (
             <div
               key={r.id}
-              className={`group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl ${isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
+              className={`group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl ${isAwaitingDraw ? 'border-amber-300/40' : isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
             >
               <Link href={`/raffles/${r.slug}`} className="block">
                 <div className="relative aspect-4/3 overflow-hidden">
-                  <div className={`absolute top-3 left-3 z-10 rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
-                    {isSoldOut ? 'Sold Out' : 'Entries Open'}
+                  <div className={`absolute top-3 left-3 z-10 rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
+                    {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
                   </div>
                   {r.heroImageUrl ? (
                     <Image
@@ -70,23 +71,31 @@ export default async function RafflesPage() {
                 </h3>
                 <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-brand-midnight/40 uppercase">
                   <div className="flex items-center gap-1.5">
-                    <div className={`h-1.5 w-1.5 rounded-full ${isSoldOut ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
-                    <span>{raffleStats.ticketsSold} / {maxTickets} Sold</span>
+                    <div className={`h-1.5 w-1.5 rounded-full ${isAwaitingDraw ? 'bg-amber-500 animate-pulse' : isSoldOut ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
+                    <span>{isAwaitingDraw ? 'Sold Out · Draw Pending' : `${raffleStats.ticketsSold} / ${maxTickets} Sold`}</span>
                   </div>
-                  <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+                  {!isAwaitingDraw && (
+                    <span>Ends: {new Date(r.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+                  )}
                 </div>
                   <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-brand-accent">
                     <div
-                      className="h-full bg-brand-secondary"
-                      style={{ width: `${progress}%` }}
+                      className={`h-full ${isAwaitingDraw ? 'bg-amber-500' : 'bg-brand-secondary'}`}
+                      style={{ width: `${isAwaitingDraw ? 100 : progress}%` }}
                     />
                   </div>
                   <div className="mt-6 text-center">
-                    <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
-                      Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
-                    </p>
-                    <BrandButton fullWidth className="mt-4" variant={isSoldOut ? "outline" : "primary"}>
-                      {isSoldOut ? "View Results" : "Enter Now"}
+                    {isAwaitingDraw ? (
+                      <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">
+                        Live draw coming soon
+                      </p>
+                    ) : (
+                      <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
+                        Just <span className="text-brand-secondary">{formatGBPFromPence(r.ticketPricePence)}</span> per entry
+                      </p>
+                    )}
+                    <BrandButton fullWidth className="mt-4" variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
+                      {isAwaitingDraw ? "View Details" : isSoldOut ? "View Results" : "Enter Now"}
                     </BrandButton>
                   </div>
                 </div>

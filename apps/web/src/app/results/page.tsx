@@ -12,6 +12,7 @@ type DrawResult = {
   title: string;
   winner: string;
   date: string;
+  rawDate: number;
   ticket: number | string | undefined;
   image: string;
   audit: { seed: string; totalTickets: number } | null;
@@ -46,6 +47,7 @@ export default async function DrawResultsPage() {
         month: "short",
         year: "numeric",
       }),
+      rawDate: new Date(draw.drawnAt).getTime(),
       ticket: draw.winningTicketNumber,
       image:
         contentfulEntry?.heroImageUrl ||
@@ -71,6 +73,7 @@ export default async function DrawResultsPage() {
             year: "numeric",
           })
         : "—",
+      rawDate: entry.drawDate ? new Date(entry.drawDate).getTime() : 0,
       ticket: entry.winnerTicketNumber,
       image:
         entry.heroImageUrl ||
@@ -80,7 +83,7 @@ export default async function DrawResultsPage() {
     });
   }
 
-  const displayResults = results;
+  const displayResults = results.sort((a, b) => b.rawDate - a.rawDate);
 
   return (
     <div className="min-h-screen bg-surface-mint py-16 sm:py-24">
