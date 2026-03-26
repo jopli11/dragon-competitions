@@ -110,8 +110,7 @@ async function performDraw(raffleDoc) {
         return;
     }
     try {
-        await db.runTransaction(async (transaction) => {
-            // 1. Select a winner using cryptographically secure randomness
+        const drawResult = await db.runTransaction(async (transaction) => {
             let winningTicketNumber;
             let winningTicketData = null;
             let attempts = 0;
@@ -121,8 +120,6 @@ async function performDraw(raffleDoc) {
                 const randomBytes = crypto.randomBytes(4);
                 const randomNumber = randomBytes.readUInt32BE(0);
                 winningTicketNumber = (randomNumber % totalTickets) + 1;
-                // 2. Find the winning ticket/order
-                // First, try the individual tickets collection (for small orders)
                 const ticketRef = db
                     .collection("raffles")
                     .doc(raffleId)
@@ -141,9 +138,6 @@ async function performDraw(raffleDoc) {
                     };
                 }
                 else {
-                    // If not found in tickets, look in the orders collection (for large orders)
-                    // Note: We use a plain get here because we can't easily query inside a transaction for multiple docs
-                    // but we will verify the order status once found.
                     const orderQuery = await db
                         .collection("orders")
                         .where("raffleSlug", "==", raffleId)
@@ -165,7 +159,6 @@ async function performDraw(raffleDoc) {
                     }
                 }
                 if (winningTicketData) {
-                    // 3. Record the draw result
                     transaction.update(raffleDoc.ref, {
                         drawStatus: "completed",
                         winningTicketNumber,
@@ -178,24 +171,27 @@ async function performDraw(raffleDoc) {
                             attempts,
                         },
                     });
-                    // 4. Send winner email
                     const raffleTitle = raffleData.title || raffleId;
-                    // We'll move the email send outside the transaction to avoid holding it open
                     return { email: winningTicketData.email, title: raffleTitle, ticket: winningTicketNumber };
                 }
             }
             throw new Error(`Failed to find a valid winner after ${maxAttempts} attempts`);
-        }).then(async (result) => {
-            if (result && result.email) {
-                await sendWinnerEmail(result.email, result.title, result.ticket, totalTickets);
-            }
         });
-        // 5. Handle post-draw CMS sync
+        console.log(`Draw complete for ${raffleId}. Winner: ${drawResult.email}, Ticket: #${drawResult.ticket}`);
+        // Send emails (outside the transaction)
+        console.log(`Sending winner notification email to ${drawResult.email}...`);
+        try {
+            await sendWinnerEmail(drawResult.email, drawResult.title, drawResult.ticket, totalTickets);
+            console.log(`Winner email sent successfully for ${raffleId}`);
+        }
+        catch (emailError) {
+            console.error(`CRITICAL: Failed to send winner email for ${raffleId}:`, emailError.message, emailError.statusCode, JSON.stringify(emailError));
+        }
+        // Handle post-draw CMS sync
         if (raffleData.isReoccurring) {
             await handleReoccurring(raffleId);
         }
         else {
-            // Archive non-reoccurring raffle in Contentful with winner data
             const freshDoc = await raffleDoc.ref.get();
             const fresh = freshDoc.data();
             const maskedEmail = maskEmail(fresh?.winnerEmail || "");
@@ -207,7 +203,7 @@ async function performDraw(raffleDoc) {
         }
     }
     catch (error) {
-        console.error(`Draw failed for raffle ${raffleId}:`, error);
+        console.error(`Draw failed for raffle ${raffleId}:`, error.message, error.stack);
     }
 }
 function maskEmail(email) {
@@ -347,44 +343,44 @@ async function sendWinnerEmail(email, raffleTitle, ticketNumber, totalTickets) {
     const serverToken = process.env.POSTMARK_SERVER_TOKEN;
     const fromEmail = process.env.POSTMARK_FROM_EMAIL || "noreply@coastcompetitions.co.uk";
     const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@coastcompetitions.co.uk";
+    console.log(`sendWinnerEmail called: to=${email}, raffle=${raffleTitle}, ticket=#${ticketNumber}, from=${fromEmail}, adminTo=${adminEmail}, hasToken=${!!serverToken}`);
     if (!serverToken) {
-        console.warn("Postmark not configured in functions. Skipping winner email.");
-        return;
+        console.error("POSTMARK_SERVER_TOKEN is empty/undefined. Cannot send winner email.");
+        throw new Error("Postmark not configured");
     }
     const client = new postmark.ServerClient(serverToken);
-    try {
-        // 1. Send to Winner
-        await client.sendEmail({
-            From: fromEmail,
-            To: email,
-            Subject: `CONGRATULATIONS! You won the ${raffleTitle}!`,
-            TextBody: `You are the winner of the "${raffleTitle}" raffle! Your winning ticket was #${ticketNumber}. We will contact you shortly to arrange your prize.`,
-            HtmlBody: `
-        <h1>You Won!</h1>
-        <p>Congratulations!</p>
-        <p>You are the winner of the <strong>${raffleTitle}</strong> raffle!</p>
-        <p><strong>Winning ticket:</strong> #${ticketNumber}</p>
-        <p>We will contact you shortly to arrange your prize delivery or cash alternative.</p>
-      `,
-        });
-        // 2. Send to Admin
-        await client.sendEmail({
-            From: fromEmail,
-            To: adminEmail,
-            Subject: `[ADMIN] Draw Complete: ${raffleTitle}`,
-            TextBody: `The draw for "${raffleTitle}" is complete. Winner: ${email}. Winning Ticket: #${ticketNumber}. Total entries: ${totalTickets}.`,
-            HtmlBody: `
-        <h1>Draw Completed</h1>
-        <p>The automated draw for <strong>${raffleTitle}</strong> has finished.</p>
-        <p><strong>Winner:</strong> ${email}</p>
-        <p><strong>Winning Ticket:</strong> #${ticketNumber}</p>
-        <p><strong>Total Entries:</strong> ${totalTickets}</p>
-        <p>The raffle document in Firestore has been updated with the audit trail.</p>
-      `,
-        });
-    }
-    catch (error) {
-        console.error("Error sending draw completion emails:", error);
-    }
+    // Send to Winner
+    console.log(`Sending winner congratulations to ${email}...`);
+    const winnerResult = await client.sendEmail({
+        From: fromEmail,
+        To: email,
+        Subject: `CONGRATULATIONS! You won the ${raffleTitle}!`,
+        TextBody: `You are the winner of the "${raffleTitle}" raffle! Your winning ticket was #${ticketNumber}. We will contact you shortly to arrange your prize.`,
+        HtmlBody: `
+      <h1>You Won!</h1>
+      <p>Congratulations!</p>
+      <p>You are the winner of the <strong>${raffleTitle}</strong> raffle!</p>
+      <p><strong>Winning ticket:</strong> #${ticketNumber}</p>
+      <p>We will contact you shortly to arrange your prize delivery or cash alternative.</p>
+    `,
+    });
+    console.log(`Winner email sent: MessageID=${winnerResult.MessageID}, To=${winnerResult.To}`);
+    // Send to Admin
+    console.log(`Sending admin notification to ${adminEmail}...`);
+    const adminResult = await client.sendEmail({
+        From: fromEmail,
+        To: adminEmail,
+        Subject: `[ADMIN] Draw Complete: ${raffleTitle}`,
+        TextBody: `The draw for "${raffleTitle}" is complete. Winner: ${email}. Winning Ticket: #${ticketNumber}. Total entries: ${totalTickets}.`,
+        HtmlBody: `
+      <h1>Draw Completed</h1>
+      <p>The automated draw for <strong>${raffleTitle}</strong> has finished.</p>
+      <p><strong>Winner:</strong> ${email}</p>
+      <p><strong>Winning Ticket:</strong> #${ticketNumber}</p>
+      <p><strong>Total Entries:</strong> ${totalTickets}</p>
+      <p>The raffle document in Firestore has been updated with the audit trail.</p>
+    `,
+    });
+    console.log(`Admin email sent: MessageID=${adminResult.MessageID}, To=${adminResult.To}`);
 }
 //# sourceMappingURL=index.js.map
