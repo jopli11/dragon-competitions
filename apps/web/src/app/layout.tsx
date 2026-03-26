@@ -50,11 +50,26 @@ export const metadata: Metadata = {
     siteName: 'Coast Competitions',
     locale: 'en_GB',
     type: 'website',
+    images: [
+      {
+        url: 'https://images.ctfassets.net/gbo22d874wm2/4SxkVn3dgdpIM6ICvihQ7o/38d94b3752507a021da051be56a1e5f4/Photo_26-02-2026__07_46_17.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Coast Competitions',
+        type: 'image/jpeg',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Coast Competitions · Win Incredible Prizes & Cash",
     description: "Enter Coast Competitions for your chance to win tax-free cash, luxury cars, and the latest tech.",
+    images: [
+      {
+        url: 'https://images.ctfassets.net/gbo22d874wm2/4SxkVn3dgdpIM6ICvihQ7o/38d94b3752507a021da051be56a1e5f4/Photo_26-02-2026__07_46_17.jpg',
+        alt: 'Coast Competitions',
+      },
+    ],
   },
   robots: {
     index: true,
