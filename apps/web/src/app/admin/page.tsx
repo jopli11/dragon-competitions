@@ -22,6 +22,8 @@ function AdminPage() {
   const [lookupResult, setLookupResult] = useState<any>(null);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState<string | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [confirmResult, setConfirmResult] = useState<any>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -94,6 +96,45 @@ function AdminPage() {
       setLookupResult({ error: "Lookup failed" });
     } finally {
       setLookupLoading(false);
+    }
+  }
+
+  async function handleConfirmWinner() {
+    if (!lookupSlug || !lookupResult?.found) return;
+    const confirmed = window.confirm(
+      `Confirm ticket #${lookupResult.ticketNumber} as the winner of "${lookupSlug}"?\n\nThe server will independently verify the ticket owner. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setConfirmLoading(true);
+    setConfirmResult(null);
+    try {
+      const user = auth?.currentUser;
+      if (!user) return;
+      const idToken = await user.getIdToken();
+
+      const res = await fetch("/api/admin/confirm-live-winner", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          raffleSlug: lookupSlug,
+          ticketNumber: lookupResult.ticketNumber,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setConfirmResult({ success: true, message: data.message });
+      } else {
+        setConfirmResult({ success: false, message: data.error || "Failed to confirm winner" });
+      }
+    } catch (err) {
+      console.error("Confirm winner error:", err);
+      setConfirmResult({ success: false, message: "Network error. Please try again." });
+    } finally {
+      setConfirmLoading(false);
     }
   }
 
@@ -384,10 +425,29 @@ function AdminPage() {
               {lookupResult && (
                 <div className={`mt-4 rounded-2xl p-6 ${lookupResult.found ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
                   {lookupResult.found ? (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div className="text-xs font-bold uppercase tracking-widest text-green-700">Ticket #{lookupResult.ticketNumber} Owner</div>
                       <div className="text-lg font-black text-brand-midnight">{lookupResult.email}</div>
                       <div className="text-xs text-brand-midnight/50">Order: {lookupResult.orderId} &middot; Status: {lookupResult.status}</div>
+
+                      <div className="pt-3 border-t border-green-200">
+                        <BrandButton
+                          size="sm"
+                          onClick={handleConfirmWinner}
+                          disabled={confirmLoading || confirmResult?.success}
+                        >
+                          {confirmLoading ? "Confirming..." : confirmResult?.success ? "Winner Confirmed" : "Confirm as Live Draw Winner"}
+                        </BrandButton>
+                        <p className="mt-2 text-[10px] text-brand-midnight/40">
+                          This records the winner in Firestore so it appears on their dashboard.
+                        </p>
+                      </div>
+
+                      {confirmResult && (
+                        <div className={`mt-2 rounded-xl p-4 text-sm font-bold ${confirmResult.success ? "bg-brand-secondary/10 text-brand-secondary" : "bg-red-100 text-red-700"}`}>
+                          {confirmResult.message}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-sm font-bold text-red-700">{lookupResult.message || lookupResult.error || "Ticket not found"}</div>
