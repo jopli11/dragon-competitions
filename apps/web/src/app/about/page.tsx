@@ -39,7 +39,7 @@ export default function AboutPage() {
                   Coast Competitions was born from a passion for high-performance machinery and the desire to make premium experiences accessible to everyone. We saw a gap in the market for a truly transparent, UK-based platform that puts the community first.
                 </p>
                 <p>
-                  Every raffle we host is a promise: a promise of a fair draw, a guaranteed winner, and a life-changing moment. We don't do extensions, and we don't do hidden terms. Just pure, skill-based competition.
+                  Every competition and raffle we host is a promise: a promise of a fair draw, a guaranteed winner, and a life-changing moment. We don't do extensions, and we don't do hidden terms. Just pure, skill-based competition.
                 </p>
               </div>
               
@@ -78,7 +78,7 @@ export default function AboutPage() {
                 </div>
                 <h3 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Instant Wins</h3>
                 <p className="mt-4 text-brand-midnight/60 leading-relaxed font-medium">
-                  Beyond our main draws, we offer instant win opportunities on select raffles for immediate excitement.
+                  Beyond our main draws, we offer instant win opportunities on select competitions for immediate excitement.
                 </p>
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function AboutPage() {
                 </p>
                 <div className="mt-10">
                   <Link href="/raffles" className="inline-flex items-center justify-center bg-white text-brand-primary px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm shadow-xl transition-all duration-300 hover:bg-brand-accent hover:-translate-y-1 active:translate-y-0">
-                    Explore Live Raffles
+                    Explore Live Competitions
                   </Link>
                 </div>
               </div>
@@ -125,7 +125,7 @@ export default function AboutPage() {
       <div className="py-24 text-center border-t border-brand-primary/5">
         <Container>
           <p className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-midnight/20">
-            Coast Competitions • UK Skill-Based Raffles
+            Coast Competitions • UK Skill-Based Prize Competitions
           </p>
         </Container>
       </div>

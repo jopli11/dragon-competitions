@@ -267,7 +267,7 @@ export function SiteHeader() {
         </nav>
         <div className="mt-auto">
           <BrandLinkButton fullWidth size="lg" href="/raffles" onClick={() => setIsOpen(false)}>
-            View All Raffles
+            View All Competitions
           </BrandLinkButton>
           <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-widest text-brand-midnight/20">
             18+ Only • BeGambleAware

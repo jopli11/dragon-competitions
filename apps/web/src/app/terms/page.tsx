@@ -35,7 +35,7 @@ export default function TermsPage() {
 
             <h2 className="text-2xl font-black uppercase tracking-tight text-brand-midnight mt-12 mb-6">3. Skill-Based Entry</h2>
             <p className="text-brand-midnight/70 leading-relaxed font-medium mb-6">
-              All competitions hosted on this platform are skill-based. To be entered into a draw, you must correctly answer a qualifying question. Failure to answer correctly will result in an invalid entry without a refund.
+              All competitions hosted on this platform are skill-based. To be entered into a draw, you must correctly answer a qualifying question. If you answer incorrectly, your entry will not be submitted and no payment will be taken. You are welcome to attempt the question again.
             </p>
 
             <h2 className="text-2xl font-black uppercase tracking-tight text-brand-midnight mt-12 mb-6">4. Draw Transparency</h2>

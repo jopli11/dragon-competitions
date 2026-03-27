@@ -114,7 +114,7 @@ const faqCategories = [
     items: [
       {
         question: "How many tickets can I buy?",
-        answer: "The maximum number of tickets per person varies for each competition. You can find the specific limit on each individual raffle page.",
+        answer: "The maximum number of tickets per person varies for each competition. You can find the specific limit on each individual competition page.",
       },
       {
         question: "What happens if I answer the question incorrectly?",

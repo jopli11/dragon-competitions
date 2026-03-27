@@ -47,7 +47,7 @@ export function SiteFooter() {
               </div>
             </Link>
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-white/50">
-              UK skill-based competition raffles. Win epic prizes with
+              UK skill-based prize competitions. Win epic prizes with
               transparent draws and fast entry. Join thousands of winners today.
             </p>
           </div>

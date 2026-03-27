@@ -134,7 +134,7 @@ export default async function Home() {
         {featuredRaffles.length === 0 && (
           <div className="mt-20 text-center">
             <p className="text-sm font-bold text-brand-midnight/40 uppercase tracking-widest">
-              No live raffles yet.
+              No live competitions yet.
             </p>
             <p className="mt-2 text-xs text-brand-midnight/30">
               Check back soon for epic prizes!

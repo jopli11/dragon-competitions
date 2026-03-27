@@ -244,7 +244,7 @@ export function SkillQuestionCard({
           </svg>
         </div>
         <h2 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Sold Out</h2>
-        <p className="mt-2 text-sm text-brand-midnight/50">All tickets for this raffle have been sold. Check back for future raffles!</p>
+        <p className="mt-2 text-sm text-brand-midnight/50">All tickets for this competition have been sold. Check back for future competitions!</p>
       </section>
     );
   }

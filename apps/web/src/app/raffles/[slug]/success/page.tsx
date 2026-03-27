@@ -43,7 +43,7 @@ export default async function SuccessPage({
           </p>
           <div className="mt-10 flex flex-col items-center gap-4">
             <Link href={`/raffles/${slug}`} className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-8 text-sm font-medium text-background transition-colors hover:bg-foreground/90">
-              Return to raffle
+              Return to competition
             </Link>
           </div>
         </AnimatedIn>
@@ -115,13 +115,13 @@ export default async function SuccessPage({
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
           </div>
-          <h1 className="mt-6 text-3xl font-semibold tracking-tight">Raffle Sold Out</h1>
+          <h1 className="mt-6 text-3xl font-semibold tracking-tight">Competition Sold Out</h1>
           <p className="mt-3 text-sm text-foreground/70 max-w-md mx-auto">
-            I'm sorry, but this raffle sold out just as you were checking out. We have automatically issued a full refund to your original payment method.
+            I'm sorry, but this competition sold out just as you were checking out. We have automatically issued a full refund to your original payment method.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4">
             <Link href="/raffles" className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-8 text-sm font-medium text-background transition-colors hover:bg-foreground/90">
-              Browse other raffles
+              Browse other competitions
             </Link>
           </div>
         </AnimatedIn>
@@ -188,7 +188,7 @@ export default async function SuccessPage({
               href="/raffles"
               className="inline-flex h-12 w-full sm:w-auto items-center justify-center rounded-full bg-linear-to-r from-brand-primary to-brand-secondary px-10 text-sm font-black uppercase tracking-wider text-white shadow-lg shadow-brand-primary/20 transition-all hover:scale-105"
             >
-              Enter Another Raffle
+              Enter Another Competition
             </Link>
             <Link
               href="/dashboard"

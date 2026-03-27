@@ -44,7 +44,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const raffle = await fetchRaffleBySlug(slug);
 
-  if (!raffle) return { title: "Raffle Not Found" };
+  if (!raffle) return { title: "Competition Not Found" };
 
   return {
     title: raffle.title,
@@ -188,7 +188,7 @@ export default async function RaffleDetailPage({
             {/* About Section */}
             <GlassCard className="p-6 sm:p-8">
               <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-brand-midnight">
-                About this <GradientText>Raffle</GradientText>
+                About this <GradientText>Competition</GradientText>
               </h2>
               <div className="mt-6 prose prose-sm max-w-none text-brand-midnight/70">
                 {raffle.raffleDescription ? (
@@ -311,10 +311,10 @@ export default async function RaffleDetailPage({
                 </div>
                 <h3 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Competition Closed</h3>
                 <p className="mt-2 text-sm text-brand-midnight/60">
-                  This raffle has reached its maximum ticket limit and is now closed for entries.
+                  This competition has reached its maximum ticket limit and is now closed for entries.
                 </p>
                 <Link href="/raffles" className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-foreground px-8 text-sm font-medium text-background transition-colors hover:bg-foreground/90">
-                  View Other Raffles
+                  View Other Competitions
                 </Link>
               </GlassCard>
             )}

@@ -14,12 +14,12 @@ const nunitoSans = Nunito_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Coast Competitions · Win Incredible Prizes & Cash",
-    template: "%s · Coast Competitions",
+    default: "Coast Competitions UK · Win Incredible Prizes & Cash",
+    template: "%s · Coast Competitions UK",
   },
   description:
-    "Enter Coast Competitions for your chance to win tax-free cash, luxury cars, and the latest tech. Skill-based UK raffles with transparent draws and guaranteed winners.",
-  keywords: ["raffle", "competitions", "win cash", "UK competitions", "skill-based raffle", "Coast Competitions", "win a car"],
+    "Enter Coast Competitions UK for your chance to win tax-free cash, luxury cars, and the latest tech. Skill-based UK prize competitions and raffles with transparent draws and guaranteed winners.",
+  keywords: ["prize competition", "competitions", "win cash", "UK competitions", "skill-based competition", "Coast Competitions UK", "win a car", "UK prize competitions", "raffle"],
   authors: [{ name: "Coast Competitions" }],
   creator: "Coast Competitions",
   publisher: "Coast Competitions",
@@ -44,10 +44,10 @@ export const metadata: Metadata = {
   },
   manifest: '/favicon/site.webmanifest',
   openGraph: {
-    title: "Coast Competitions · Win Incredible Prizes & Cash",
-    description: "Enter Coast Competitions for your chance to win tax-free cash, luxury cars, and the latest tech.",
+    title: "Coast Competitions UK · Win Incredible Prizes & Cash",
+    description: "Enter Coast Competitions UK for your chance to win tax-free cash, luxury cars, and the latest tech.",
     url: 'https://coastcompetitions.co.uk',
-    siteName: 'Coast Competitions',
+    siteName: 'Coast Competitions UK',
     locale: 'en_GB',
     type: 'website',
     images: [
@@ -62,8 +62,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Coast Competitions · Win Incredible Prizes & Cash",
-    description: "Enter Coast Competitions for your chance to win tax-free cash, luxury cars, and the latest tech.",
+    title: "Coast Competitions UK · Win Incredible Prizes & Cash",
+    description: "Enter Coast Competitions UK for your chance to win tax-free cash, luxury cars, and the latest tech.",
     images: [
       {
         url: 'https://images.ctfassets.net/gbo22d874wm2/4SxkVn3dgdpIM6ICvihQ7o/38d94b3752507a021da051be56a1e5f4/Photo_26-02-2026__07_46_17.jpg',

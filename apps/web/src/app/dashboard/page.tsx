@@ -115,7 +115,7 @@ export default function DashboardPage() {
             <GlassCard className="p-12 text-center">
               <p className="text-brand-midnight/60 font-medium">You haven't entered any competitions yet.</p>
               <Link href="/raffles" className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-brand-primary px-8 text-sm font-bold text-white transition-all hover:scale-105 shadow-lg shadow-brand-primary/20">
-                Enter a Raffle Now
+                Enter a Competition Now
               </Link>
             </GlassCard>
           ) : (

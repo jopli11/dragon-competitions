@@ -108,7 +108,7 @@ export default async function RafflesPage() {
       {raffles.length === 0 ? (
         <div className="mt-20 text-center">
           <p className="text-sm font-bold text-foreground/40 uppercase tracking-widest">
-            No live raffles yet.
+            No live competitions yet.
           </p>
           <p className="mt-2 text-xs text-foreground/30">
             Check back soon for epic prizes!

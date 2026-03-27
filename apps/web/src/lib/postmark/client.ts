@@ -43,11 +43,11 @@ export async function sendPurchaseConfirmation({
       From: FROM_EMAIL,
       To: to,
       Subject: `Confirmation: You're entered in ${raffleTitle}!`,
-      TextBody: `Thank you for your purchase! You have been entered into the "${raffleTitle}" raffle. Your ticket numbers are: ${rangeStr}. Order ID: ${orderId}`,
+      TextBody: `Thank you for your purchase! You have been entered into the "${raffleTitle}" competition. Your ticket numbers are: ${rangeStr}. Order ID: ${orderId}`,
       HtmlBody: `
         <h1>Entry Confirmation</h1>
         <p>Thank you for your purchase!</p>
-        <p>You have been entered into the <strong>${escapeHtml(raffleTitle)}</strong> raffle.</p>
+        <p>You have been entered into the <strong>${escapeHtml(raffleTitle)}</strong> competition.</p>
         <p><strong>Your ticket numbers:</strong> ${rangeStr}</p>
         <p>Order ID: ${escapeHtml(orderId)}</p>
         <p>Good luck!</p>
@@ -98,7 +98,7 @@ export async function sendAdminDrawNotification({
         <p><strong>Winner:</strong> ${escapeHtml(winnerEmail)}</p>
         <p><strong>Winning Ticket:</strong> #${winningTicket}</p>
         <p><strong>Total Entries:</strong> ${totalTickets}</p>
-        <p>The raffle document has been updated with the audit trail.</p>
+        <p>The competition record has been updated with the audit trail.</p>
       `,
     });
   } catch (error) {
