@@ -94,7 +94,7 @@ export default function RootLayout({
       <head>
         <Script
           defer
-          data-website-id="cmnagyy0z0001aad2m05fzyyg"
+          data-website-id="cmnah3g3q0003aad2s9nfeyl4"
           src="https://www.crumbless.io/tracker.js"
           strategy="afterInteractive"
         />
