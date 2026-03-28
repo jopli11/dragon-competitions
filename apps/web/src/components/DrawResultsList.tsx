@@ -122,7 +122,7 @@ export function DrawResultsList({ results }: DrawResultsListProps) {
                       sizes="(min-width: 1024px) 40vw, 100vw"
                       className="object-cover"
                     />
-                    <div className="absolute inset-0 bg-linear-to-t from-brand-midnight/80 via-brand-midnight/20 to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-brand-midnight/40 via-transparent to-transparent" />
                     <div className="absolute bottom-6 left-8">
                       <span className={`text-[10px] font-black text-brand-accent uppercase tracking-widest px-2 py-1 rounded backdrop-blur-sm ${result.isLiveDraw ? "bg-amber-500/30" : "bg-brand-secondary/20"}`}>
                         {result.isLiveDraw ? "Live Draw Result" : "Official Result"}
