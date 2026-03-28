@@ -34,8 +34,8 @@ export default function PrivacyPage() {
                 <li>Identity Data: Name, date of birth.</li>
                 <li>Contact Data: Email address, phone number, postal address.</li>
                 <li>Financial Data: Payment card details (processed securely by our payment provider).</li>
-                <li>Technical Data: IP address, browser type, device information.</li>
-                <li>Usage Data: Information about how you use our website and competitions.</li>
+                <li>Technical Data: Browser type, device information.</li>
+                <li>Usage Data: Information about how you use our website and competitions (collected anonymously via Crumbless).</li>
               </ul>
             </section>
 

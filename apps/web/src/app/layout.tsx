@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Nunito_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { CookieConsent } from "@/components/CookieConsent";
 import EmotionRegistry from "@/lib/emotion-registry";
 import { AuthProvider } from "@/lib/auth-context";
 
@@ -91,6 +91,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          defer
+          data-website-id="cmnagyy0z0001aad2m05fzyyg"
+          src="https://www.crumbless.io/tracker.js"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className={`${nunitoSans.variable} antialiased`}>
         <AuthProvider>
           <EmotionRegistry>
@@ -98,7 +106,6 @@ export default function RootLayout({
               <SiteHeader />
               <main className="grow">{children}</main>
               <SiteFooter />
-              <CookieConsent />
             </div>
           </EmotionRegistry>
         </AuthProvider>

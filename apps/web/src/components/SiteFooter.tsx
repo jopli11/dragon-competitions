@@ -73,7 +73,6 @@ export function SiteFooter() {
               <FooterLink href="/contact">Contact Us</FooterLink>
               <FooterLink href="/terms">Terms & Conditions</FooterLink>
               <FooterLink href="/privacy">Privacy Policy</FooterLink>
-              <FooterLink href="/cookies">Cookie Policy</FooterLink>
               <FooterLink href="/refunds">Refund Policy</FooterLink>
               <FooterLink href="/responsible-gaming">Responsible Gaming</FooterLink>
             </nav>
