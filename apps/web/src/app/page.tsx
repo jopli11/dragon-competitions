@@ -30,12 +30,19 @@ export default async function Home() {
   ]);
   
   // Prepare slides for the hero carousel from live raffles
-  const carouselSlides = raffles.slice(0, 3).map(r => ({
-    id: r.id,
-    image: r.heroImageUrl || "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=2000&auto=format&fit=crop",
-    link: `/raffles/${r.slug}`,
-    title: r.title,
-  }));
+  const carouselSlides = raffles.length > 0 
+    ? raffles.slice(0, 3).map(r => ({
+        id: r.id,
+        image: r.heroImageUrl || "/placeholder.png",
+        link: `/raffles/${r.slug}`,
+        title: r.title,
+      }))
+    : [{
+        id: "placeholder",
+        image: "/placeholder.png",
+        link: "/raffles",
+        title: "New Competitions Coming Soon",
+      }];
 
   // Take only the first 4 for the landing page grid
   const featuredRaffles = raffles.slice(0, 4);
@@ -88,7 +95,13 @@ export default async function Home() {
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     ) : (
-                      <div className="h-full w-full bg-brand-accent" />
+                      <Image
+                        src="/placeholder.png"
+                        alt={r.title}
+                        fill
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110 opacity-50"
+                      />
                     )}
                   </div>
                   <div className="p-8">
