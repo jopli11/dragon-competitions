@@ -73,6 +73,9 @@ export function SiteFooter() {
               <FooterLink href="/contact">Contact Us</FooterLink>
               <FooterLink href="/terms">Terms & Conditions</FooterLink>
               <FooterLink href="/privacy">Privacy Policy</FooterLink>
+              <FooterLink href="/cookies">Cookie Policy</FooterLink>
+              <FooterLink href="/refunds">Refund Policy</FooterLink>
+              <FooterLink href="/responsible-gaming">Responsible Gaming</FooterLink>
             </nav>
             <div className="mt-8 flex gap-4">
               {[
@@ -111,12 +114,12 @@ export function SiteFooter() {
             </p>
           </div>
           <div className="flex items-center gap-6">
-            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+            <Link href="/responsible-gaming" className="text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors">
               18+ Only
-            </span>
-            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
+            </Link>
+            <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors">
               BeGambleAware
-            </span>
+            </a>
           </div>
         </div>
       </Container>

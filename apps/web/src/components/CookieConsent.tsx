@@ -38,8 +38,8 @@ export function CookieConsent() {
               </h3>
               <p className="mt-2 text-sm font-medium text-brand-midnight/60 leading-relaxed">
                 We use cookies to enhance your experience and analyze our traffic. By clicking "Accept All", you consent to our use of cookies. Read our{" "}
-                <Link href="/privacy" className="text-brand-primary underline hover:text-brand-secondary">
-                  Privacy Policy
+                <Link href="/cookies" className="text-brand-primary underline hover:text-brand-secondary">
+                  Cookie Policy
                 </Link>{" "}
                 for more info.
               </p>

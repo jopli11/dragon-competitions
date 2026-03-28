@@ -12,6 +12,8 @@ function RegisterContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [confirmAge, setConfirmAge] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -26,6 +28,16 @@ function RegisterContent() {
     
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+
+    if (!agreedToTerms || !confirmAge) {
+      setError("You must agree to the terms and confirm you are 18+.");
+      return;
+    }
+
+    if (!agreedToTerms || !confirmAge) {
+      setError("You must agree to the terms and confirm you are 18+.");
       return;
     }
     
@@ -152,6 +164,37 @@ function RegisterContent() {
             required
             className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all"
           />
+        </div>
+
+        <div className="space-y-4 pt-2">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={confirmAge}
+              onChange={(e) => setConfirmAge(e.target.checked)}
+              className="mt-1 w-4 h-4 rounded border-brand-primary/10 text-brand-secondary focus:ring-brand-secondary/20"
+              required
+            />
+            <span className="text-[10px] font-bold text-brand-midnight/40 uppercase tracking-widest leading-tight group-hover:text-brand-midnight/60 transition-colors">
+              I confirm I am 18 years of age or older
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-1 w-4 h-4 rounded border-brand-primary/10 text-brand-secondary focus:ring-brand-secondary/20"
+              required
+            />
+            <span className="text-[10px] font-bold text-brand-midnight/40 uppercase tracking-widest leading-tight group-hover:text-brand-midnight/60 transition-colors">
+              I have read and agree to the{" "}
+              <Link href="/terms" className="text-brand-secondary underline">
+                Terms and Conditions
+              </Link>
+            </span>
+          </label>
         </div>
 
         {error && (
