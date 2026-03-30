@@ -238,6 +238,7 @@ export default async function RaffleDetailPage({
                   "Open to residents of the United Kingdom only.",
                   "Correct answer to the skill question is required for entry.",
                   "Draw will be conducted live on our social media channels.",
+                  "Free postal entry is available — see our Terms & Conditions for full details.",
                 ].map((rule, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm font-medium text-brand-midnight/60">
                     <span className="shrink-0 w-5 h-5 rounded-full bg-brand-accent flex items-center justify-center text-brand-secondary text-[10px] font-bold">
@@ -319,6 +320,13 @@ export default async function RaffleDetailPage({
               </GlassCard>
             )}
             
+            <div className="rounded-2xl border border-brand-primary/10 bg-brand-accent/30 px-5 py-3 text-center">
+              <span className="text-xs font-medium text-brand-midnight/50">For free entry method </span>
+              <Link href="/terms#free-postal-entry" className="text-xs font-bold text-brand-primary underline hover:text-brand-secondary transition-colors">
+                Click here
+              </Link>
+            </div>
+
             <GlassCard className="text-center py-8">
               <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-midnight/40 mb-2">
                 Tickets Sold
