@@ -7,14 +7,6 @@ import { RaffleCard } from "@/components/RaffleCard";
 export const dynamic = "force-dynamic";
 export const revalidate = 10;
 
-function formatGBPFromPence(pence: number) {
-  if (pence < 100) return `${pence}p`;
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-  }).format(pence / 100);
-}
-
 export default async function RafflesPage() {
   const [raffles, stats] = await Promise.all([
     fetchLiveRaffles(),
@@ -39,7 +31,6 @@ export default async function RafflesPage() {
             key={r.id}
             raffle={r}
             initialTicketsSold={stats[r.slug]?.ticketsSold || 0}
-            formatGBPFromPence={formatGBPFromPence}
             variant="compact"
           />
         ))}

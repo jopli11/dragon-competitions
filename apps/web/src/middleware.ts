@@ -17,13 +17,15 @@ export function middleware(request: NextRequest) {
 
   // 1. Block requests for sensitive file extensions (PHP scans, etc.)
   if (BLOCKED_EXTENSIONS.some(ext => pathname.toLowerCase().endsWith(ext))) {
-    console.warn(`Blocked request for sensitive extension: ${pathname} from ${request.ip || 'unknown'}`);
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    console.warn(`Blocked request for sensitive extension: ${pathname} from ${ip}`);
     return new NextResponse(null, { status: 404 });
   }
 
   // 2. Block suspicious user agents
   if (BLOCKED_USER_AGENTS.some(ua => userAgent.includes(ua))) {
-    console.warn(`Blocked suspicious user agent: ${userAgent} from ${request.ip || 'unknown'}`);
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    console.warn(`Blocked suspicious user agent: ${userAgent} from ${ip}`);
     return new NextResponse(null, { status: 403 });
   }
 

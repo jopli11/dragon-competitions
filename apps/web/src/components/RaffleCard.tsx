@@ -8,11 +8,19 @@ import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
 interface RaffleCardProps {
   raffle: any;
   initialTicketsSold: number;
-  formatGBPFromPence: (pence: number) => string;
   variant?: "default" | "compact";
 }
 
-export function RaffleCard({ raffle, initialTicketsSold, formatGBPFromPence, variant = "default" }: RaffleCardProps) {
+function formatGBPFromPence(pence: number) {
+  if (pence < 100) return `${pence}p`;
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    maximumFractionDigits: 2,
+  }).format(pence / 100);
+}
+
+export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: RaffleCardProps) {
   const { stats: liveStats } = useRaffleStats(raffle.slug, { ticketsSold: initialTicketsSold });
   const currentTicketsSold = liveStats.ticketsSold;
   

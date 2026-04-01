@@ -15,15 +15,6 @@ export const revalidate = 10;
 const HowItWorks = dynamic(() => import("@/components/HowItWorks").then(m => m.HowItWorks));
 const WinnersSection = dynamic(() => import("@/components/WinnersSection").then(m => m.WinnersSection));
 
-function formatGBPFromPence(pence: number) {
-  if (pence < 100) return `${pence}p`;
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-    maximumFractionDigits: 2,
-  }).format(pence / 100);
-}
-
 export default async function Home() {
   const [raffles, stats] = await Promise.all([
     fetchLiveRaffles(),
@@ -75,7 +66,6 @@ export default async function Home() {
               key={r.id}
               raffle={r}
               initialTicketsSold={stats[r.slug]?.ticketsSold || 0}
-              formatGBPFromPence={formatGBPFromPence}
             />
           ))}
         </div>
