@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styled from "@emotion/styled";
 import { BrandButton } from "@/lib/styles";
+import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
 
 const OptionButton = styled.button<{ active: boolean; isWrong: boolean }>`
   display: flex;
@@ -130,7 +131,10 @@ export function SkillQuestionCard({
   const [quantity, setQuantity] = useState(1);
   const router = useRouter();
 
-  const remainingTickets = Math.max(0, maxTickets - ticketsSold);
+  const { stats: liveStats } = useRaffleStats(slug, { ticketsSold });
+  const currentTicketsSold = liveStats.ticketsSold;
+
+  const remainingTickets = Math.max(0, maxTickets - currentTicketsSold);
   const maxPurchase = remainingTickets;
 
   useEffect(() => {

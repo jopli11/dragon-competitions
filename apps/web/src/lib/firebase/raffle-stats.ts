@@ -1,11 +1,9 @@
-import { serverDb } from "@/lib/firebase/server-client";
-import { collection, doc, getDoc, getDocs, query, where, orderBy } from "firebase/firestore";
+import { adminDb } from "@/lib/firebase/admin";
 
 export async function getRaffleStats(slug: string) {
   try {
-    const raffleRef = doc(serverDb, "raffles", slug);
-    const raffleDoc = await getDoc(raffleRef);
-    if (!raffleDoc.exists()) {
+    const raffleDoc = await adminDb.collection("raffles").doc(slug).get();
+    if (!raffleDoc.exists) {
       return { ticketsSold: 0 };
     }
     return {
@@ -19,8 +17,7 @@ export async function getRaffleStats(slug: string) {
 
 export async function getAllRaffleStats() {
   try {
-    const rafflesRef = collection(serverDb, "raffles");
-    const snapshot = await getDocs(rafflesRef);
+    const snapshot = await adminDb.collection("raffles").get();
     const stats: Record<string, { ticketsSold: number }> = {};
     snapshot.forEach(doc => {
       stats[doc.id] = {
@@ -36,13 +33,10 @@ export async function getAllRaffleStats() {
 
 export async function getCompletedDraws() {
   try {
-    const rafflesRef = collection(serverDb, "raffles");
-    const q = query(
-      rafflesRef,
-      where("drawStatus", "==", "completed"),
-      orderBy("drawnAt", "desc")
-    );
-    const snapshot = await getDocs(q);
+    const snapshot = await adminDb.collection("raffles")
+      .where("drawStatus", "==", "completed")
+      .orderBy("drawnAt", "desc")
+      .get();
     
     return snapshot.docs.map(doc => {
       const data = doc.data();

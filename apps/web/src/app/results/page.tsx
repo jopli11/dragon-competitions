@@ -5,7 +5,7 @@ import { fetchEndedRaffles } from "@/lib/contentful/raffles";
 import { DrawResultsList } from "@/components/DrawResultsList";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 10;
 
 type DrawResult = {
   id: string;

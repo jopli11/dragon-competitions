@@ -1,18 +1,22 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { useState, useEffect, use } from "react";
 import { Container } from "@/components/Container";
 import { SkillQuestionCard } from "@/components/SkillQuestionCard";
 import { RaffleMobileCTA } from "@/components/RaffleMobileCTA";
 import { fetchRaffleBySlug } from "@/lib/contentful/raffles";
 import { getRaffleStats } from "@/lib/firebase/raffle-stats";
+import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
 import { BrandBadge, GlassCard, GradientText } from "@/lib/styles";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { BLOCKS, INLINES } from "@contentful/rich-text-types";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 10;
 
 const RICH_TEXT_OPTIONS = {
   renderNode: {
@@ -64,17 +68,33 @@ export async function generateMetadata({
   };
 }
 
-export default async function RaffleDetailPage({
+export default function RaffleDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
-  const [raffle, stats] = await Promise.all([
-    fetchRaffleBySlug(slug),
-    getRaffleStats(slug)
-  ]);
+  const { slug } = use(params);
+  const [raffle, setRaffle] = useState<any>(null);
+  const [initialStats, setInitialStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    async function fetchData() {
+      const [r, s] = await Promise.all([
+        fetchRaffleBySlug(slug),
+        getRaffleStats(slug)
+      ]);
+      setRaffle(r);
+      setInitialStats(s);
+      setLoading(false);
+    }
+    fetchData();
+  }, [slug]);
+
+  const { stats: liveStats } = useRaffleStats(slug, initialStats);
+  const currentTicketsSold = liveStats.ticketsSold;
+
+  if (loading) return null; // Or a skeleton
   if (!raffle) notFound();
 
   function formatGBPFromPence(pence: number) {
@@ -332,7 +352,7 @@ export default async function RaffleDetailPage({
                 Tickets Sold
               </div>
               <div className="text-3xl font-black text-brand-midnight">
-                {stats.ticketsSold} <span className="text-lg text-brand-midnight/20">/ {maxTickets}</span>
+                {currentTicketsSold} <span className="text-lg text-brand-midnight/20">/ {maxTickets}</span>
               </div>
               <div className="mt-4 h-2 w-full bg-brand-accent rounded-full overflow-hidden">
                 <div 
