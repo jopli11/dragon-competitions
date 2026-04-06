@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { fetchLiveRaffles } from '@/lib/contentful/raffles';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://coastcompetitions.co.uk';
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.coastcompetitions.com').replace(/\/+$/, '');
 
   // Fetch all live raffles
   const raffles = await fetchLiveRaffles();

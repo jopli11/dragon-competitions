@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://coastcompetitions.co.uk'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://www.coastcompetitions.com'),
   alternates: {
     canonical: '/',
   },
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Coast Competitions UK · Win Incredible Prizes & Cash",
     description: "Enter Coast Competitions UK for your chance to win tax-free cash, luxury cars, and the latest tech.",
-    url: 'https://coastcompetitions.co.uk',
+    url: '/',
     siteName: 'Coast Competitions UK',
     locale: 'en_GB',
     type: 'website',
