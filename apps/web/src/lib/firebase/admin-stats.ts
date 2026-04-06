@@ -1,4 +1,5 @@
 import { adminDb } from "@/lib/firebase/admin";
+import { AggregateField } from "firebase-admin/firestore";
 
 function serializeFirestoreDoc(doc: FirebaseFirestore.QueryDocumentSnapshot): Record<string, any> {
   const data = doc.data();
@@ -25,42 +26,31 @@ function serializeFirestoreDoc(doc: FirebaseFirestore.QueryDocumentSnapshot): Re
 
 export async function getAdminStats() {
   try {
-    // 1. Get Active Raffles count from Firestore
-    const rafflesSnapshot = await adminDb.collection("raffles").get();
-    const activeRaffles = rafflesSnapshot.size;
+    const [rafflesSnapshot, revenueAgg, recentOrdersSnapshot] = await Promise.all([
+      adminDb.collection("raffles").get(),
+      adminDb.collection("orders").aggregate({
+        totalRevenue: AggregateField.sum("amountTotal"),
+      }).get(),
+      adminDb.collection("orders")
+        .orderBy("createdAt", "desc")
+        .limit(20)
+        .get(),
+    ]);
+
     const raffles = rafflesSnapshot.docs.map(serializeFirestoreDoc);
+    const activeRaffles = rafflesSnapshot.size;
+    const totalRevenuePence = revenueAgg.data().totalRevenue as number || 0;
+    const recentOrders = recentOrdersSnapshot.docs.map(serializeFirestoreDoc);
 
-    // 2. Get Total Revenue from Orders
-    const ordersSnapshot = await adminDb.collection("orders").get();
-    let totalRevenuePence = 0;
-    const orders = ordersSnapshot.docs.map(doc => {
-      const serialized = serializeFirestoreDoc(doc);
-      totalRevenuePence += serialized.amountTotal || 0;
-      return serialized;
-    });
-
-    // 3. Get Pending Draws
-    const pendingDrawsSnapshot = await adminDb
-      .collection("raffles")
-      .where("drawStatus", "==", "pending")
-      .get();
-    const pendingDraws = pendingDrawsSnapshot.size;
-
-    // Sort orders by date descending
-    const sortedOrders = orders.sort((a, b) =>
-      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-    );
-
-    // 4. Get Winners
+    let pendingDraws = 0;
     const winners: any[] = [];
-    const winnersSnapshot = await adminDb
-      .collection("raffles")
-      .where("drawStatus", "==", "completed")
-      .get();
 
-    winnersSnapshot.forEach(doc => {
+    for (const doc of rafflesSnapshot.docs) {
       const data = doc.data();
-      if (data.winningTicketNumber > 0) {
+      if (data.drawStatus === "pending") {
+        pendingDraws++;
+      }
+      if (data.drawStatus === "completed" && data.winningTicketNumber > 0) {
         winners.push({
           id: doc.id,
           name: data.winnerEmail || "Unknown",
@@ -69,13 +59,13 @@ export async function getAdminStats() {
           ticket: data.winningTicketNumber,
         });
       }
-    });
+    }
 
     return {
       activeRaffles,
       totalRevenuePence,
       pendingDraws,
-      recentOrders: sortedOrders.slice(0, 10),
+      recentOrders: recentOrders.slice(0, 10),
       raffles,
       winners,
     };

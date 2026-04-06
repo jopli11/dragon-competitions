@@ -145,11 +145,10 @@ export function SiteHeader() {
   const router = useRouter();
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
+    document.body.style.overflow = isOpen ? "hidden" : "unset";
+    return () => {
       document.body.style.overflow = "unset";
-    }
+    };
   }, [isOpen]);
 
   const handleLogout = async () => {
