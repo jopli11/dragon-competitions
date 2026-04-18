@@ -197,7 +197,9 @@ export async function refundTransaction({
 
   const payload: Record<string, unknown> = { id: transactionId };
   if (amountPence !== undefined) {
-    payload.amount = penceToDnaAmount(amountPence);
+    // DNA's JSON API requires `amount` as a float64, not a string.
+    // Round-trip via toFixed to avoid float precision artefacts (e.g. 0.1 + 0.2).
+    payload.amount = Number((amountPence / 100).toFixed(2));
   }
   if (reason) {
     payload.reason = reason;
