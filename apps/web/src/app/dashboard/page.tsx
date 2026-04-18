@@ -153,9 +153,21 @@ export default function DashboardPage() {
                         </span>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="font-mono text-xs font-bold text-brand-secondary">
-                          #{order.ticketRange.start} — #{order.ticketRange.end}
-                        </div>
+                        {order.ticketRange ? (
+                          <div className="font-mono text-xs font-bold text-brand-secondary">
+                            #{order.ticketRange.start} — #{order.ticketRange.end}
+                          </div>
+                        ) : (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                            order.status === "pending" 
+                              ? "bg-amber-100 text-amber-700" 
+                              : order.status === "failed" 
+                                ? "bg-red-100 text-red-700" 
+                                : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {order.status === "pending" ? "Processing" : order.status}
+                          </span>
+                        )}
                       </td>
                       <td className="px-8 py-6 text-brand-midnight/60 font-medium">
                         {new Date(order.createdAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}

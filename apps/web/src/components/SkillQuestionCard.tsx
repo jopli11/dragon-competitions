@@ -196,9 +196,9 @@ export function SkillQuestionCard({
 
       const res = await fetch("/api/checkout/create-session", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           slug,
@@ -213,15 +213,67 @@ export function SkillQuestionCard({
         throw new Error(data.error || "Failed to create checkout session");
       }
 
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      const isTestMode =
+        (process.env.NEXT_PUBLIC_DNA_ENV || "test") === "test";
+
+      window.DNAPayments.configure({
+        isTestMode,
+        paymentMethods: [
+          { name: window.DNAPayments.paymentMethods.BankCard },
+          { name: window.DNAPayments.paymentMethods.ApplePay },
+          { name: window.DNAPayments.paymentMethods.GooglePay },
+        ],
+        events: {
+          paid: () => {
+            window.DNAPayments.closePaymentWidget();
+            router.push(
+              `/raffles/${slug}/success?invoiceId=${data.invoiceId}`
+            );
+          },
+          declined: () => {
+            setError("Payment declined. Please try again.");
+            window.DNAPayments.closePaymentWidget();
+            setLoading(false);
+          },
+          cancelled: () => {
+            setLoading(false);
+          },
+        },
+      });
+
+      const origin = window.location.origin;
+
+      window.DNAPayments.openPaymentIframeWidget({
+        invoiceId: data.invoiceId,
+        amount: parseFloat(data.amount),
+        currency: data.currency,
+        description: `Tickets for ${data.raffleTitle}`,
+        paymentSettings: {
+          terminalId: data.terminalId,
+          returnUrl: `${origin}/raffles/${slug}/success?invoiceId=${data.invoiceId}`,
+          failureReturnUrl: `${origin}/raffles/${slug}?payment=failed`,
+          callbackUrl: `${origin}/api/webhooks/dna`,
+          failureCallbackUrl: `${origin}/api/webhooks/dna`,
+        },
+        customerDetails: {
+          email: data.email,
+          accountDetails: { accountId: user.uid },
+          billingAddress: { country: "GB" },
+        },
+        auth: data.auth,
+      });
     } catch (err: any) {
       const msg = err.message.toLowerCase();
-      if (msg.includes("expired") || msg.includes("invalid") || msg.includes("used")) {
+      if (
+        msg.includes("expired") ||
+        msg.includes("invalid") ||
+        msg.includes("used")
+      ) {
         sessionStorage.removeItem(`quiz_pass_${slug}`);
         setQuizPassId(null);
-        setError("Your quiz session has ended. Please answer the question again to continue.");
+        setError(
+          "Your quiz session has ended. Please answer the question again to continue."
+        );
       } else {
         setError(err.message);
       }

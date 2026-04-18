@@ -4,14 +4,14 @@ A high-performance, skill-based raffle platform built with Next.js, Firebase, an
 
 ## 🚀 Project Overview
 
-Dragon Competitions is a UK-based competition website where users win prizes by answering skill-based questions. The platform features CMS-driven raffle management, secure Stripe payments, and automated winner selection via Firebase Cloud Functions.
+Dragon Competitions is a UK-based competition website where users win prizes by answering skill-based questions. The platform features CMS-driven raffle management, secure DNA Payments checkout (card, Apple Pay, Google Pay), and automated winner selection via Firebase Cloud Functions.
 
 ## 🛠 Tech Stack
 
 - **Frontend**: Next.js 16 (App Router), TypeScript, Emotion CSS, Tailwind CSS 4
 - **CMS**: Contentful (Raffle details, FAQs, Legal text)
 - **Backend**: Firebase (Firestore, Cloud Functions 2, Authentication)
-- **Payments**: Stripe (Checkout, Webhooks)
+- **Payments**: DNA Payments (Checkout Lightbox, Webhooks — Card, Apple Pay, Google Pay)
 - **Email**: Postmark (Transactional emails)
 - **Monorepo**: npm Workspaces (`apps/web`, `apps/functions`)
 
@@ -21,7 +21,7 @@ Dragon Competitions is a UK-based competition website where users win prizes by 
 - [x] **Monorepo Scaffold**: Root-level development scripts and workspace linking.
 - [x] **CMS Integration**: Contentful schema defined and fetching logic implemented.
 - [x] **Skill Gate**: Server-side verification of answers before allowing entry.
-- [x] **Payment Flow**: Stripe Checkout integration and webhook fulfillment.
+- [x] **Payment Flow**: DNA Payments Checkout (Lightbox) integration with webhook fulfillment.
 - [x] **Automation**: Scheduled Cloud Function for automated, auditable winner draws.
 - [x] **Email System**: Postmark client for purchase and winner notifications.
 - [x] **Best Practices**: Integrated Vercel React Best Practices for performance.
@@ -42,10 +42,12 @@ To run this project, you will need to collect the following variables from your 
 - `CONTENTFUL_ADMIN_TOKEN`: Content Management API (CMA) token (for migrations).
 - `CONTENTFUL_ENVIRONMENT`: (Optional) Defaults to `master`.
 
-### Stripe (Payments)
-- `STRIPE_SECRET_KEY`: Your secret API key from the Stripe dashboard.
-- `STRIPE_WEBHOOK_SECRET`: The secret used to verify webhook signatures (found in Stripe CLI or Dashboard).
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Your public API key.
+### DNA Payments
+- `DNA_CLIENT_ID`: Client ID provided by DNA Payments.
+- `DNA_CLIENT_SECRET`: Client Secret provided by DNA Payments.
+- `DNA_TERMINAL_ID`: Terminal ID provided by DNA Payments.
+- `DNA_ENV`: `test` or `live` (selects OAuth, API, and widget script URLs).
+- `NEXT_PUBLIC_DNA_ENV`: `test` or `live` (client-side — loads the correct DNA widget script).
 
 ### Firebase (Database & Auth)
 - `FIREBASE_PROJECT_ID`: Your Firebase project ID.

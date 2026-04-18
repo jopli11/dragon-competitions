@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe/client";
 import { fetchRaffleBySlug } from "@/lib/contentful/raffles";
-import { adminDb, adminAuth } from "@/lib/firebase/admin";
-import { getRequiredEnv } from "@/lib/env";
+import { adminDb, adminAuth, admin } from "@/lib/firebase/admin";
+import {
+  getCheckoutAccessToken,
+  penceToDnaAmount,
+  getTerminalId,
+} from "@/lib/dna/client";
 
 export async function POST(request: Request) {
   try {
@@ -41,7 +44,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Verify the quiz pass in Firestore
     const passRef = adminDb.collection("quizPasses").doc(quizPassId);
     const passDoc = await passRef.get();
 
@@ -67,7 +69,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Fetch raffle details from Contentful to get the price
     const raffle = await fetchRaffleBySlug(slug);
     if (!raffle || raffle.status !== "live") {
       return NextResponse.json(
@@ -76,51 +77,56 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2.5 Check ticket availability (Soft Check)
     const raffleRef = adminDb.collection("raffles").doc(slug);
     const raffleDoc = await raffleRef.get();
-    const ticketsSold = raffleDoc.exists ? raffleDoc.data()?.ticketsSold || 0 : 0;
+    const ticketsSold = raffleDoc.exists
+      ? raffleDoc.data()?.ticketsSold || 0
+      : 0;
     const maxTickets = raffle.maxTickets || 5000;
 
     if (ticketsSold + quantity > maxTickets) {
       return NextResponse.json(
-        { error: "Not enough tickets remaining. Please try a smaller quantity or check back later." },
+        {
+          error:
+            "Not enough tickets remaining. Please try a smaller quantity or check back later.",
+        },
         { status: 400 }
       );
     }
 
-    // 3. Create Stripe Checkout Session
-    const baseUrl = getRequiredEnv("NEXT_PUBLIC_BASE_URL");
+    const amountPence = raffle.ticketPricePence * quantity;
+    const invoiceId = crypto.randomUUID();
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "gbp",
-            product_data: {
-              name: `Tickets for ${raffle.title}`,
-              description: `Skill-based competition entry - ${quantity} ticket(s)`,
-              images: raffle.heroImageUrl ? [raffle.heroImageUrl] : [],
-            },
-            unit_amount: raffle.ticketPricePence,
-          },
-          quantity: quantity,
-        },
-      ],
-      mode: "payment",
-      success_url: `${baseUrl}/raffles/${slug}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/raffles/${slug}`,
-      metadata: {
-        raffleSlug: slug,
-        quizPassId: quizPassId,
-        quantity: quantity.toString(),
-      },
-    }, {
-      idempotencyKey: `checkout_${quizPassId}`,
+    await adminDb.collection("orders").doc(invoiceId).set({
+      raffleSlug: slug,
+      quizPassId,
+      quantity,
+      amountPence,
+      email: userEmail,
+      uid: decodedToken.uid,
+      status: "pending",
+      provider: "dna",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    return NextResponse.json({ url: session.url });
+    const dnaAuth = await getCheckoutAccessToken({ invoiceId, amountPence });
+
+    return NextResponse.json({
+      invoiceId,
+      amount: penceToDnaAmount(amountPence),
+      currency: "GBP",
+      terminalId: getTerminalId(),
+      auth: {
+        access_token: dnaAuth.access_token,
+        expires_in: dnaAuth.expires_in,
+        scope: dnaAuth.scope,
+        token_type: dnaAuth.token_type,
+      },
+      raffleTitle: raffle.title,
+      heroImageUrl: raffle.heroImageUrl || null,
+      email: userEmail,
+      slug,
+    });
   } catch (error) {
     console.error("Error creating checkout session:", error);
     return NextResponse.json(

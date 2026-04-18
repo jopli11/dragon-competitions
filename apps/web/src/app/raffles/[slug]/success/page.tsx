@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Container } from "@/components/Container";
 import { AnimatedIn } from "@/components/AnimatedIn";
-import { stripe } from "@/lib/stripe/client";
 import { adminDb } from "@/lib/firebase/admin";
 import { redirect } from "next/navigation";
 
@@ -10,56 +9,21 @@ export default async function SuccessPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ session_id?: string }>;
+  searchParams: Promise<{ invoiceId?: string }>;
 }) {
   const { slug } = await params;
-  const { session_id } = await searchParams;
+  const { invoiceId } = await searchParams;
 
-  if (!session_id) {
+  if (!invoiceId) {
     redirect(`/raffles/${slug}`);
   }
 
-  // 1. Verify session with Stripe
-  let session;
-  try {
-    session = await stripe.checkout.sessions.retrieve(session_id);
-  } catch (err) {
-    console.error("Error retrieving Stripe session:", err);
-    redirect(`/raffles/${slug}`);
-  }
-
-  if (session.payment_status !== "paid") {
-    return (
-      <Container className="py-20 text-center">
-        <AnimatedIn>
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-yellow-500/10 text-yellow-500">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-          </div>
-          <h1 className="mt-6 text-3xl font-semibold tracking-tight">Payment Pending</h1>
-          <p className="mt-3 text-sm text-foreground/70">
-            Your payment is still being processed. Please check your email for confirmation once it completes.
-          </p>
-          <div className="mt-10 flex flex-col items-center gap-4">
-            <Link href={`/raffles/${slug}`} className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-8 text-sm font-medium text-background transition-colors hover:bg-foreground/90">
-              Return to competition
-            </Link>
-          </div>
-        </AnimatedIn>
-      </Container>
-    );
-  }
-
-  // 2. Fetch order details from Firestore
-  // We might need to wait a few seconds for the webhook to finish, so we'll show a "Processing" state if not found
-  const orderDoc = await adminDb.collection("orders").doc(session_id).get();
+  const orderDoc = await adminDb.collection("orders").doc(invoiceId).get();
   const orderData = orderDoc.data();
 
-  if (!orderData) {
-    // Check if this session was created more than 2 minutes ago (webhook likely failed)
-    const sessionCreated = session.created ? session.created * 1000 : Date.now();
-    const ageMs = Date.now() - sessionCreated;
+  if (!orderData || orderData.status === "pending") {
+    const createdAt = orderData?.createdAt?.toMillis?.() || Date.now();
+    const ageMs = Date.now() - createdAt;
     const isStale = ageMs > 2 * 60 * 1000;
 
     return (
@@ -105,7 +69,29 @@ export default async function SuccessPage({
     );
   }
 
-  // 3. Handle oversold/refunded case
+  if (orderData.status === "failed") {
+    return (
+      <Container className="py-20 text-center">
+        <AnimatedIn>
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+          </div>
+          <h1 className="mt-6 text-3xl font-semibold tracking-tight">Payment Failed</h1>
+          <p className="mt-3 text-sm text-foreground/70 max-w-md mx-auto">
+            Your payment could not be processed. No charge has been made. Please try again or use a different payment method.
+          </p>
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <Link href={`/raffles/${slug}`} className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-8 text-sm font-medium text-background transition-colors hover:bg-foreground/90">
+              Try Again
+            </Link>
+          </div>
+        </AnimatedIn>
+      </Container>
+    );
+  }
+
   if (orderData.status === "refunded_oversold" || orderData.status === "refunded_pass_reuse" || orderData.status === "refunded") {
     return (
       <Container className="py-20 text-center">
@@ -174,7 +160,7 @@ export default async function SuccessPage({
               <div className="h-8 w-px bg-brand-primary/10" />
               <div className="text-center">
                 <p className="text-[10px] font-bold text-brand-midnight/40 uppercase tracking-wider">Order</p>
-                <p className="font-mono text-xs font-bold text-brand-midnight/60">{session_id.slice(-12)}</p>
+                <p className="font-mono text-xs font-bold text-brand-midnight/60">{invoiceId.slice(-12)}</p>
               </div>
             </div>
           </div>

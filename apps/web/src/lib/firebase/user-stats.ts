@@ -6,7 +6,7 @@ export interface UserOrder {
   raffleSlug: string;
   quantity: number;
   amountTotal: number;
-  ticketRange: { start: number; end: number };
+  ticketRange?: { start: number; end: number };
   createdAt: string;
   status: string;
 }
@@ -32,11 +32,11 @@ export async function getUserOrders(email: string) {
       return {
         id: doc.id,
         raffleSlug: data.raffleSlug,
-        quantity: data.quantity,
-        amountTotal: data.amountTotal,
-        ticketRange: data.ticketRange,
+        quantity: data.quantity ?? 0,
+        amountTotal: data.amountTotal ?? data.amountPence ?? 0,
+        ticketRange: data.ticketRange ?? undefined,
         createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        status: data.status,
+        status: data.status ?? "unknown",
       } as UserOrder;
     });
   } catch (error) {

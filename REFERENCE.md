@@ -17,7 +17,7 @@
 8. [API Endpoints](#8-api-endpoints)
 9. [Components Reference](#9-components-reference)
 10. [Skill Question System](#10-skill-question-system)
-11. [Payment & Checkout (Stripe)](#11-payment--checkout-stripe)
+11. [Payment & Checkout (DNA Payments)](#11-payment--checkout-dna-payments)
 12. [Ticket Allocation System](#12-ticket-allocation-system)
 13. [Automated Draw System](#13-automated-draw-system)
 14. [Provably Fair System](#14-provably-fair-system)
@@ -36,7 +36,7 @@
 
 ## 1. Platform Overview
 
-**Coast Competitions** is a UK-based, skill-based competition and raffle platform. Users browse live competitions, answer a skill-based question to prove eligibility, purchase tickets via Stripe, and are automatically entered into a transparent, cryptographically audited draw when the competition ends.
+**Coast Competitions** is a UK-based, skill-based competition and raffle platform. Users browse live competitions, answer a skill-based question to prove eligibility, purchase tickets via DNA Payments (card, Apple Pay, Google Pay), and are automatically entered into a transparent, cryptographically audited draw when the competition ends.
 
 ### What Makes It Different
 
@@ -48,25 +48,31 @@
 
 ---
 
-## 11. Payment & Checkout (Stripe)
+## 11. Payment & Checkout (DNA Payments)
 
-Coast Competitions uses **Stripe Checkout** for all payments. The integration is hardened for production with idempotency, concurrency protection, and automated error handling.
+Coast Competitions uses **DNA Payments Checkout** (JS Lightbox / iframe) for all payments. Supported payment methods: **Card (Visa, Mastercard, Maestro, Amex)**, **Apple Pay**, and **Google Pay**. The integration is hardened for production with HMAC-SHA256 signature verification, idempotency, concurrency protection, and automated error handling.
+
+### Payment Flow
+1. User answers the skill question and selects ticket quantity.
+2. Client calls `/api/checkout/create-session` which authenticates with DNA's OAuth, mints a unique `invoiceId`, persists a pending order in Firestore, and returns an access token.
+3. Client opens the DNA Lightbox via `window.DNAPayments.openPaymentIframeWidget()` with card, Apple Pay, and Google Pay options.
+4. On completion, DNA sends a server-to-server callback (Payment Result) to `/api/webhooks/dna`.
+5. The webhook verifies the HMAC-SHA256 signature, runs an atomic Firestore transaction to allocate tickets, and sends a confirmation email via Postmark.
+6. The user is redirected to the success page keyed by `invoiceId`.
 
 ### Webhook Configuration
-The platform requires a Stripe Webhook to be configured in the Stripe Dashboard pointing to:
-`https://www.coastcompetitions.com/api/webhooks/stripe`
-
-**Required Events:**
-1. `checkout.session.completed` — Primary trigger for ticket allocation.
-2. `checkout.session.expired` — Cleans up abandoned quiz passes.
-3. `charge.refunded` — Automatically voids tickets associated with a refund.
-4. `payment_intent.payment_failed` — Logs payment failures for customer support.
+DNA Payments must be configured to send the Payment Result callback to:
+`https://www.coastcompetitions.com/api/webhooks/dna`
 
 ### Concurrency & Inventory Protection
 To prevent overselling during high-traffic "last minute" rushes, the system uses a three-layer guard:
 1. **Soft Check**: Pre-checkout availability check in the `create-session` API.
 2. **Hard Guard**: Atomic Firestore transaction inside the webhook ensures only the first writer wins the race for the last tickets.
-3. **Auto-Refund**: If a user pays but tickets are gone (due to a race condition), the system automatically triggers a Stripe refund and notifies the user.
+3. **Auto-Reversal/Refund**: If a user pays but tickets are gone (due to a race condition), the system automatically triggers a DNA reversal (pre-settlement) or refund (post-settlement) and notifies the user.
+
+### Refunds
+- **Automatic**: Oversold/pass-reuse scenarios are handled in the webhook with reversal-first, refund-fallback.
+- **Admin**: The `/api/admin/refund-order` endpoint allows admins to refund completed orders via DNA's Transaction Refund API, voiding tickets in the same Firestore transaction.
 
 ---
 
@@ -129,9 +135,9 @@ Any user can take the Seed and the Total Ticket count and run the calculation th
 | Reoccurring Raffle Logic | **Complete** | Automated via Cloud Functions |
 | Footer Compliance Update | **Complete** | Added Company No. 17087259 and address |
 | Postmark Configuration | **Complete** | API keys and sender verified |
-| Stripe Production Hardening | **Complete** | Idempotency, atomic cap, auto-refunds |
+| DNA Payments Integration | **Complete** | Checkout Lightbox with Card, Apple Pay, Google Pay, HMAC signature verification, auto-reversal/refund |
 | Branded Email Templates | **Not started** | Basic HTML currently used |
-| Stripe Production Setup | **Pending** | Needs account creation & bank connection |
+| DNA Payments Production Setup | **Pending** | Set DNA_ENV=live, replace test credentials, Apple domain-association file from DNA |
 
 ---
 
@@ -154,9 +160,9 @@ The following environment variables **MUST** be set in the Firebase Functions co
 #### 2. Logo Refresh
 **What:** Update the site logo to the final version approved by stakeholders.
 
-#### 3. Stripe Production Setup
-**What:** Create the production Stripe account, complete KYC, and connect the new business bank account.
-**Status:** Bank account is ready, account setup pending.
+#### 3. DNA Payments Production Setup
+**What:** Set `DNA_ENV=live` and `NEXT_PUBLIC_DNA_ENV=live` in production, replace test credentials with live ones, commit the Apple domain-association file from DNA support, and complete final integration approval with DNA.
+**Status:** Test integration complete, live credentials pending.
 
 ### Tier 2: HIGH PRIORITY — Post-Launch Polish & SEO
 

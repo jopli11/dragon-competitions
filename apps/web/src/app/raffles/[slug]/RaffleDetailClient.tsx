@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { SkillQuestionCard } from "@/components/SkillQuestionCard";
 import { RaffleMobileCTA } from "@/components/RaffleMobileCTA";
+import { DnaScript } from "@/components/DnaScript";
 import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
 import { BrandBadge, GlassCard, GradientText } from "@/lib/styles";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
@@ -73,6 +74,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
 
   return (
     <div className="min-h-screen bg-white pb-20">
+      <DnaScript />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

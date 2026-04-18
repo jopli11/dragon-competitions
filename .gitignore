@@ -15,6 +15,9 @@ build/
 # misc
 .DS_Store
 *.pem
+*.rpmsg
+dna-credentials*
+*-dna-credentials*
 
 # debug
 npm-debug.log*
