@@ -108,6 +108,26 @@ const SliderThumb = styled.input`
   }
 `;
 
+// Choose 3 round bulk quantities that scale with remaining tickets.
+// Returns unique ascending values, each clamped to available stock.
+function getBulkTiers(maxPurchase: number): number[] {
+  if (maxPurchase < 2) return [];
+  const tierLadders: number[][] = [
+    [25, 100, 250],
+    [10, 50, 150],
+    [5, 25, 75],
+    [5, 15, 40],
+    [3, 10, 25],
+    [3, 5, 15],
+    [2, 5, 10],
+    [2, 3, 5],
+  ];
+  const ladder = tierLadders.find(([, , top]) => top <= maxPurchase);
+  const tiers = ladder ?? [2, Math.max(2, Math.floor(maxPurchase / 2)), maxPurchase];
+  const clamped = tiers.map((t) => Math.min(t, maxPurchase));
+  return Array.from(new Set(clamped)).sort((a, b) => a - b);
+}
+
 export function SkillQuestionCard({
   question,
   options,
@@ -125,6 +145,7 @@ export function SkillQuestionCard({
 }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isWrong, setIsWrong] = useState(false);
   const [quizPassId, setQuizPassId] = useState<string | null>(null);
@@ -189,6 +210,7 @@ export function SkillQuestionCard({
     }
 
     setLoading(true);
+    setCheckoutLoading(true);
     setError(null);
 
     try {
@@ -224,6 +246,9 @@ export function SkillQuestionCard({
           { name: window.DNAPayments.paymentMethods.GooglePay },
         ],
         events: {
+          opened: () => {
+            setCheckoutLoading(false);
+          },
           paid: () => {
             window.DNAPayments.closePaymentWidget();
             router.push(
@@ -234,9 +259,11 @@ export function SkillQuestionCard({
             setError("Payment declined. Please try again.");
             window.DNAPayments.closePaymentWidget();
             setLoading(false);
+            setCheckoutLoading(false);
           },
           cancelled: () => {
             setLoading(false);
+            setCheckoutLoading(false);
           },
         },
       });
@@ -278,6 +305,7 @@ export function SkillQuestionCard({
         setError(err.message);
       }
       setLoading(false);
+      setCheckoutLoading(false);
     }
   }
 
@@ -290,6 +318,7 @@ export function SkillQuestionCard({
 
   const totalPricePence = quantity * ticketPricePence;
   const sliderPercentage = maxPurchase <= 1 ? 100 : ((quantity - 1) / (maxPurchase - 1)) * 100;
+  const bulkTiers = getBulkTiers(maxPurchase);
 
   if (quizPassId && remainingTickets === 0) {
     return (
@@ -307,6 +336,26 @@ export function SkillQuestionCard({
 
   if (quizPassId) {
     return (
+      <>
+      {checkoutLoading && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed inset-0 z-[9990] flex items-center justify-center bg-brand-midnight/60 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div className="mx-4 flex max-w-sm flex-col items-center gap-5 rounded-3xl bg-white p-8 text-center shadow-2xl">
+            <div className="h-14 w-14 animate-spin rounded-full border-4 border-brand-primary/20 border-t-brand-primary" />
+            <div>
+              <p className="text-sm font-black uppercase tracking-widest text-brand-midnight">
+                Preparing Secure Checkout
+              </p>
+              <p className="mt-2 text-xs font-medium text-brand-midnight/60">
+                Opening DNA Payments. This usually takes a few seconds.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <section className="rounded-3xl border border-black/5 bg-white p-8 shadow-brand">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold tracking-tight text-green-600">
@@ -360,6 +409,45 @@ export function SkillQuestionCard({
             <span>1 Ticket</span>
             <span>{maxPurchase} Max</span>
           </div>
+
+          {bulkTiers.length > 0 && (
+            <div className="mt-6">
+              <p className="text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 mb-2">
+                Quick Select
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {bulkTiers.map((tier, idx) => {
+                  const isActive = quantity === tier;
+                  const isTopTier = idx === bulkTiers.length - 1 && bulkTiers.length > 1;
+                  return (
+                    <button
+                      key={tier}
+                      type="button"
+                      onClick={() => setQuantity(tier)}
+                      className={`relative rounded-xl border-2 px-2 py-3 text-center transition-all ${
+                        isActive
+                          ? "border-brand-primary bg-brand-primary/5 shadow-md shadow-brand-primary/10"
+                          : "border-brand-primary/10 bg-white hover:border-brand-primary/30 hover:bg-brand-primary/[0.02]"
+                      }`}
+                      aria-label={`Select ${tier} tickets for ${formatGBP(tier * ticketPricePence)}`}
+                    >
+                      {isTopTier && (
+                        <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-brand-secondary px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-white shadow-sm">
+                          Best Odds
+                        </span>
+                      )}
+                      <div className={`text-lg font-black tracking-tight ${isActive ? "text-brand-primary" : "text-brand-midnight"}`}>
+                        {tier}
+                      </div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-brand-midnight/50">
+                        {formatGBP(tier * ticketPricePence)}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 rounded-2xl bg-brand-midnight p-6 text-center text-white shadow-xl">
@@ -387,6 +475,7 @@ export function SkillQuestionCard({
           {loading ? "Preparing checkout..." : "Proceed to Payment"}
         </BrandButton>
       </section>
+      </>
     );
   }
 
