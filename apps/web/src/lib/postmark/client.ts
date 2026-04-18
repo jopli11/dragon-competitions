@@ -73,6 +73,73 @@ export async function sendPurchaseConfirmation({
   }
 }
 
+export async function sendRefundConfirmation({
+  to,
+  raffleTitle,
+  ticketRange,
+  orderId,
+  amountPence,
+  currency = "GBP",
+}: {
+  to: string;
+  raffleTitle: string;
+  ticketRange?: { start: number; end: number } | null;
+  orderId: string;
+  amountPence: number;
+  currency?: string;
+}) {
+  if (!postmarkClient) {
+    console.warn("Postmark not configured. Skipping refund email.");
+    return;
+  }
+
+  const amountStr = new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency,
+  }).format(amountPence / 100);
+
+  const rangeStr = ticketRange
+    ? ticketRange.start === ticketRange.end
+      ? `Ticket #${ticketRange.start}`
+      : `Tickets #${ticketRange.start} - #${ticketRange.end}`
+    : "your tickets";
+
+  try {
+    await postmarkClient.sendEmail({
+      From: FROM_EMAIL,
+      To: to,
+      Subject: `Refund Confirmation - ${raffleTitle}`,
+      TextBody: `Your order for "${raffleTitle}" (${rangeStr}) has been refunded for ${amountStr}. Funds typically appear in your account within 3-10 business days. Order ID: ${orderId}`,
+      HtmlBody: `
+        <h1>Refund Confirmed</h1>
+        <p>Your order for <strong>${escapeHtml(raffleTitle)}</strong> has been refunded.</p>
+        <p><strong>Refunded:</strong> ${amountStr}</p>
+        <p><strong>Tickets:</strong> ${rangeStr}</p>
+        <p><strong>Order ID:</strong> ${escapeHtml(orderId)}</p>
+        <p>Funds typically appear back in your account within 3-10 business days, depending on your bank.</p>
+        <p>If you have any questions, please reply to this email.</p>
+      `,
+    });
+
+    await postmarkClient.sendEmail({
+      From: FROM_EMAIL,
+      To: ADMIN_EMAIL,
+      Subject: `[ADMIN] Refund Processed: ${raffleTitle}`,
+      TextBody: `Refund processed for "${raffleTitle}". Customer: ${to}. Amount: ${amountStr}. Tickets: ${rangeStr}. Order ID: ${orderId}`,
+      HtmlBody: `
+        <h1>Refund Processed</h1>
+        <p>A refund has been issued for <strong>${escapeHtml(raffleTitle)}</strong>.</p>
+        <p><strong>Customer:</strong> ${escapeHtml(to)}</p>
+        <p><strong>Amount:</strong> ${amountStr}</p>
+        <p><strong>Tickets voided:</strong> ${rangeStr}</p>
+        <p><strong>Order ID:</strong> ${escapeHtml(orderId)}</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Error sending refund emails:", error);
+  }
+}
+
 export async function sendAdminDrawNotification({
   raffleTitle,
   winnerEmail,

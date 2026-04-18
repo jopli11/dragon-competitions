@@ -13,6 +13,134 @@ function formatGBPFromPence(pence: number) {
   }).format(pence / 100);
 }
 
+const STATUS_STYLES: Record<string, string> = {
+  completed: "bg-green-100 text-green-700",
+  refunded: "bg-gray-200 text-gray-600",
+  pending: "bg-amber-100 text-amber-700",
+  failed: "bg-red-100 text-red-700",
+  refunded_oversold: "bg-orange-100 text-orange-700",
+  refunded_pass_reuse: "bg-orange-100 text-orange-700",
+};
+
+function OrderStatusBadge({ status }: { status?: string }) {
+  const s = status || "unknown";
+  const style = STATUS_STYLES[s] || "bg-gray-100 text-gray-600";
+  const label = s.replace(/_/g, " ");
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${style}`}>
+      {label}
+    </span>
+  );
+}
+
+function RefundModal({
+  order,
+  reason,
+  onReasonChange,
+  loading,
+  error,
+  onCancel,
+  onConfirm,
+}: {
+  order: any;
+  reason: string;
+  onReasonChange: (v: string) => void;
+  loading: boolean;
+  error: string | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const amount = order.amountTotal ?? order.amountPence ?? 0;
+  const ticketStr = order.ticketRange
+    ? order.ticketRange.start === order.ticketRange.end
+      ? `Ticket #${order.ticketRange.start}`
+      : `Tickets #${order.ticketRange.start} - #${order.ticketRange.end}`
+    : `${order.quantity || 0} tickets`;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-9990 flex items-center justify-center bg-brand-midnight/60 backdrop-blur-sm"
+      onClick={onCancel}
+    >
+      <div
+        className="mx-4 w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-6">
+          <h2 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Confirm Refund</h2>
+          <p className="mt-2 text-sm text-brand-midnight/60">
+            This refunds the customer through DNA Payments and voids their tickets. This cannot be undone.
+          </p>
+        </div>
+
+        <div className="space-y-3 rounded-2xl bg-brand-accent/30 p-5 text-sm">
+          <div className="flex justify-between">
+            <span className="text-brand-midnight/50 font-medium">Order</span>
+            <span className="font-mono text-xs font-bold text-brand-midnight">{order.id}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-brand-midnight/50 font-medium">Customer</span>
+            <span className="font-bold text-brand-midnight text-xs break-all text-right">{order.email || "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-brand-midnight/50 font-medium">Raffle</span>
+            <span className="font-bold text-brand-midnight">{order.raffleSlug}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-brand-midnight/50 font-medium">Tickets</span>
+            <span className="font-bold text-brand-midnight">{ticketStr}</span>
+          </div>
+          <div className="flex justify-between border-t border-brand-primary/10 pt-3">
+            <span className="text-brand-midnight/50 font-medium">Refund Amount</span>
+            <span className="text-lg font-black text-brand-midnight">{formatGBPFromPence(amount)}</span>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <label className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 mb-2">
+            Reason (optional, internal)
+          </label>
+          <textarea
+            value={reason}
+            onChange={(e) => onReasonChange(e.target.value)}
+            placeholder="e.g. customer request, duplicate purchase..."
+            rows={2}
+            className="w-full bg-white border border-brand-primary/10 rounded-2xl px-4 py-3 text-sm text-brand-midnight font-medium focus:border-brand-primary focus:outline-none resize-none"
+            disabled={loading}
+          />
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-xs font-bold text-red-700">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-6 flex gap-3 justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest text-brand-midnight/60 hover:text-brand-midnight transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={loading}
+            className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-600/20"
+          >
+            {loading ? "Processing..." : `Refund ${formatGBPFromPence(amount)}`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdminPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "raffles" | "orders" | "winners" | "settings">("overview");
   const [stats, setStats] = useState<any>(null);
@@ -24,6 +152,13 @@ function AdminPage() {
   const [exportLoading, setExportLoading] = useState<string | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmResult, setConfirmResult] = useState<any>(null);
+
+  const [orderFilter, setOrderFilter] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState<"all" | "completed" | "refunded" | "pending" | "failed">("all");
+  const [refundOrder, setRefundOrder] = useState<any>(null);
+  const [refundReason, setRefundReason] = useState("");
+  const [refundLoading, setRefundLoading] = useState(false);
+  const [refundError, setRefundError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -135,6 +270,63 @@ function AdminPage() {
       setConfirmResult({ success: false, message: "Network error. Please try again." });
     } finally {
       setConfirmLoading(false);
+    }
+  }
+
+  async function handleRefund() {
+    if (!refundOrder || refundLoading) return;
+
+    setRefundLoading(true);
+    setRefundError(null);
+    try {
+      const user = auth?.currentUser;
+      if (!user) {
+        setRefundError("Not authenticated.");
+        return;
+      }
+      const idToken = await user.getIdToken();
+
+      const res = await fetch("/api/admin/refund-order", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderId: refundOrder.id,
+          reason: refundReason.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRefundError(data.error || "Refund failed");
+        return;
+      }
+
+      setStats((prev: any) => {
+        if (!prev) return prev;
+        const updateOrder = (o: any) =>
+          o.id === refundOrder.id
+            ? {
+                ...o,
+                status: "refunded",
+                refundedAt: new Date().toISOString(),
+                dnaRefundId: data.dnaRefundId,
+              }
+            : o;
+        return {
+          ...prev,
+          orders: (prev.orders || []).map(updateOrder),
+          recentOrders: (prev.recentOrders || []).map(updateOrder),
+        };
+      });
+
+      setRefundOrder(null);
+      setRefundReason("");
+    } catch (err: any) {
+      setRefundError(err.message || "Network error");
+    } finally {
+      setRefundLoading(false);
     }
   }
 
@@ -330,31 +522,136 @@ function AdminPage() {
       )}
 
       {activeTab === "orders" && (
-        <section>
-          <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
-                <tr>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Order ID</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Email</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Raffle</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Tickets</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-primary/5">
-                {stats.recentOrders.map((order: any) => (
-                  <tr key={order.id}>
-                    <td className="px-8 py-4 font-mono text-[10px] text-brand-midnight/60">{order.id}</td>
-                    <td className="px-8 py-4 font-medium text-brand-midnight">{order.email}</td>
-                    <td className="px-8 py-4 font-medium text-brand-midnight">{order.raffleSlug}</td>
-                    <td className="px-8 py-4 font-bold text-brand-secondary text-center">{order.quantity}</td>
-                    <td className="px-8 py-4 font-bold text-brand-midnight text-right">{formatGBPFromPence(order.amountTotal)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={orderFilter}
+                onChange={(e) => setOrderFilter(e.target.value)}
+                placeholder="Filter by email, order ID, or raffle..."
+                className="w-full bg-white border border-brand-primary/10 rounded-2xl px-6 py-3 text-sm text-brand-midnight font-medium focus:border-brand-primary focus:outline-none"
+              />
+            </div>
+            <div className="flex gap-1 bg-brand-accent/30 p-1 rounded-2xl">
+              {(["all", "completed", "refunded", "pending", "failed"] as const).map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setOrderStatusFilter(status)}
+                  className={`px-3 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+                    orderStatusFilter === status
+                      ? "bg-white text-brand-primary shadow-sm"
+                      : "text-brand-midnight/50 hover:text-brand-midnight"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
           </div>
+
+          <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm min-w-[920px]">
+                <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
+                  <tr>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Order</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Customer</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Raffle</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Tickets</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 text-right">Amount</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Status</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-primary/5">
+                  {(() => {
+                    const allOrders = stats.orders || stats.recentOrders || [];
+                    const filtered = allOrders.filter((o: any) => {
+                      if (orderStatusFilter !== "all" && o.status !== orderStatusFilter) return false;
+                      if (orderFilter) {
+                        const q = orderFilter.toLowerCase();
+                        return (
+                          (o.email || "").toLowerCase().includes(q) ||
+                          (o.id || "").toLowerCase().includes(q) ||
+                          (o.raffleSlug || "").toLowerCase().includes(q)
+                        );
+                      }
+                      return true;
+                    });
+
+                    if (filtered.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={7} className="px-6 py-12 text-center text-brand-midnight/40 text-sm font-medium">
+                            No orders match your filters.
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return filtered.map((order: any) => {
+                      const amount = order.amountTotal ?? order.amountPence ?? 0;
+                      const isRefundable = order.status === "completed" && !!order.dnaTransactionId;
+                      const isRefunded = order.status === "refunded";
+                      return (
+                        <tr key={order.id} className={`hover:bg-brand-accent/5 transition-colors ${isRefunded ? "opacity-70" : ""}`}>
+                          <td className="px-6 py-4">
+                            <div className="font-mono text-[11px] font-bold text-brand-midnight">{order.id.slice(0, 8)}...{order.id.slice(-4)}</div>
+                            <div className="text-[10px] text-brand-midnight/40 mt-0.5">
+                              {order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 font-medium text-brand-midnight text-xs break-all">{order.email || "—"}</td>
+                          <td className="px-6 py-4 font-medium text-brand-midnight text-xs">{order.raffleSlug || "—"}</td>
+                          <td className="px-6 py-4">
+                            <div className="font-bold text-brand-secondary">{order.quantity || 0}</div>
+                            {order.ticketRange && (
+                              <div className="text-[10px] font-mono text-brand-midnight/40 mt-0.5">
+                                #{order.ticketRange.start}-#{order.ticketRange.end}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 font-black text-brand-midnight text-right">{formatGBPFromPence(amount)}</td>
+                          <td className="px-6 py-4">
+                            <OrderStatusBadge status={order.status} />
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            {isRefundable ? (
+                              <button
+                                onClick={() => { setRefundOrder(order); setRefundReason(""); setRefundError(null); }}
+                                className="text-red-600 font-bold text-xs hover:underline"
+                              >
+                                Refund
+                              </button>
+                            ) : isRefunded ? (
+                              <span className="text-[10px] font-bold text-brand-midnight/30 uppercase tracking-wider" title={order.refundedAt ? `Refunded ${new Date(order.refundedAt).toLocaleString("en-GB")}` : ""}>
+                                Refunded
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-brand-midnight/20">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {refundOrder && (
+            <RefundModal
+              order={refundOrder}
+              reason={refundReason}
+              onReasonChange={setRefundReason}
+              loading={refundLoading}
+              error={refundError}
+              onCancel={() => { if (!refundLoading) { setRefundOrder(null); setRefundError(null); } }}
+              onConfirm={handleRefund}
+            />
+          )}
         </section>
       )}
 

@@ -26,21 +26,21 @@ function serializeFirestoreDoc(doc: FirebaseFirestore.QueryDocumentSnapshot): Re
 
 export async function getAdminStats() {
   try {
-    const [rafflesSnapshot, revenueAgg, recentOrdersSnapshot] = await Promise.all([
+    const [rafflesSnapshot, revenueAgg, ordersSnapshot] = await Promise.all([
       adminDb.collection("raffles").get(),
       adminDb.collection("orders").aggregate({
         totalRevenue: AggregateField.sum("amountTotal"),
       }).get(),
       adminDb.collection("orders")
         .orderBy("createdAt", "desc")
-        .limit(20)
+        .limit(200)
         .get(),
     ]);
 
     const raffles = rafflesSnapshot.docs.map(serializeFirestoreDoc);
     const activeRaffles = rafflesSnapshot.size;
     const totalRevenuePence = revenueAgg.data().totalRevenue as number || 0;
-    const recentOrders = recentOrdersSnapshot.docs.map(serializeFirestoreDoc);
+    const orders = ordersSnapshot.docs.map(serializeFirestoreDoc);
 
     let pendingDraws = 0;
     const winners: any[] = [];
@@ -65,7 +65,8 @@ export async function getAdminStats() {
       activeRaffles,
       totalRevenuePence,
       pendingDraws,
-      recentOrders: recentOrders.slice(0, 10),
+      recentOrders: orders.slice(0, 10),
+      orders,
       raffles,
       winners,
     };

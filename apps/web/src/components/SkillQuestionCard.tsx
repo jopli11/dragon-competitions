@@ -341,7 +341,7 @@ export function SkillQuestionCard({
         <div
           role="status"
           aria-live="polite"
-          className="fixed inset-0 z-[9990] flex items-center justify-center bg-brand-midnight/60 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-9990 flex items-center justify-center bg-brand-midnight/60 backdrop-blur-sm animate-in fade-in duration-200"
         >
           <div className="mx-4 flex max-w-sm flex-col items-center gap-5 rounded-3xl bg-white p-8 text-center shadow-2xl">
             <div className="h-14 w-14 animate-spin rounded-full border-4 border-brand-primary/20 border-t-brand-primary" />
@@ -427,7 +427,7 @@ export function SkillQuestionCard({
                       className={`relative rounded-xl border-2 px-2 py-3 text-center transition-all ${
                         isActive
                           ? "border-brand-primary bg-brand-primary/5 shadow-md shadow-brand-primary/10"
-                          : "border-brand-primary/10 bg-white hover:border-brand-primary/30 hover:bg-brand-primary/[0.02]"
+                          : "border-brand-primary/10 bg-white hover:border-brand-primary/30 hover:bg-brand-primary/2"
                       }`}
                       aria-label={`Select ${tier} tickets for ${formatGBP(tier * ticketPricePence)}`}
                     >
