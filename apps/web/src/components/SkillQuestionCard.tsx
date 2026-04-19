@@ -238,13 +238,25 @@ export function SkillQuestionCard({
       const isTestMode =
         (process.env.NEXT_PUBLIC_DNA_ENV || "test") === "test";
 
+      // Apple Pay is gated behind an env flag because it requires the
+      // apple-developer-merchantid-domain-association file from DNA.
+      // Set NEXT_PUBLIC_DNA_APPLE_PAY=enabled once the file is deployed.
+      const applePayEnabled =
+        process.env.NEXT_PUBLIC_DNA_APPLE_PAY === "enabled";
+
+      const paymentMethods = [
+        { name: window.DNAPayments.paymentMethods.BankCard },
+        { name: window.DNAPayments.paymentMethods.GooglePay },
+      ];
+      if (applePayEnabled) {
+        paymentMethods.splice(1, 0, {
+          name: window.DNAPayments.paymentMethods.ApplePay,
+        });
+      }
+
       window.DNAPayments.configure({
         isTestMode,
-        paymentMethods: [
-          { name: window.DNAPayments.paymentMethods.BankCard },
-          { name: window.DNAPayments.paymentMethods.ApplePay },
-          { name: window.DNAPayments.paymentMethods.GooglePay },
-        ],
+        paymentMethods,
         events: {
           opened: () => {
             setCheckoutLoading(false);

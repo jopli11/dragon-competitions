@@ -14,7 +14,7 @@ service cloud.firestore {
     // Publicly readable so users can see competition details and stats
     match /raffles/{raffleId} {
       allow read: if true;
-      allow write: if false; // Writes only allowed via Admin SDK (Stripe Webhook / Cloud Functions)
+      allow write: if false; // Writes only allowed via Admin SDK (DNA webhook / Cloud Functions)
       
       // Tickets Subcollection
       // Restrict to owner email to prevent PII leakage
@@ -28,7 +28,7 @@ service cloud.firestore {
     // Users can only read their own orders based on their authenticated email
     match /orders/{orderId} {
       allow read: if request.auth != null && request.auth.token.email == resource.data.email;
-      allow write: if false; // Writes only allowed via Admin SDK (Stripe Webhook)
+      allow write: if false; // Writes only allowed via Admin SDK (DNA webhook)
     }
 
     // Quiz Passes Collection

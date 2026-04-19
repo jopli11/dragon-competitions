@@ -87,7 +87,7 @@ export async function POST(
     }
 
     // 2. If correct, create a short-lived quiz pass in Firestore
-    // This pass will be required by the Stripe checkout session creation
+    // This pass will be required by the DNA checkout session creation
     const passRef = adminDb.collection("quizPasses").doc();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
