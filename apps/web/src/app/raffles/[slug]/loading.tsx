@@ -11,7 +11,7 @@ export default function Loading() {
         <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
           <div className="space-y-8">
             {/* Main Image Skeleton */}
-            <div className="aspect-16/10 w-full rounded-[2.5rem] bg-brand-midnight/5 animate-pulse shadow-sm" />
+            <div className="aspect-[16/10] w-full max-w-full rounded-[2.5rem] bg-brand-midnight/5 animate-pulse shadow-sm" />
             
             {/* Content Skeleton */}
             <div className="space-y-4">

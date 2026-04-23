@@ -15,9 +15,9 @@ export function RaffleMobileCTA({ ticketPriceFormatted }: RaffleMobileCTAProps) 
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-brand-primary/10 bg-white/80 p-4 backdrop-blur-lg lg:hidden">
-      <Container>
-        <div className="flex items-center justify-between gap-4">
-          <div>
+      <Container className="min-w-0">
+        <div className="flex min-w-0 items-center justify-between gap-4">
+          <div className="min-w-0 shrink-0">
             <p className="text-[10px] font-bold uppercase tracking-wider text-brand-midnight/40">
               Ticket Price
             </p>
@@ -25,12 +25,11 @@ export function RaffleMobileCTA({ ticketPriceFormatted }: RaffleMobileCTAProps) 
               {ticketPriceFormatted}
             </p>
           </div>
-          <BrandButton
-            fullWidth
-            onClick={scrollToQuestion}
-          >
-            Enter Now
-          </BrandButton>
+          <div className="min-w-0 flex-1">
+            <BrandButton fullWidth onClick={scrollToQuestion}>
+              Enter Now
+            </BrandButton>
+          </div>
         </div>
       </Container>
     </div>

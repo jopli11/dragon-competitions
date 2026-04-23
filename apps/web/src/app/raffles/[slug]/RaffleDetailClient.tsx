@@ -73,7 +73,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
   };
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen overflow-x-hidden bg-white pb-20">
       <DnaScript />
       <script
         type="application/ld+json"
@@ -111,11 +111,11 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
       </div>
 
       <Container className="-mt-4 relative z-10">
-        <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-start">
-          <div className="space-y-8">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-start">
+          <div className="min-w-0 space-y-8">
             {/* Main Image Card */}
-            <div className="overflow-hidden rounded-4xl border border-black/5 bg-white shadow-xl">
-              <div className="relative aspect-16/10">
+            <div className="w-full max-w-full min-w-0 overflow-hidden rounded-4xl border border-black/5 bg-white shadow-xl">
+              <div className="relative aspect-[16/10] w-full max-w-full overflow-hidden">
                 {raffle.heroImageUrl ? (
                   <Image
                     src={raffle.heroImageUrl}
@@ -214,7 +214,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
           </div>
 
           {/* Sticky Sidebar */}
-          <div className="lg:sticky lg:top-24 space-y-6">
+          <div className="min-w-0 space-y-6 lg:sticky lg:top-24">
             {isAwaitingDraw ? (
               <GlassCard className="p-8 text-center border-amber-500/20 bg-amber-50">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 mb-4">
