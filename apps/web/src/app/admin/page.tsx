@@ -75,6 +75,10 @@ type AdminStats = {
 type TicketLookupResult = {
   found?: boolean;
   ticketNumber?: number;
+  email?: string;
+  orderId?: string;
+  status?: string;
+  message?: string;
   error?: string;
 };
 
@@ -342,7 +346,7 @@ function AdminPage() {
       });
       const data = (await res.json()) as { message?: string; error?: string };
       if (res.ok) {
-        setConfirmResult({ success: true, message: data.message });
+        setConfirmResult({ success: true, message: data.message || "Winner confirmed successfully" });
       } else {
         setConfirmResult({ success: false, message: data.error || "Failed to confirm winner" });
       }
