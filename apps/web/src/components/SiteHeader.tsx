@@ -183,8 +183,8 @@ export function SiteHeader() {
               />
             </div>
             <div className="flex flex-col justify-center leading-none -ml-2 sm:-ml-4 -mt-1">
-              <span className="text-xl sm:text-3xl font-bold tracking-widest uppercase text-brand-midnight">
-                Coast
+              <span className="text-[1.65rem] sm:text-[2.35rem] font-bold leading-none tracking-widest text-brand-midnight">
+                coast
               </span>
               <span className="text-[7px] sm:text-[10px] font-black tracking-[0.22em] uppercase text-brand-midnight mt-0.5 ml-0.5">
                 Competitions
@@ -237,8 +237,8 @@ export function SiteHeader() {
             />
           </div>
           <div className="flex flex-col justify-center leading-none -ml-4 -mt-1">
-            <span className="text-4xl font-bold tracking-widest uppercase text-brand-midnight">
-              Coast
+            <span className="text-[3rem] font-bold leading-none tracking-widest text-brand-midnight">
+              coast
             </span>
             <span className="text-[12px] font-black tracking-[0.24em] uppercase text-brand-midnight mt-1 ml-1">
               Competitions
