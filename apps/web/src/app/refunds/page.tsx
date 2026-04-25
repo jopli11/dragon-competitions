@@ -45,7 +45,7 @@ export default function RefundPolicyPage() {
             <section>
               <h2 className="text-2xl font-black uppercase tracking-tight text-brand-midnight mb-6">5. Contact Us</h2>
               <p className="text-brand-midnight/70 leading-relaxed font-medium">
-                If you have any questions regarding our refund policy, please contact our support team at support@coastcompetitions.co.uk.
+                If you have any questions regarding our refund policy, please contact our support team at coastcompetitionsuk@gmail.com.
               </p>
             </section>
           </div>

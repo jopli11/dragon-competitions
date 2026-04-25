@@ -1,36 +1,48 @@
 import { adminDb } from "@/lib/firebase/admin";
-import { AggregateField } from "firebase-admin/firestore";
 
-function serializeFirestoreDoc(doc: FirebaseFirestore.QueryDocumentSnapshot): Record<string, any> {
-  const data = doc.data();
-  const result: Record<string, any> = { id: doc.id };
-  for (const [key, value] of Object.entries(data)) {
-    if (value && typeof value === "object" && typeof value.toDate === "function") {
-      result[key] = value.toDate().toISOString();
-    } else if (value && typeof value === "object" && !Array.isArray(value)) {
-      const nested: Record<string, any> = {};
-      for (const [nk, nv] of Object.entries(value)) {
-        if (nv && typeof nv === "object" && typeof (nv as any).toDate === "function") {
-          nested[nk] = (nv as any).toDate().toISOString();
-        } else {
-          nested[nk] = nv;
-        }
-      }
-      result[key] = nested;
-    } else {
-      result[key] = value;
+type TimestampLike = {
+  toDate: () => Date;
+};
+
+function isTimestampLike(value: unknown): value is TimestampLike {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof value.toDate === "function"
+  );
+}
+
+function serializeFirestoreValue(value: unknown): unknown {
+  if (isTimestampLike(value)) {
+    return value.toDate().toISOString();
+  }
+
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const nested: Record<string, unknown> = {};
+    for (const [key, nestedValue] of Object.entries(value)) {
+      nested[key] = serializeFirestoreValue(nestedValue);
     }
+    return nested;
+  }
+
+  return value;
+}
+
+function serializeFirestoreDoc(doc: FirebaseFirestore.QueryDocumentSnapshot): Record<string, unknown> {
+  const data = doc.data();
+  const result: Record<string, unknown> = { id: doc.id };
+  for (const [key, value] of Object.entries(data)) {
+    result[key] = serializeFirestoreValue(value);
   }
   return result;
 }
 
 export async function getAdminStats() {
   try {
-    const [rafflesSnapshot, revenueAgg, ordersSnapshot] = await Promise.all([
+    const [rafflesSnapshot, completedOrdersSnapshot, ordersSnapshot] = await Promise.all([
       adminDb.collection("raffles").get(),
-      adminDb.collection("orders").aggregate({
-        totalRevenue: AggregateField.sum("amountTotal"),
-      }).get(),
+      adminDb.collection("orders").where("status", "==", "completed").get(),
       adminDb.collection("orders")
         .orderBy("createdAt", "desc")
         .limit(200)
@@ -39,11 +51,14 @@ export async function getAdminStats() {
 
     const raffles = rafflesSnapshot.docs.map(serializeFirestoreDoc);
     const activeRaffles = rafflesSnapshot.size;
-    const totalRevenuePence = revenueAgg.data().totalRevenue as number || 0;
+    const totalRevenuePence = completedOrdersSnapshot.docs.reduce((sum, doc) => {
+      const amount = doc.data().amountTotal;
+      return sum + (typeof amount === "number" ? amount : 0);
+    }, 0);
     const orders = ordersSnapshot.docs.map(serializeFirestoreDoc);
 
     let pendingDraws = 0;
-    const winners: any[] = [];
+    const winners: Array<Record<string, unknown>> = [];
 
     for (const doc of rafflesSnapshot.docs) {
       const data = doc.data();

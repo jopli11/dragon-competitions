@@ -22,6 +22,67 @@ const STATUS_STYLES: Record<string, string> = {
   refunded_pass_reuse: "bg-orange-100 text-orange-700",
 };
 
+type TicketRange = {
+  start: number;
+  end: number;
+};
+
+type AdminOrder = {
+  id: string;
+  amountTotal?: number;
+  amountPence?: number;
+  ticketRange?: TicketRange;
+  quantity?: number;
+  email?: string;
+  raffleSlug?: string;
+  status?: string;
+  dnaTransactionId?: string;
+  dnaRefundId?: string;
+  createdAt?: string;
+  refundedAt?: string;
+};
+
+type AdminRaffle = {
+  id: string;
+  slug?: string;
+  title?: string;
+  ticketsSold?: number;
+  totalTickets?: number;
+  endAt?: string;
+  drawStatus?: string;
+  status?: string;
+  isSoldOut?: boolean;
+};
+
+type AdminWinner = {
+  id: string;
+  name?: string;
+  prize?: string;
+  date?: string;
+  ticket?: number;
+};
+
+type AdminStats = {
+  activeRaffles: number;
+  totalRevenuePence: number;
+  pendingDraws: number;
+  recentOrders: AdminOrder[];
+  orders: AdminOrder[];
+  raffles: AdminRaffle[];
+  winners?: AdminWinner[];
+};
+
+type TicketLookupResult = {
+  found?: boolean;
+  ticketNumber?: number;
+  error?: string;
+};
+
+type ConfirmWinnerResult = {
+  success: boolean;
+  message: string;
+};
+
 function OrderStatusBadge({ status }: { status?: string }) {
   const s = status || "unknown";
   const style = STATUS_STYLES[s] || "bg-gray-100 text-gray-600";
@@ -42,7 +103,7 @@ function RefundModal({
   onCancel,
   onConfirm,
 }: {
-  order: any;
+  order: AdminOrder;
   reason: string;
   onReasonChange: (v: string) => void;
   loading: boolean;
@@ -51,6 +112,8 @@ function RefundModal({
   onConfirm: () => void;
 }) {
   const amount = order.amountTotal ?? order.amountPence ?? 0;
+  const [confirmText, setConfirmText] = useState("");
+  const canConfirm = confirmText === "REFUND";
   const ticketStr = order.ticketRange
     ? order.ticketRange.start === order.ticketRange.end
       ? `Ticket #${order.ticketRange.start}`
@@ -69,8 +132,11 @@ function RefundModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-6">
-          <h2 className="text-xl font-black uppercase tracking-tight text-brand-midnight">Confirm Refund</h2>
-          <p className="mt-2 text-sm text-brand-midnight/60">
+          <div className="inline-flex rounded-full bg-red-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-red-700">
+            Dangerous Action
+          </div>
+          <h2 className="mt-3 text-xl font-black uppercase tracking-tight text-brand-midnight">Confirm Refund</h2>
+          <p className="mt-2 text-sm font-bold text-red-700">
             This refunds the customer through DNA Payments and voids their tickets. This cannot be undone.
           </p>
         </div>
@@ -112,6 +178,21 @@ function RefundModal({
           />
         </div>
 
+        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4">
+          <label className="block text-[10px] font-black uppercase tracking-widest text-red-700 mb-2">
+            Type REFUND to enable this action
+          </label>
+          <input
+            type="text"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="REFUND"
+            className="w-full rounded-xl border border-red-200 bg-white px-4 py-3 font-mono text-sm font-bold text-brand-midnight outline-none transition-colors focus:border-red-500"
+            disabled={loading}
+            autoComplete="off"
+          />
+        </div>
+
         {error && (
           <div className="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-xs font-bold text-red-700">
             {error}
@@ -130,7 +211,7 @@ function RefundModal({
           <button
             type="button"
             onClick={onConfirm}
-            disabled={loading}
+            disabled={loading || !canConfirm}
             className="px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-600/20"
           >
             {loading ? "Processing..." : `Refund ${formatGBPFromPence(amount)}`}
@@ -143,19 +224,19 @@ function RefundModal({
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "raffles" | "orders" | "winners" | "settings">("overview");
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [lookupSlug, setLookupSlug] = useState("");
   const [lookupTicket, setLookupTicket] = useState("");
-  const [lookupResult, setLookupResult] = useState<any>(null);
+  const [lookupResult, setLookupResult] = useState<TicketLookupResult | null>(null);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState<string | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [confirmResult, setConfirmResult] = useState<any>(null);
+  const [confirmResult, setConfirmResult] = useState<ConfirmWinnerResult | null>(null);
 
   const [orderFilter, setOrderFilter] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState<"all" | "completed" | "refunded" | "pending" | "failed">("all");
-  const [refundOrder, setRefundOrder] = useState<any>(null);
+  const [refundOrder, setRefundOrder] = useState<AdminOrder | null>(null);
   const [refundReason, setRefundReason] = useState("");
   const [refundLoading, setRefundLoading] = useState(false);
   const [refundError, setRefundError] = useState<string | null>(null);
@@ -174,7 +255,7 @@ function AdminPage() {
         const { fetchAdminDashboardData } = await import("./actions");
         const result = await fetchAdminDashboardData(idToken);
         if (result && result.success) {
-          setStats(result.data);
+          setStats(result.data as AdminStats);
         } else {
           console.error("Failed to fetch admin data:", result?.error);
         }
@@ -224,7 +305,7 @@ function AdminPage() {
         `/api/admin/lookup-ticket?raffleSlug=${encodeURIComponent(lookupSlug)}&ticketNumber=${encodeURIComponent(lookupTicket)}`,
         { headers: { Authorization: `Bearer ${idToken}` } }
       );
-      const data = await res.json();
+      const data = (await res.json()) as TicketLookupResult;
       setLookupResult(data);
     } catch (err) {
       console.error("Lookup error:", err);
@@ -259,7 +340,7 @@ function AdminPage() {
           ticketNumber: lookupResult.ticketNumber,
         }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as { message?: string; error?: string };
       if (res.ok) {
         setConfirmResult({ success: true, message: data.message });
       } else {
@@ -297,15 +378,15 @@ function AdminPage() {
           reason: refundReason.trim() || undefined,
         }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as { error?: string; dnaRefundId?: string };
       if (!res.ok) {
         setRefundError(data.error || "Refund failed");
         return;
       }
 
-      setStats((prev: any) => {
+      setStats((prev) => {
         if (!prev) return prev;
-        const updateOrder = (o: any) =>
+        const updateOrder = (o: AdminOrder): AdminOrder =>
           o.id === refundOrder.id
             ? {
                 ...o,
@@ -323,8 +404,8 @@ function AdminPage() {
 
       setRefundOrder(null);
       setRefundReason("");
-    } catch (err: any) {
-      setRefundError(err.message || "Network error");
+    } catch (err) {
+      setRefundError(err instanceof Error ? err.message : "Network error");
     } finally {
       setRefundLoading(false);
     }
@@ -412,16 +493,16 @@ function AdminPage() {
             <div className="rounded-[2.5rem] border border-brand-primary/5 bg-white p-8 shadow-sm">
               <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-6">Live Raffles</h3>
               <div className="space-y-4">
-                {stats.raffles.slice(0, 3).map((raffle: any) => (
+                {stats.raffles.slice(0, 3).map((raffle) => (
                   <div key={raffle.id} className="flex items-center justify-between p-4 rounded-2xl bg-brand-accent/20">
                     <div>
                       <div className="font-bold text-sm text-brand-midnight">{raffle.title}</div>
                       <div className="text-[10px] text-brand-midnight/40 font-bold uppercase tracking-wider">
-                        {raffle.ticketsSold} / {raffle.totalTickets} tickets
+                        {raffle.ticketsSold || 0} / {raffle.totalTickets || 0} tickets
                       </div>
                     </div>
                     <div className="h-1.5 w-20 bg-brand-accent rounded-full overflow-hidden">
-                      <div className="h-full bg-brand-secondary" style={{ width: `${(raffle.ticketsSold / raffle.totalTickets) * 100}%` }} />
+                      <div className="h-full bg-brand-secondary" style={{ width: `${((raffle.ticketsSold || 0) / (raffle.totalTickets || 1)) * 100}%` }} />
                     </div>
                   </div>
                 ))}
@@ -432,13 +513,13 @@ function AdminPage() {
             <div className="rounded-[2.5rem] border border-brand-primary/5 bg-white p-8 shadow-sm">
               <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-6">Recent Orders</h3>
               <div className="space-y-4">
-                {stats.recentOrders.map((order: any) => (
+                {stats.recentOrders.map((order) => (
                   <div key={order.id} className="flex items-center justify-between p-4 rounded-2xl border border-brand-primary/5">
                     <div>
                       <div className="font-bold text-sm text-brand-midnight">{order.email}</div>
                       <div className="text-[10px] text-brand-midnight/40 font-bold uppercase tracking-wider">{order.raffleSlug}</div>
                     </div>
-                    <div className="font-black text-brand-secondary">{formatGBPFromPence(order.amountTotal)}</div>
+                    <div className="font-black text-brand-secondary">{formatGBPFromPence(order.amountTotal || 0)}</div>
                   </div>
                 ))}
               </div>
@@ -461,7 +542,7 @@ function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/5">
-                {stats.raffles.map((raffle: any) => (
+                {stats.raffles.map((raffle) => (
                   <tr key={raffle.id}>
                     <td className="px-8 py-4">
                       <div className="font-bold text-brand-midnight">{raffle.title}</div>
@@ -469,19 +550,19 @@ function AdminPage() {
                     </td>
                     <td className="px-8 py-4">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-brand-midnight">{raffle.ticketsSold}</span>
+                        <span className="font-bold text-brand-midnight">{raffle.ticketsSold || 0}</span>
                         <span className="text-brand-midnight/20">/</span>
-                        <span className="text-brand-midnight/40">{raffle.totalTickets}</span>
+                        <span className="text-brand-midnight/40">{raffle.totalTickets || 0}</span>
                       </div>
                       <div className="mt-1.5 h-1 w-24 bg-brand-accent rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-brand-secondary" 
-                          style={{ width: `${(raffle.ticketsSold / raffle.totalTickets) * 100}%` }}
+                          style={{ width: `${((raffle.ticketsSold || 0) / (raffle.totalTickets || 1)) * 100}%` }}
                         />
                       </div>
                     </td>
                     <td className="px-8 py-4 font-medium text-brand-midnight">
-                      {new Date(raffle.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {raffle.endAt ? new Date(raffle.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' }) : "—"}
                     </td>
                     <td className="px-8 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
@@ -567,7 +648,7 @@ function AdminPage() {
                 <tbody className="divide-y divide-brand-primary/5">
                   {(() => {
                     const allOrders = stats.orders || stats.recentOrders || [];
-                    const filtered = allOrders.filter((o: any) => {
+                    const filtered = allOrders.filter((o) => {
                       if (orderStatusFilter !== "all" && o.status !== orderStatusFilter) return false;
                       if (orderFilter) {
                         const q = orderFilter.toLowerCase();
@@ -590,7 +671,7 @@ function AdminPage() {
                       );
                     }
 
-                    return filtered.map((order: any) => {
+                    return filtered.map((order) => {
                       const amount = order.amountTotal ?? order.amountPence ?? 0;
                       const isRefundable = order.status === "completed" && !!order.dnaTransactionId;
                       const isRefunded = order.status === "refunded";
@@ -668,7 +749,7 @@ function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/5">
-                {(stats.winners || []).map((winner: any) => (
+                {(stats.winners || []).map((winner) => (
                   <tr key={winner.id}>
                     <td className="px-8 py-4 font-bold text-brand-midnight">{winner.name}</td>
                     <td className="px-8 py-4 font-medium text-brand-midnight">{winner.prize}</td>
@@ -698,7 +779,7 @@ function AdminPage() {
                     className="w-full bg-white border border-brand-primary/10 rounded-2xl px-6 py-4 text-brand-midnight font-medium"
                   >
                     <option value="">Select raffle...</option>
-                    {stats.raffles.map((r: any) => (
+                    {stats.raffles.map((r) => (
                       <option key={r.id} value={r.slug || r.id}>{r.title || r.id}</option>
                     ))}
                   </select>
@@ -760,11 +841,11 @@ function AdminPage() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Support Email</label>
-                <input type="email" defaultValue="support@coastcompetitions.co.uk" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium" />
+                <input type="email" defaultValue="coastcompetitionsuk@gmail.com" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium" />
               </div>
               <div className="space-y-2">
                 <label className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">Admin Notification Email</label>
-                <input type="email" defaultValue="admin@coastcompetitions.co.uk" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium" />
+                <input type="email" defaultValue="coastcompetitionsuk@gmail.com" className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium" />
               </div>
               <BrandButton size="sm">Save Settings</BrandButton>
             </div>

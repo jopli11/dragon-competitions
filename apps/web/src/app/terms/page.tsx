@@ -19,7 +19,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-black uppercase tracking-tight text-brand-midnight mb-6">1. The Promoter</h2>
               <p className="text-brand-midnight/70 leading-relaxed font-medium">
-                The promoter is Coast Competitions Ltd (Company No. 17087259), whose registered office is at 33 Seaview Drive, Ogmore-By-Sea, Bridgend, Wales, CF32 0PB (&ldquo;Promoter&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;), who operates various competitions resulting in the allocation of prizes (&ldquo;Prize&rdquo; or &ldquo;Prizes&rdquo;) on the website www.coastcompetitions.co.uk (&ldquo;Platform&rdquo;) in accordance with these Terms and Conditions.
+                The promoter is Coast Competitions Ltd (Company No. 17087259), whose registered office is at 33 Seaview Drive, Ogmore-By-Sea, Bridgend, Wales, CF32 0PB (&ldquo;Promoter&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;), who operates various competitions resulting in the allocation of prizes (&ldquo;Prize&rdquo; or &ldquo;Prizes&rdquo;) on the website www.coastcompetitions.com (&ldquo;Platform&rdquo;) in accordance with these Terms and Conditions.
               </p>
             </section>
 
@@ -56,7 +56,7 @@ export default function TermsPage() {
                   3.1 &nbsp; Competitions are open to all persons aged 18 or over who are resident in the United Kingdom.
                 </p>
                 <p>
-                  3.2 &nbsp; Any employees of the Promoter or any person connected with the Promoter (through immediate family, professional or commercial association) are prohibited from participating in Competitions.
+                  3.2 &nbsp; Employees of the Promoter and anyone professionally or commercially connected with the operation of a Competition are prohibited from participating in that Competition.
                 </p>
                 <p>
                   3.3 &nbsp; By entering a Competition, the entrant (&ldquo;Entrant&rdquo;, &ldquo;you&rdquo;, &ldquo;your(s)&rdquo;) will be deemed to undertake that you:
@@ -127,16 +127,16 @@ export default function TermsPage() {
                       </ul>
                     </li>
                     <li>
-                      <strong>Postage:</strong> First-class or second-class Royal Mail postage must be paid by the entrant. Special delivery, recorded delivery, courier, or franked mail will not be accepted. The Promoter is not responsible for entries lost, delayed, or damaged in the post.
+                      <strong>Postage:</strong> Each postal entry must be sent using paid Royal Mail postage, either first-class or second-class stamped post, or a Royal Mail tracked service. Hand-delivered entries, unpaid postage, courier deliveries, franked mail, or any delivery method other than Royal Mail stamped or tracked post will not be accepted. The Promoter is not responsible for entries lost, delayed, or damaged in the post.
                     </li>
                     <li>
-                      <strong>Postal Address:</strong> All postal entries must be sent to: <strong>Coast Competitions Ltd, 33 Seaview Drive, Ogmore-By-Sea, Bridgend, Wales, CF32 0PB</strong>. Entries delivered by hand or through the letterbox directly will not be accepted.
+                      <strong>Postal Address:</strong> All postal entries must be sent to: <strong>Coast Competitions Ltd, 33 Seaview Drive, Ogmore-By-Sea, Bridgend, Wales, CF32 0PB</strong>. Entries delivered by hand, placed through the letterbox directly, or sent without paid Royal Mail postage will not be accepted.
                     </li>
                     <li>
                       <strong>Deadline:</strong> Postal entries must be <strong>received</strong> (not postmarked) by the Promoter no later than 48 hours before the published draw date and time for the relevant Competition. Late entries will not be accepted regardless of the posting date.
                     </li>
                     <li>
-                      <strong>Account Requirement:</strong> All postal entrants must hold a valid, registered account on coastcompetitions.co.uk at the time the entry is received. The email address on the postcard must match the registered account email exactly. Entries from unregistered individuals will be void.
+                      <strong>Account Requirement:</strong> All postal entrants must hold a valid, registered account on coastcompetitions.com at the time the entry is received. The email address on the postcard must match the registered account email exactly. Entries from unregistered individuals will be void.
                     </li>
                     <li>
                       <strong>Verification:</strong> The Promoter reserves the right to verify the identity and eligibility of any postal entrant. Incomplete, illegible, defaced, altered, or non-compliant postcards will be void and discarded without notice. The Promoter&apos;s decision regarding the validity of any postal entry is final.
@@ -420,8 +420,8 @@ export default function TermsPage() {
               <div className="text-brand-midnight/70 leading-relaxed font-medium space-y-2">
                 <p><strong>Promoter:</strong> Coast Competitions Ltd</p>
                 <p>33 Seaview Drive, Ogmore-By-Sea, Bridgend, Wales, CF32 0PB</p>
-                <p><strong>Email:</strong> support@coastcompetitions.co.uk</p>
-                <p><strong>Platform:</strong> <a href="https://www.coastcompetitions.co.uk" className="text-brand-primary underline">www.coastcompetitions.co.uk</a></p>
+                <p><strong>Email:</strong> coastcompetitionsuk@gmail.com</p>
+                <p><strong>Platform:</strong> <a href="https://www.coastcompetitions.com" className="text-brand-primary underline">www.coastcompetitions.com</a></p>
               </div>
             </section>
 

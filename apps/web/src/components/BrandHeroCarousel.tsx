@@ -48,12 +48,20 @@ const Overlay = styled.div`
 
 const SlideContent = styled.div`
   position: absolute;
-  bottom: 10%;
+  bottom: 28%;
   left: 0;
   right: 0;
   z-index: 20;
   color: white;
   text-align: center;
+
+  @media (min-width: 640px) {
+    bottom: 14%;
+  }
+
+  @media (min-width: 768px) {
+    bottom: 10%;
+  }
 `;
 
 const Controls = styled.div`
@@ -123,7 +131,7 @@ export function BrandHeroCarousel({ slides }: BrandHeroCarouselProps) {
             <Overlay />
             <SlideContent>
               <Container>
-                <h2 className="text-xl font-black uppercase tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl px-4">
+                <h2 className="text-3xl font-black uppercase tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl px-4">
                   {slide.title}
                 </h2>
               </Container>

@@ -149,7 +149,7 @@ The following environment variables **MUST** be set in the Firebase Functions co
 - `CONTENTFUL_SPACE_ID`: Your Contentful Space ID.
 - `CONTENTFUL_ENVIRONMENT`: (Optional) Defaults to `master`.
 - `POSTMARK_SERVER_TOKEN`: API key for transactional emails.
-- `POSTMARK_FROM_EMAIL`: The verified sender email (e.g., `noreply@coastcompetitions.co.uk`).
+- `POSTMARK_FROM_EMAIL`: The verified sender email (e.g., `coastcompetitionsuk@gmail.com`).
 - `ADMIN_NOTIFICATION_EMAIL`: Where admin draw alerts are sent.
 
 ### Tier 1: CRITICAL — Must Have Before Launch

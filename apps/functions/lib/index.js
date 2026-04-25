@@ -341,8 +341,8 @@ async function handleReoccurring(slug) {
 }
 async function sendWinnerEmail(email, raffleTitle, ticketNumber, totalTickets) {
     const serverToken = process.env.POSTMARK_SERVER_TOKEN;
-    const fromEmail = process.env.POSTMARK_FROM_EMAIL || "noreply@coastcompetitions.co.uk";
-    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "admin@coastcompetitions.co.uk";
+    const fromEmail = process.env.POSTMARK_FROM_EMAIL || "coastcompetitionsuk@gmail.com";
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "coastcompetitionsuk@gmail.com";
     console.log(`sendWinnerEmail called: to=${email}, raffle=${raffleTitle}, ticket=#${ticketNumber}, from=${fromEmail}, adminTo=${adminEmail}, hasToken=${!!serverToken}`);
     if (!serverToken) {
         console.error("POSTMARK_SERVER_TOKEN is empty/undefined. Cannot send winner email.");

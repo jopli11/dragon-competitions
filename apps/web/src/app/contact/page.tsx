@@ -1,7 +1,7 @@
 "use client";
 
 import { Container } from "@/components/Container";
-import { BrandSectionHeading, GradientText, BrandButton } from "@/lib/styles";
+import { BrandSectionHeading, GradientText } from "@/lib/styles";
 import { submitContactForm } from "./actions";
 import { useState } from "react";
 
@@ -21,7 +21,7 @@ export default function ContactPage() {
       } else {
         setStatus("success");
       }
-    } catch (err) {
+    } catch {
       setStatus("error");
       setErrorMessage("Something went wrong. Please try again.");
     }
@@ -33,7 +33,7 @@ export default function ContactPage() {
         <div className="text-center mb-16 sm:mb-24">
           <BrandSectionHeading>Get in <GradientText>Touch</GradientText></BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">
-            Have a question or need help? We're here for you.
+            Have a question or need help? We&apos;re here for you.
           </p>
         </div>
 
@@ -51,7 +51,7 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-black text-brand-midnight uppercase tracking-tight mb-2">Message Sent!</h3>
-                <p className="text-brand-midnight/60 font-medium">Thank you for reaching out. We'll get back to you shortly.</p>
+                <p className="text-brand-midnight/60 font-medium">Thank you for reaching out. We&apos;ll get back to you shortly.</p>
                 <button 
                   onClick={() => setStatus("idle")}
                   className="mt-8 text-sm font-black uppercase tracking-widest text-brand-primary hover:text-brand-secondary transition-colors"
@@ -102,8 +102,8 @@ export default function ContactPage() {
               {[
                 { 
                   title: "Email Us", 
-                  value: "support@coastcompetitions.co.uk", 
-                  link: "mailto:support@coastcompetitions.co.uk",
+                  value: "coastcompetitionsuk@gmail.com", 
+                  link: "mailto:coastcompetitionsuk@gmail.com",
                   icon: (
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

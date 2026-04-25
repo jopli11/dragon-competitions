@@ -17,14 +17,14 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-2xl font-black uppercase tracking-tight text-brand-midnight mb-6">1. Introduction</h2>
               <p className="text-brand-midnight/70 leading-relaxed font-medium">
-                Coast Competitions Ltd ("we", "us", "our") is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your personal data in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
+                Coast Competitions Ltd (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your personal data in accordance with the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-black uppercase tracking-tight text-brand-midnight mb-6">2. Data Controller</h2>
               <p className="text-brand-midnight/70 leading-relaxed font-medium">
-                Coast Competitions Ltd is the data controller responsible for your personal data. If you have any questions, please contact us at support@coastcompetitions.co.uk.
+                Coast Competitions Ltd is the data controller responsible for your personal data. If you have any questions, please contact us at coastcompetitionsuk@gmail.com.
               </p>
             </section>
 
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
                 <li>The right to data portability.</li>
               </ul>
               <p className="mt-4 text-brand-midnight/70 leading-relaxed font-medium">
-                You also have the right to make a complaint at any time to the Information Commissioner's Office (ICO), the UK supervisory authority for data protection issues.
+                You also have the right to make a complaint at any time to the Information Commissioner&apos;s Office (ICO), the UK supervisory authority for data protection issues.
               </p>
             </section>
           </div>

@@ -1,7 +1,7 @@
 import { Container } from "@/components/Container";
 import { BrandSectionHeading } from "@/lib/styles";
 import { BrandHeroCarousel } from "@/components/BrandHeroCarousel";
-import { TrustpilotBadge } from "@/components/TrustpilotBadge";
+// import { TrustpilotBadge } from "@/components/TrustpilotBadge";
 import { HomeCountdown } from "@/components/HomeCountdown";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
@@ -51,9 +51,9 @@ export default async function Home() {
 
       <HomeCountdown endAt={nextEndingRaffle?.endAt} />
 
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <TrustpilotBadge />
-      </div>
+      </div> */}
 
       <Container className="pt-6 pb-20">
         <div className="text-center">

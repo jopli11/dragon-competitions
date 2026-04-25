@@ -2,7 +2,7 @@
 
 ## Global Settings (single entry)
 - **internalName**: `Main`
-- **supportEmail**: `support@dragoncompetitions.co.uk`
+- **supportEmail**: `coastcompetitionsuk@gmail.com`
 - **globalLegalCopy**: (optional) Short compliance/legal text for footer.
 
 ## FAQ Item

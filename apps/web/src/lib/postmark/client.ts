@@ -1,5 +1,5 @@
 import * as postmark from "postmark";
-import { getRequiredEnv, getOptionalEnv } from "@/lib/env";
+import { getOptionalEnv } from "@/lib/env";
 
 const serverToken = getOptionalEnv("POSTMARK_SERVER_TOKEN");
 export const postmarkClient = serverToken ? new postmark.ServerClient(serverToken) : null;
@@ -13,8 +13,8 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;");
 }
 
-export const FROM_EMAIL = getOptionalEnv("POSTMARK_FROM_EMAIL") || "noreply@coastcompetitions.co.uk";
-export const ADMIN_EMAIL = getOptionalEnv("ADMIN_NOTIFICATION_EMAIL") || "admin@coastcompetitions.co.uk";
+export const FROM_EMAIL = getOptionalEnv("POSTMARK_FROM_EMAIL") || "coastcompetitionsuk@gmail.com";
+export const ADMIN_EMAIL = getOptionalEnv("ADMIN_NOTIFICATION_EMAIL") || "coastcompetitionsuk@gmail.com";
 
 export async function sendPurchaseConfirmation({
   to,
