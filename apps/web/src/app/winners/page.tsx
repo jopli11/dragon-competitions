@@ -4,31 +4,13 @@ import Image from "next/image";
 
 const winners = [
   {
-    prize: "Tesla Model S Plaid",
-    winner: "Michael Walker",
-    date: "January 21, 2026",
-    ticket: "282262",
-    quote: "I've been entering for 6 months and finally my number came up! The team at Coast were amazing and the car is even better in person.",
-    image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=1200&auto=format&fit=crop",
-    hasVideo: true,
-  },
-  {
-    prize: "BMW M5 Competition",
-    winner: "Louise St Louie",
-    date: "January 20, 2026",
-    ticket: "282262",
-    quote: "Absolutely life changing. I never thought I'd actually win, but here I am with my dream car. Thank you Coast Competitions!",
-    image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop",
-    hasVideo: false,
-  },
-  {
-    prize: "£15,000 Tax Free Cash",
-    winner: "Danny Hales",
-    date: "January 19, 2026",
-    ticket: "286004",
-    quote: "The cash alternative was exactly what my family needed right now. The process was so fast and transparent.",
-    image: "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=1200&auto=format&fit=crop",
-    hasVideo: true,
+    prize: "Easter Giveaway",
+    winner: "Jess Cox",
+    date: "April 24, 2026",
+    quote: "Winning the Easter competition on Coast Competitions was such an amazing experience! The staff are very friendly and were quick at responding. I'll definitely be entering their competitions again. Thank you so much.",
+    image: "/winners/1/Photo 24-04-2026, 20 44 30 (1).jpg",
+    secondaryImage: "/winners/1/Photo 24-04-2026, 21 46 04.jpg",
+    instagramUrl: "https://www.instagram.com/p/DWrmfKfDLxB/?hl=en",
   },
 ];
 
@@ -55,21 +37,23 @@ export default function WinnersPage() {
                   sizes="(min-width: 1024px) 45vw, 100vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                {winner.hasVideo && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
-                    <button className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-brand-secondary shadow-2xl transition-transform duration-300 hover:scale-110" aria-label="Play testimonial video">
-                      <svg fill="currentColor" viewBox="0 0 24 24" className="w-8 h-8 ml-1">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
                 <div className="absolute top-6 right-6 z-20 bg-[#00b67a] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
                   <svg fill="currentColor" viewBox="0 0 20 20" className="w-3 h-3">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   Verified Winner
                 </div>
+                {winner.secondaryImage && (
+                  <div className="absolute bottom-6 left-6 z-20 h-24 w-24 overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl sm:h-32 sm:w-32">
+                    <Image
+                      src={winner.secondaryImage}
+                      alt={`${winner.winner} with Easter Giveaway prize`}
+                      fill
+                      sizes="128px"
+                      className="object-cover"
+                    />
+                  </div>
+                )}
               </div>
               
               <div className="p-8 sm:p-16 flex flex-col justify-center bg-white">
@@ -92,13 +76,17 @@ export default function WinnersPage() {
 
                 <div className="flex flex-wrap items-center gap-x-12 gap-y-6 pt-10 border-t border-brand-primary/5">
                   <div>
-                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40 tracking-widest mb-1">Draw Date</span>
+                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40 tracking-widest mb-1">Winner Announced</span>
                     <span className="text-lg font-bold text-brand-midnight">{winner.date}</span>
                   </div>
-                  <div>
-                    <span className="block text-[10px] font-bold uppercase text-brand-midnight/40 tracking-widest mb-1">Winning Ticket</span>
-                    <span className="text-lg font-black text-brand-secondary">#{winner.ticket}</span>
-                  </div>
+                  <a
+                    href={winner.instagramUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-11 items-center rounded-full bg-brand-secondary px-6 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-brand-secondary/90"
+                  >
+                    View Instagram Post
+                  </a>
                 </div>
               </div>
             </div>

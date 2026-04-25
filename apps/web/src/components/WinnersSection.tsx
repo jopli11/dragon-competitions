@@ -106,20 +106,11 @@ const Quote = styled.p`
 
 const winners = [
   {
-    prize: "Tesla Model S Plaid",
-    winner: "Michael Walker",
-    date: "Jan 21, 2026",
-    ticket: "282262",
-    quote: "I've been entering for 6 months and finally my number came up! The team at Coast were amazing and the car is even better in person.",
-    image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    prize: "BMW M5 Competition",
-    winner: "Louise St Louie",
-    date: "Jan 20, 2026",
-    ticket: "282262",
-    quote: "Absolutely life changing. I never thought I'd actually win, but here I am with my dream car. Thank you Coast Competitions!",
-    image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=800&auto=format&fit=crop",
+    prize: "Easter Giveaway",
+    winner: "Jess Cox",
+    date: "Apr 24, 2026",
+    quote: "Winning the Easter competition on Coast Competitions was such an amazing experience! The staff are very friendly and were quick at responding.",
+    image: "/winners/1/Photo 24-04-2026, 20 44 30 (1).jpg",
   },
 ];
 
@@ -169,7 +160,7 @@ export function WinnersSection() {
 
                 <div className="flex items-center justify-between pt-4 border-t border-brand-primary/5">
                   <div className="text-[10px] font-bold uppercase text-brand-midnight/40">
-                    Ticket <span className="text-brand-secondary">#{winner.ticket}</span>
+                    Verified Winner
                   </div>
                   <div className="text-[10px] font-bold uppercase text-brand-midnight/40">
                     {winner.date}

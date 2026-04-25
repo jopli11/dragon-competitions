@@ -51,7 +51,7 @@ export default async function DrawResultsPage() {
         contentfulEntry?.heroImageUrl ||
         "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format&fit=crop",
       audit: draw.drawAudit || null,
-      isLiveDraw: false,
+      isLiveDraw: draw.drawType === "live",
     });
   }
 
@@ -77,7 +77,7 @@ export default async function DrawResultsPage() {
         entry.heroImageUrl ||
         "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?q=80&w=800&auto=format&fit=crop",
       audit: null,
-      isLiveDraw: true,
+      isLiveDraw: entry.drawType === "live",
     });
   }
 

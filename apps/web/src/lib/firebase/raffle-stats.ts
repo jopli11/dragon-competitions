@@ -45,6 +45,7 @@ export async function getCompletedDraws() {
         winnerEmail: data.winnerEmail as string | undefined,
         winningTicketNumber: data.winningTicketNumber as number | undefined,
         drawAudit: data.drawAudit as { seed: string; totalTickets: number } | undefined,
+        drawType: data.drawType as "auto" | "live" | undefined,
         drawnAt: data.drawnAt?.toDate?.()?.toISOString() || new Date().toISOString(),
       };
     });
