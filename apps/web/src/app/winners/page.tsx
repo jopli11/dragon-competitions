@@ -8,8 +8,8 @@ const winners = [
     winner: "Jess Cox",
     date: "April 24, 2026",
     quote: "Winning the Easter competition on Coast Competitions was such an amazing experience! The staff are very friendly and were quick at responding. I'll definitely be entering their competitions again. Thank you so much.",
-    image: "/winners/1/Photo 24-04-2026, 20 44 30 (1).jpg",
-    secondaryImage: "/winners/1/Photo 24-04-2026, 21 46 04.jpg",
+    image: "/winners/1/jess-cox-easter-giveaway-main.jpg",
+    secondaryImage: "/winners/1/jess-cox-easter-giveaway-secondary.jpg",
     instagramUrl: "https://www.instagram.com/p/DWrmfKfDLxB/?hl=en",
   },
 ];
