@@ -1,5 +1,5 @@
 import { Container } from "@/components/Container";
-import { GradientText, BrandSectionHeading } from "@/lib/styles";
+import { GradientText } from "@/lib/styles";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -21,8 +21,9 @@ export default function AboutPage() {
             About <GradientText>Coast</GradientText>
           </h1>
           <p className="mt-10 text-xl sm:text-2xl text-white/70 max-w-3xl mx-auto font-medium leading-relaxed px-4">
-            We're not just another competition site. We're a community-driven platform 
-            built on transparency, epic prizes, and the thrill of the win.
+            We&apos;re more than just a competition site. We&apos;re a family-run,
+            community-focused platform built on transparency, exciting prizes,
+            and the belief that a win can make a real difference.
           </p>
         </Container>
       </section>
@@ -36,38 +37,33 @@ export default function AboutPage() {
               </h2>
               <div className="mt-10 space-y-8 text-brand-midnight/70 text-lg sm:text-xl leading-relaxed font-medium">
                 <p>
-                  Coast Competitions was born from a passion for high-performance machinery and the desire to make premium experiences accessible to everyone. We saw a gap in the market for a truly transparent, UK-based platform that puts the community first.
+                  Coast Competitions is a family-run UK prize competition company built on fairness, transparency, and community.
                 </p>
                 <p>
-                  Every competition and raffle we host is a promise: a promise of a fair draw, a guaranteed winner, and a life-changing moment. We don't do extensions, and we don't do hidden terms. Just pure, skill-based competition.
+                  Inspired by the coast and the communities around it, our brand carries a coastal spirit - but our prizes are not limited by it. From high-performance machinery and cash prizes to lifestyle rewards and coastal-themed experiences, we aim to offer prizes that excite, inspire, and make a real difference.
                 </p>
-              </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mt-16">
-                {[
-                  { label: "Winners", value: "1,200+" },
-                  { label: "Prizes Won", value: "£2.5M+" },
-                  { label: "Community", value: "50k+" },
-                  { label: "Trust Score", value: "4.9/5" },
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-brand-accent/30 rounded-3xl p-6 text-center border border-brand-primary/5 flex flex-col gap-2">
-                    <div className="text-xl sm:text-2xl font-black text-brand-secondary">{stat.value}</div>
-                    <div className="text-[10px] font-extrabold text-brand-midnight/40 uppercase tracking-widest leading-none">{stat.label}</div>
-                  </div>
-                ))}
+                <p>
+                  Every competition is designed to be simple, fair, and transparent, with guaranteed winners, clear entry routes, and no hidden surprises.
+                </p>
+                <p>
+                  As we grow, we&apos;ll bring the Coast Competitions community together through events, treasure hunts, cash drops, social media giveaways, and local initiatives. We&apos;ll also listen to your feedback, recommendations, and ideas to help shape the prizes, events, and causes we support.
+                </p>
+                <p>
+                  Our mission is simple: create unforgettable winning moments, give back to coastal communities, and hopefully change lives along the way.
+                </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="bg-white rounded-[2.5rem] p-10 border border-brand-primary/5 shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-brand-secondary/20 group">
                 <div className="w-14 h-14 bg-brand-accent rounded-2xl flex items-center justify-center text-brand-secondary mb-8 border border-brand-secondary/10 group-hover:bg-brand-secondary group-hover:text-white transition-colors duration-300">
                   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04M12 21.355l-.39-.233A11.952 11.955 0 003.382 5.44M12 21.355l.39-.233A11.952 11.955 0 0020.618 5.44" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-black uppercase tracking-tight text-brand-midnight">UK Regulated</h3>
+                <h3 className="text-xl font-black uppercase tracking-tight text-brand-midnight">UK Skill-Based</h3>
                 <p className="mt-4 text-brand-midnight/60 leading-relaxed font-medium">
-                  Operating strictly under UK skill-based competition laws. Every draw is transparent and auditable.
+                  Operating under UK skill-based competition rules. Every draw is transparent and auditable.
                 </p>
               </div>
               <div className="bg-white rounded-[2.5rem] p-10 border border-brand-primary/5 shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-brand-secondary/20 group">
@@ -81,22 +77,34 @@ export default function AboutPage() {
                   Beyond our main draws, we offer instant win opportunities on select competitions for immediate excitement.
                 </p>
               </div>
+              <div className="bg-white rounded-[2.5rem] p-10 border border-brand-primary/5 shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-brand-secondary/20 group">
+                <div className="w-14 h-14 bg-brand-accent rounded-2xl flex items-center justify-center text-brand-secondary mb-8 border border-brand-secondary/10 group-hover:bg-brand-secondary group-hover:text-white transition-colors duration-300">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.868v4.264a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-black uppercase tracking-tight text-brand-midnight">And Much More</h3>
+                <p className="mt-4 text-brand-midnight/60 leading-relaxed font-medium">
+                  Treasure hunts, cash drops, giveaways and events that bring the Coast community together.
+                </p>
+              </div>
             </div>
           </div>
 
           <div className="space-y-12">
             <div className="relative aspect-4/5 rounded-[3rem] sm:rounded-[4rem] overflow-hidden shadow-2xl group border-12 border-white">
               <Image
-                src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1000&auto=format&fit=crop"
-                alt="Coast Competitions Lifestyle"
+                src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop"
+                alt="Waves on the coast"
                 fill
                 sizes="(min-width: 1024px) 40vw, 100vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-linear-to-t from-brand-midnight/80 via-brand-midnight/20 to-transparent" />
               <div className="absolute bottom-10 left-10 right-10">
-                <p className="text-white font-black uppercase tracking-[0.3em] text-xs mb-3 opacity-80">Established 2024</p>
-                <h3 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">The Coast <br />Standard</h3>
+                <p className="text-white font-black uppercase tracking-[0.3em] text-xs mb-3 opacity-80">Established 2025</p>
+                <h3 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">Family-Run. <br />Community-Focused.</h3>
               </div>
             </div>
             
@@ -104,7 +112,7 @@ export default function AboutPage() {
               <div className="relative z-10">
                 <h3 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-white leading-tight">Ready <br />to Win?</h3>
                 <p className="mt-6 text-white/80 text-lg sm:text-xl font-medium leading-relaxed">
-                  Join thousands of happy winners and start your journey today.
+                  Be part of Coast Competitions from the very beginning. Enter today for your chance to win exciting prizes through fair, transparent, skill-based competitions.
                 </p>
                 <div className="mt-10">
                   <Link href="/raffles" className="inline-flex items-center justify-center bg-white text-brand-primary px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm shadow-xl transition-all duration-300 hover:bg-brand-accent hover:-translate-y-1 active:translate-y-0">

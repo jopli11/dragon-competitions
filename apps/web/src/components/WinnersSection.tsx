@@ -120,11 +120,14 @@ export function WinnersSection() {
       <Container>
         <div className="text-center">
           <h2 className="text-sm font-black uppercase tracking-[0.3em] text-brand-secondary">
-            Hall of Fame
+            The Coast Winners Club
           </h2>
           <h3 className="mt-4 text-4xl font-black uppercase tracking-tight sm:text-5xl text-brand-midnight">
             Recent Winners
           </h3>
+          <p className="mx-auto mt-4 max-w-2xl text-brand-midnight/60 font-medium">
+            Every big story starts with an entry. Take part in our skill-based competitions for your chance to win exciting prizes and become part of the Coast Competitions journey.
+          </p>
         </div>
 
         <WinnersGrid>
@@ -156,7 +159,7 @@ export function WinnersSection() {
                   </p>
                 </div>
 
-                <Quote>"{winner.quote}"</Quote>
+                <Quote>&ldquo;{winner.quote}&rdquo;</Quote>
 
                 <div className="flex items-center justify-between pt-4 border-t border-brand-primary/5">
                   <div className="text-[10px] font-bold uppercase text-brand-midnight/40">

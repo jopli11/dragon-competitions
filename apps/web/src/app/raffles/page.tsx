@@ -21,7 +21,7 @@ export default async function RafflesPage() {
             Current <GradientText>Competitions</GradientText>
           </BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">
-            Answer correctly, pick your quantity, and win big.
+            Choose your prize, test your skill, and take your shot at winning big.
           </p>
         </div>
 
