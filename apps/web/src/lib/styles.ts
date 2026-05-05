@@ -2,7 +2,6 @@
 
 import styled from "@emotion/styled";
 import { css } from "@emotion/react";
-import { ComponentProps } from "react";
 import Link from "next/link";
 import isPropValid from "@emotion/is-prop-valid";
 
@@ -103,6 +102,15 @@ interface BrandButtonProps {
 }
 
 export const BrandButton = styled("button", {
+  shouldForwardProp: (prop) => isPropValid(prop) && !ignoredProps.includes(prop),
+})<BrandButtonProps>`
+  ${buttonStyles}
+  width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
+  ${({ variant }) => getButtonVariant(variant)}
+  ${({ size }) => getButtonSize(size)}
+`;
+
+export const BrandButtonLabel = styled("span", {
   shouldForwardProp: (prop) => isPropValid(prop) && !ignoredProps.includes(prop),
 })<BrandButtonProps>`
   ${buttonStyles}

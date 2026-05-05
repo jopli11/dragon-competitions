@@ -7,8 +7,7 @@ import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
 import dynamic from "next/dynamic";
 import { RaffleCard } from "@/components/RaffleCard";
-import Link from "next/link";
-import { BrandButton } from "@/lib/styles";
+import { BrandLinkButton } from "@/lib/styles";
 
 export const revalidate = 10;
 
@@ -83,11 +82,9 @@ export default async function Home() {
 
         {raffles.length > 4 && (
           <div className="mt-12 text-center">
-            <Link href="/raffles">
-              <BrandButton variant="outline" size="lg">
-                View All Competitions
-              </BrandButton>
-            </Link>
+            <BrandLinkButton href="/raffles" variant="outline" size="lg">
+              View All Competitions
+            </BrandLinkButton>
           </div>
         )}
       </Container>

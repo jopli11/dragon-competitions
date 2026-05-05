@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { BrandButton } from "@/lib/styles";
+import { BrandButtonLabel } from "@/lib/styles";
 import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
+import type { RaffleSummary } from "@/lib/contentful/raffles";
 
 interface RaffleCardProps {
-  raffle: any;
+  raffle: RaffleSummary;
   initialTicketsSold: number;
   variant?: "default" | "compact";
 }
@@ -80,9 +81,9 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
                   Just <span className="text-brand-secondary">{formatGBPFromPence(raffle.ticketPricePence)}</span> per entry
                 </p>
               )}
-              <BrandButton fullWidth className="mt-4" variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
+              <BrandButtonLabel fullWidth className="mt-4" variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
                 {isAwaitingDraw ? "View Details" : isSoldOut ? "View Results" : "Enter Now"}
-              </BrandButton>
+              </BrandButtonLabel>
             </div>
           </div>
         </Link>
@@ -146,9 +147,9 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
                 Just <span className="text-brand-secondary">{formatGBPFromPence(raffle.ticketPricePence)}</span> per entry
               </p>
             )}
-            <BrandButton fullWidth variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
+            <BrandButtonLabel fullWidth variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
               {isAwaitingDraw ? "View Details" : isSoldOut ? "View Results" : "Enter Now"}
-            </BrandButton>
+            </BrandButtonLabel>
           </div>
         </div>
       </Link>

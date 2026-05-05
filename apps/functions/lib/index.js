@@ -46,6 +46,7 @@ const db = admin.firestore();
 const runtimeConfig = (0, params_1.defineJsonSecret)("RUNTIME_CONFIG");
 const postmarkToken = (0, params_1.defineSecret)("POSTMARK_SERVER_TOKEN");
 const contentfulToken = (0, params_1.defineSecret)("CONTENTFUL_MANAGEMENT_TOKEN");
+const BUSINESS_NOTIFICATION_EMAIL = "coastcompetitionsuk@gmail.com";
 /**
  * Scheduled function to run every minute and check for ended raffles
  * that need a draw.
@@ -341,9 +342,12 @@ async function handleReoccurring(slug) {
 }
 async function sendWinnerEmail(email, raffleTitle, ticketNumber, totalTickets) {
     const serverToken = process.env.POSTMARK_SERVER_TOKEN;
-    const fromEmail = process.env.POSTMARK_FROM_EMAIL || "coastcompetitionsuk@gmail.com";
-    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "coastcompetitionsuk@gmail.com";
-    console.log(`sendWinnerEmail called: to=${email}, raffle=${raffleTitle}, ticket=#${ticketNumber}, from=${fromEmail}, adminTo=${adminEmail}, hasToken=${!!serverToken}`);
+    const fromEmail = process.env.POSTMARK_FROM_EMAIL || BUSINESS_NOTIFICATION_EMAIL;
+    const adminEmails = Array.from(new Set([
+        process.env.ADMIN_NOTIFICATION_EMAIL,
+        BUSINESS_NOTIFICATION_EMAIL,
+    ].filter((recipient) => Boolean(recipient))));
+    console.log(`sendWinnerEmail called: to=${email}, raffle=${raffleTitle}, ticket=#${ticketNumber}, from=${fromEmail}, adminTo=${adminEmails.join(",")}, hasToken=${!!serverToken}`);
     if (!serverToken) {
         console.error("POSTMARK_SERVER_TOKEN is empty/undefined. Cannot send winner email.");
         throw new Error("Postmark not configured");
@@ -366,10 +370,10 @@ async function sendWinnerEmail(email, raffleTitle, ticketNumber, totalTickets) {
     });
     console.log(`Winner email sent: MessageID=${winnerResult.MessageID}, To=${winnerResult.To}`);
     // Send to Admin
-    console.log(`Sending admin notification to ${adminEmail}...`);
+    console.log(`Sending admin notification to ${adminEmails.join(", ")}...`);
     const adminResult = await client.sendEmail({
         From: fromEmail,
-        To: adminEmail,
+        To: adminEmails.join(","),
         Subject: `[ADMIN] Draw Complete: ${raffleTitle}`,
         TextBody: `The draw for "${raffleTitle}" is complete. Winner: ${email}. Winning Ticket: #${ticketNumber}. Total entries: ${totalTickets}.`,
         HtmlBody: `

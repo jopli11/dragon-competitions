@@ -1,6 +1,5 @@
 import { Container } from "@/components/Container";
-import { BrandButton, BrandSectionHeading, GradientText } from "@/lib/styles";
-import Link from "next/link";
+import { BrandLinkButton, BrandSectionHeading, GradientText } from "@/lib/styles";
 
 export default function NotFound() {
   return (
@@ -16,16 +15,14 @@ export default function NotFound() {
           </BrandSectionHeading>
           
           <p className="mt-6 text-lg font-medium text-brand-midnight/60 leading-relaxed">
-            The page you're looking for doesn't exist or has been moved. 
-            Let's get you back to the competitions!
+            The page you&apos;re looking for doesn&apos;t exist or has been moved. 
+            Let&apos;s get you back to the competitions!
           </p>
           
           <div className="mt-10">
-            <Link href="/raffles">
-              <BrandButton size="lg" className="min-w-[240px]">
-                Browse Competitions
-              </BrandButton>
-            </Link>
+            <BrandLinkButton href="/raffles" size="lg" className="min-w-[240px]">
+              Browse Competitions
+            </BrandLinkButton>
           </div>
         </div>
       </Container>

@@ -17,19 +17,20 @@ function formatDuration(ms: number) {
 
 export function Countdown({ endAt }: { endAt: string }) {
   const end = useMemo(() => new Date(endAt).getTime(), [endAt]);
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
+    setNow(Date.now());
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, []);
 
-  const remaining = end - now;
-  const ended = remaining <= 0;
+  const remaining = now === null ? null : end - now;
+  const ended = remaining !== null && remaining <= 0;
 
   return (
     <span className="tabular-nums">
-      {ended ? "Ended" : formatDuration(remaining)}
+      {remaining === null ? "--" : ended ? "Ended" : formatDuration(remaining)}
     </span>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
 import { Container } from "@/components/Container";
-import { BrandButton, BrandSectionHeading, GradientText } from "@/lib/styles";
-import Link from "next/link";
+import { BrandButton, BrandLinkButton, BrandSectionHeading, GradientText } from "@/lib/styles";
 
 export default function Error({
   error,
@@ -26,18 +25,16 @@ export default function Error({
           </BrandSectionHeading>
           
           <p className="mt-6 text-lg font-medium text-brand-midnight/60 leading-relaxed">
-            We encountered an unexpected error. Our team has been notified and we're working to fix it.
+            We encountered an unexpected error. Our team has been notified and we&apos;re working to fix it.
           </p>
           
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <BrandButton onClick={() => reset()} size="lg" className="min-w-[200px]">
               Try Again
             </BrandButton>
-            <Link href="/">
-              <BrandButton variant="outline" size="lg" className="min-w-[200px]">
-                Back to Home
-              </BrandButton>
-            </Link>
+            <BrandLinkButton href="/" variant="outline" size="lg" className="min-w-[200px]">
+              Back to Home
+            </BrandLinkButton>
           </div>
           
           {process.env.NODE_ENV === "development" && (

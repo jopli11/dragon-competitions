@@ -13,6 +13,7 @@ const db = admin.firestore();
 const runtimeConfig = defineJsonSecret("RUNTIME_CONFIG");
 const postmarkToken = defineSecret("POSTMARK_SERVER_TOKEN");
 const contentfulToken = defineSecret("CONTENTFUL_MANAGEMENT_TOKEN");
+const BUSINESS_NOTIFICATION_EMAIL = "coastcompetitionsuk@gmail.com";
 
 /**
  * Scheduled function to run every minute and check for ended raffles
@@ -356,10 +357,13 @@ async function handleReoccurring(slug: string) {
 
 async function sendWinnerEmail(email: string, raffleTitle: string, ticketNumber: number, totalTickets: number) {
   const serverToken = process.env.POSTMARK_SERVER_TOKEN;
-  const fromEmail = process.env.POSTMARK_FROM_EMAIL || "coastcompetitionsuk@gmail.com";
-  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "coastcompetitionsuk@gmail.com";
+  const fromEmail = process.env.POSTMARK_FROM_EMAIL || BUSINESS_NOTIFICATION_EMAIL;
+  const adminEmails = Array.from(new Set([
+    process.env.ADMIN_NOTIFICATION_EMAIL,
+    BUSINESS_NOTIFICATION_EMAIL,
+  ].filter((recipient): recipient is string => Boolean(recipient))));
 
-  console.log(`sendWinnerEmail called: to=${email}, raffle=${raffleTitle}, ticket=#${ticketNumber}, from=${fromEmail}, adminTo=${adminEmail}, hasToken=${!!serverToken}`);
+  console.log(`sendWinnerEmail called: to=${email}, raffle=${raffleTitle}, ticket=#${ticketNumber}, from=${fromEmail}, adminTo=${adminEmails.join(",")}, hasToken=${!!serverToken}`);
 
   if (!serverToken) {
     console.error("POSTMARK_SERVER_TOKEN is empty/undefined. Cannot send winner email.");
@@ -386,10 +390,10 @@ async function sendWinnerEmail(email: string, raffleTitle: string, ticketNumber:
   console.log(`Winner email sent: MessageID=${winnerResult.MessageID}, To=${winnerResult.To}`);
 
   // Send to Admin
-  console.log(`Sending admin notification to ${adminEmail}...`);
+  console.log(`Sending admin notification to ${adminEmails.join(", ")}...`);
   const adminResult = await client.sendEmail({
     From: fromEmail,
-    To: adminEmail,
+    To: adminEmails.join(","),
     Subject: `[ADMIN] Draw Complete: ${raffleTitle}`,
     TextBody: `The draw for "${raffleTitle}" is complete. Winner: ${email}. Winning Ticket: #${ticketNumber}. Total entries: ${totalTickets}.`,
     HtmlBody: `
