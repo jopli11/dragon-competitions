@@ -57,6 +57,9 @@ export default async function Home() {
       <Container className="pt-6 pb-20">
         <div className="text-center">
           <BrandSectionHeading>Current Competitions</BrandSectionHeading>
+          <p className="mx-auto mt-4 max-w-2xl text-sm font-medium uppercase tracking-widest text-brand-midnight/60">
+            Choose your prize, test your skill, and take your shot at winning big.
+          </p>
         </div>
 
         <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 px-4 sm:px-0">

@@ -19,10 +19,9 @@ export default function WinnersPage() {
     <div className="min-h-screen bg-white py-16 sm:py-24">
       <Container>
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
-          <BrandSectionHeading>The <GradientText>Hall of Fame</GradientText></BrandSectionHeading>
+          <BrandSectionHeading>The <GradientText>Coast Winners Club</GradientText></BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium text-lg">
-            Meet our lucky winners and hear their life-changing stories. 
-            Real people, real prizes, real winners.
+            Every big story starts with an entry. Take part in our skill-based competitions for your chance to win exciting prizes and become part of the Coast Competitions journey.
           </p>
         </div>
 
@@ -70,7 +69,7 @@ export default function WinnersPage() {
                 </div>
 
                 <blockquote className="text-xl sm:text-2xl font-semibold text-brand-midnight leading-relaxed italic relative mb-10 pl-4 sm:pl-8">
-                  <span className="absolute -top-4 -left-2 text-6xl text-brand-secondary opacity-10 font-serif">"</span>
+                  <span className="absolute -top-4 -left-2 text-6xl text-brand-secondary opacity-10 font-serif">&ldquo;</span>
                   {winner.quote}
                 </blockquote>
 
