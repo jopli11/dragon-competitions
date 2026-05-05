@@ -8,6 +8,7 @@ import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
 import dynamic from "next/dynamic";
 import { RaffleCard } from "@/components/RaffleCard";
 import { BrandLinkButton } from "@/lib/styles";
+import { FloatingPaymentPrompt } from "@/components/FloatingPaymentPrompt";
 
 export const revalidate = 10;
 
@@ -46,6 +47,8 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      <FloatingPaymentPrompt />
+
       <BrandHeroCarousel slides={carouselSlides} />
 
       <HomeCountdown endAt={nextEndingRaffle?.endAt} />

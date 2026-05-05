@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Container } from "@/components/Container";
+import { PaymentMethodBadges } from "@/components/PaymentMethodBadges";
 import styled from "@emotion/styled";
 
 const FooterWrapper = styled.footer`
@@ -51,6 +52,17 @@ export function SiteFooter() {
               fair and transparent draws, and a commitment to giving back to
               coastal communities.
             </p>
+            <div className="mt-8">
+              <h3 className="text-xs font-bold tracking-widest text-white uppercase">
+                We Accept
+              </h3>
+              <div className="mt-4">
+                <PaymentMethodBadges compact />
+              </div>
+              <p className="mt-3 max-w-sm text-xs leading-relaxed text-white/35">
+                Secure checkout with major cards, Google Pay, and Apple Pay.
+              </p>
+            </div>
           </div>
 
           <div>
