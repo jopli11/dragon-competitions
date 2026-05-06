@@ -36,7 +36,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
         className={`group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl ${isAwaitingDraw ? 'border-amber-300/40' : isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
       >
         <Link href={`/raffles/${raffle.slug}`} className="block">
-          <div className="relative aspect-4/3 overflow-hidden">
+          <div className="relative aspect-11/6 overflow-hidden bg-brand-accent">
             <div className={`absolute top-3 left-3 z-10 rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
               {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
             </div>
@@ -46,7 +46,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
                 alt={raffle.title}
                 fill
                 sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                className="object-cover"
               />
             ) : (
               <div className="h-full w-full bg-brand-accent" />
@@ -96,7 +96,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
       className={`group overflow-hidden rounded-[2.5rem] border border-brand-primary/10 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${isAwaitingDraw ? 'border-amber-300/40' : isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
     >
       <Link href={`/raffles/${raffle.slug}`} className="block">
-        <div className="relative aspect-4/3 overflow-hidden">
+        <div className="relative aspect-11/6 overflow-hidden bg-brand-accent">
           <div className={`absolute top-4 left-4 z-10 rounded-lg px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider shadow-lg ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
             {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
           </div>
@@ -106,7 +106,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
               alt={raffle.title}
               fill
               sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              className="object-cover"
             />
           ) : (
             <Image
@@ -114,7 +114,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
               alt={raffle.title}
               fill
               sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-110 opacity-50"
+              className="object-cover opacity-50"
             />
           )}
         </div>

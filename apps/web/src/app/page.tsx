@@ -36,8 +36,8 @@ export default async function Home() {
         title: "New Competitions Coming Soon",
       }];
 
-  // Take only the first 4 for the landing page grid
-  const featuredRaffles = raffles.slice(0, 4);
+  // Keep the homepage grid balanced with the standard three-card competition row.
+  const featuredRaffles = raffles.slice(0, 3);
 
   // Find the raffle ending soonest for the countdown (exclude awaitingDraw raffles)
   const activeRaffles = raffles.filter(r => r.status !== "awaitingDraw");
@@ -65,12 +65,13 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 px-4 sm:px-0">
+        <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 px-4 sm:px-0">
           {featuredRaffles.map((r) => (
             <RaffleCard 
               key={r.id}
               raffle={r}
               initialTicketsSold={stats[r.slug]?.ticketsSold || 0}
+              variant="compact"
             />
           ))}
         </div>
@@ -86,7 +87,7 @@ export default async function Home() {
           </div>
         )}
 
-        {raffles.length > 4 && (
+        {raffles.length > 3 && (
           <div className="mt-12 text-center">
             <BrandLinkButton href="/raffles" variant="outline" size="lg">
               View All Competitions

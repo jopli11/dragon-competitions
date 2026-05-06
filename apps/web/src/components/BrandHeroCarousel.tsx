@@ -4,18 +4,37 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styled from "@emotion/styled";
-import { Container } from "./Container";
 
 const CarouselWrapper = styled.section`
   position: relative;
   width: 100%;
-  aspect-ratio: 16/9;
-  background: #0a0a0a;
+  background: #f3fbf8;
   overflow: hidden;
-  
-  @media (min-width: 768px) {
-    aspect-ratio: 21/9;
+`;
+
+const BackdropContainer = styled.div<{ active: boolean }>`
+  position: absolute;
+  inset: 0;
+  opacity: ${({ active }) => (active ? 1 : 0)};
+  visibility: ${({ active }) => (active ? "visible" : "hidden")};
+  transition: opacity 0.5s ease-in-out;
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: rgba(243, 251, 248, 0.72);
   }
+`;
+
+const CarouselFrame = styled.div`
+  position: relative;
+  width: min(100%, 1280px);
+  margin-inline: auto;
+  aspect-ratio: 16/9;
+  background: #f3fbf8;
+  overflow: hidden;
+  z-index: 1;
 `;
 
 const SlideContainer = styled.div<{ active: boolean }>`
@@ -31,37 +50,6 @@ const SlideLink = styled(Link)`
   width: 100%;
   height: 100%;
   position: relative;
-`;
-
-const Overlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.2) 0%,
-    rgba(0, 0, 0, 0) 40%,
-    rgba(0, 0, 0, 0) 60%,
-    rgba(0, 0, 0, 0.4) 100%
-  );
-  z-index: 10;
-`;
-
-const SlideContent = styled.div`
-  position: absolute;
-  bottom: 28%;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  color: white;
-  text-align: center;
-
-  @media (min-width: 640px) {
-    bottom: 14%;
-  }
-
-  @media (min-width: 768px) {
-    bottom: 10%;
-  }
 `;
 
 const Controls = styled.div`
@@ -81,10 +69,15 @@ const Dot = styled.button<{ active: boolean }>`
   background: ${({ active }) => (active ? "#0070E0" : "rgba(255, 255, 255, 0.3)")};
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s ease, transform 0.2s ease;
   
   &:hover {
     background: ${({ active }) => (active ? "#0070E0" : "rgba(255, 255, 255, 0.5)")};
+  }
+
+  &:focus-visible {
+    outline: 2px solid #0070E0;
+    outline-offset: 3px;
   }
 `;
 
@@ -118,43 +111,49 @@ export function BrandHeroCarousel({ slides }: BrandHeroCarouselProps) {
   return (
     <CarouselWrapper>
       {slides.map((slide, index) => (
-        <SlideContainer key={slide.id} active={index === current}>
-          <SlideLink href={slide.link}>
-            <Image
-              src={slide.image}
-              alt={slide.title}
-              fill
-              priority={index === 0}
-              sizes="100vw"
-              className="object-cover"
-            />
-            <Overlay />
-            <SlideContent>
-              <Container>
-                <h2 className="text-3xl font-black uppercase tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl px-4">
-                  {slide.title}
-                </h2>
-              </Container>
-            </SlideContent>
-          </SlideLink>
-        </SlideContainer>
+        <BackdropContainer key={`${slide.id}-backdrop`} active={index === current} aria-hidden="true">
+          <Image
+            src={slide.image}
+            alt=""
+            fill
+            sizes="100vw"
+            className="scale-105 object-cover blur-xl"
+          />
+        </BackdropContainer>
       ))}
-      
-      {slides.length > 1 && (
-        <Controls>
-          {slides.map((_, index) => (
-            <Dot
-              key={index}
-              active={index === current}
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrent(index);
-              }}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </Controls>
-      )}
+
+      <CarouselFrame>
+        {slides.map((slide, index) => (
+          <SlideContainer key={slide.id} active={index === current}>
+            <SlideLink href={slide.link}>
+              <Image
+                src={slide.image}
+                alt={slide.title}
+                fill
+                priority={index === 0}
+                sizes="(min-width: 1280px) 1280px, 100vw"
+                className="object-cover"
+              />
+            </SlideLink>
+          </SlideContainer>
+        ))}
+        
+        {slides.length > 1 && (
+          <Controls>
+            {slides.map((_, index) => (
+              <Dot
+                key={index}
+                active={index === current}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrent(index);
+                }}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </Controls>
+        )}
+      </CarouselFrame>
     </CarouselWrapper>
   );
 }
