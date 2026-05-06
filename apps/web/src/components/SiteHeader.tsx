@@ -11,6 +11,8 @@ import { useAuth } from "@/lib/auth-context";
 import { auth as firebaseAuth } from "@/lib/firebase/client";
 import { signOut } from "firebase/auth";
 
+const BRAND_LOGO_SRC = "/coast_competitions_hi_res-removebg-preview.png";
+
 const HeaderWrapper = styled.header`
   position: sticky;
   top: 0;
@@ -172,23 +174,15 @@ export function SiteHeader() {
     <>
       <HeaderWrapper>
         <Container className="flex w-full items-center justify-between">
-          <Link href="/" className="group flex items-center gap-0" onClick={() => setIsOpen(false)}>
-            <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex items-center justify-center">
+          <Link href="/" className="block shrink-0" onClick={() => setIsOpen(false)}>
+            <div className="relative h-12 w-40 overflow-hidden sm:h-14 sm:w-52">
               <Image
-                src="/logo.png"
+                src={BRAND_LOGO_SRC}
                 alt="Coast Competitions"
                 fill
-                className="object-contain"
+                className="object-cover"
                 priority
               />
-            </div>
-            <div className="flex flex-col justify-center leading-none -ml-2 sm:-ml-4 -mt-1">
-              <span className="text-[1.65rem] sm:text-[2.35rem] font-bold leading-none tracking-widest text-brand-midnight">
-                coast
-              </span>
-              <span className="text-[7px] sm:text-[10px] font-black tracking-[0.22em] uppercase text-brand-midnight mt-0.5 ml-0.5">
-                Competitions
-              </span>
             </div>
           </Link>
 
@@ -227,22 +221,14 @@ export function SiteHeader() {
       </HeaderWrapper>
 
       <MobileMenuOverlay isOpen={isOpen}>
-        <div className="flex items-center gap-0 mb-12 px-2">
-          <div className="relative h-24 w-24 flex items-center justify-center">
+        <div className="mb-12 px-2">
+          <div className="relative h-18 w-60 overflow-hidden">
             <Image
-              src="/logo.png"
+              src={BRAND_LOGO_SRC}
               alt="Coast Competitions"
               fill
-              className="object-contain"
+              className="object-cover"
             />
-          </div>
-          <div className="flex flex-col justify-center leading-none -ml-4 -mt-1">
-            <span className="text-[3rem] font-bold leading-none tracking-widest text-brand-midnight">
-              coast
-            </span>
-            <span className="text-[12px] font-black tracking-[0.24em] uppercase text-brand-midnight mt-1 ml-1">
-              Competitions
-            </span>
           </div>
         </div>
         <nav className="flex flex-col">

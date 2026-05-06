@@ -54,11 +54,16 @@ const SlideLink = styled(Link)`
 
 const Controls = styled.div`
   position: absolute;
-  bottom: 2rem;
+  bottom: clamp(3.75rem, 5vw, 5rem);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  align-items: center;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.35rem 0.55rem;
+  box-shadow: 0 8px 24px rgba(14, 126, 139, 0.16);
   z-index: 30;
 `;
 
@@ -66,17 +71,17 @@ const Dot = styled.button<{ active: boolean }>`
   width: 0.75rem;
   height: 0.75rem;
   border-radius: 9999px;
-  background: ${({ active }) => (active ? "#0070E0" : "rgba(255, 255, 255, 0.3)")};
+  background: ${({ active }) => (active ? "#0E7E8B" : "rgba(14, 126, 139, 0.28)")};
   border: none;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
   
   &:hover {
-    background: ${({ active }) => (active ? "#0070E0" : "rgba(255, 255, 255, 0.5)")};
+    background: ${({ active }) => (active ? "#0E7E8B" : "rgba(53, 177, 171, 0.6)")};
   }
 
   &:focus-visible {
-    outline: 2px solid #0070E0;
+    outline: 2px solid #35B1AB;
     outline-offset: 3px;
   }
 `;

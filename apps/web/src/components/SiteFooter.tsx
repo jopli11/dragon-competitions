@@ -6,6 +6,8 @@ import { Container } from "@/components/Container";
 import { PaymentMethodBadges } from "@/components/PaymentMethodBadges";
 import styled from "@emotion/styled";
 
+const BRAND_LOGO_SRC = "/coast_competitions_hi_res-removebg-preview.png";
+
 const FooterWrapper = styled.footer`
   background: #232F3E;
   color: white;
@@ -29,22 +31,14 @@ export function SiteFooter() {
       <Container>
         <div className="grid gap-12 md:grid-cols-4">
           <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-0">
-              <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex items-center justify-center">
+            <Link href="/" className="inline-flex rounded-2xl bg-white p-2">
+              <div className="relative h-16 w-60 overflow-hidden">
                 <Image
-                  src="/logo.png"
+                  src={BRAND_LOGO_SRC}
                   alt="Coast Competitions"
                   fill
-                  className="object-contain"
+                  className="object-cover"
                 />
-              </div>
-              <div className="flex flex-col justify-center leading-[0.8] -ml-2 sm:-ml-4">
-                <span className="text-[1.65rem] sm:text-[2.35rem] font-bold leading-none tracking-widest text-white">
-                  coast
-                </span>
-                <span className="text-[7px] sm:text-[10px] font-black tracking-[0.22em] uppercase text-white mt-1 ml-0.5">
-                  Competitions
-                </span>
               </div>
             </Link>
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-white/50">
