@@ -108,27 +108,49 @@ const SliderThumb = styled.input`
   }
 `;
 
-// Choose 3 round bulk quantities that scale with remaining tickets.
+// Choose 3 round bulk quantities that scale with remaining tickets and prize value.
 // Returns unique ascending values, each clamped to available stock.
-function getBulkTiers(maxPurchase: number): number[] {
-  if (maxPurchase < 2) return [];
+function getBulkTiers(maxPurchase: number, maxSuggestedPurchase = maxPurchase): number[] {
+  const effectiveMax = Math.min(maxPurchase, maxSuggestedPurchase);
+  if (effectiveMax < 2) return [];
+
   const tierLadders: number[][] = [
     [25, 100, 250],
     [10, 50, 150],
     [5, 25, 75],
+    [5, 25, 50],
     [5, 15, 40],
     [3, 10, 25],
     [3, 5, 15],
     [2, 5, 10],
     [2, 3, 5],
   ];
-  const ladder = tierLadders.find(([, , top]) => top <= maxPurchase);
-  const tiers = ladder ?? [2, Math.max(2, Math.floor(maxPurchase / 2)), maxPurchase];
-  const clamped = tiers.map((t) => Math.min(t, maxPurchase));
+  const ladder = tierLadders.find(([, , top]) => top <= effectiveMax);
+  const tiers = ladder ?? [2, Math.max(2, Math.floor(effectiveMax / 2)), effectiveMax];
+  const clamped = tiers.map((t) => Math.min(t, effectiveMax, maxPurchase));
   return Array.from(new Set(clamped)).sort((a, b) => a - b);
 }
 
+function parsePrizeValuePence(title: string): number | null {
+  const match = title.match(/£\s*([\d,]+(?:\.\d{1,2})?)\s*([km])?/i);
+  if (!match) return null;
+
+  const amount = Number.parseFloat(match[1].replace(/,/g, ""));
+  if (!Number.isFinite(amount)) return null;
+
+  const suffix = match[2]?.toLowerCase();
+  const multiplier = suffix === "m" ? 1_000_000 : suffix === "k" ? 1_000 : 1;
+  return Math.round(amount * multiplier * 100);
+}
+
+function getErrorMessage(error: unknown, fallback = "Something went wrong") {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return fallback;
+}
+
 export function SkillQuestionCard({
+  raffleTitle,
   question,
   options,
   slug,
@@ -136,6 +158,7 @@ export function SkillQuestionCard({
   maxTickets,
   ticketsSold,
 }: {
+  raffleTitle: string;
   question: string;
   options: string[];
   slug: string;
@@ -157,6 +180,11 @@ export function SkillQuestionCard({
 
   const remainingTickets = Math.max(0, maxTickets - currentTicketsSold);
   const maxPurchase = remainingTickets;
+  const prizeValuePence = parsePrizeValuePence(raffleTitle);
+  const valueAwareMaxPurchase =
+    prizeValuePence && ticketPricePence > 0
+      ? Math.min(maxPurchase, Math.max(1, Math.floor(prizeValuePence / ticketPricePence)))
+      : maxPurchase;
 
   useEffect(() => {
     const savedPass = sessionStorage.getItem(`quiz_pass_${slug}`);
@@ -164,6 +192,12 @@ export function SkillQuestionCard({
       setQuizPassId(savedPass);
     }
   }, [slug]);
+
+  useEffect(() => {
+    setQuantity((currentQuantity) =>
+      Math.min(Math.max(1, currentQuantity), Math.max(1, maxPurchase))
+    );
+  }, [maxPurchase]);
 
   async function handleContinue() {
     if (selected === null || loading) return;
@@ -192,8 +226,8 @@ export function SkillQuestionCard({
         setIsWrong(true);
         setError("Incorrect answer. Please try again.");
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -301,8 +335,9 @@ export function SkillQuestionCard({
         },
         auth: data.auth,
       });
-    } catch (err: any) {
-      const msg = err.message.toLowerCase();
+    } catch (err) {
+      const errorMessage = getErrorMessage(err, "Failed to create checkout session");
+      const msg = errorMessage.toLowerCase();
       if (
         msg.includes("expired") ||
         msg.includes("invalid") ||
@@ -314,7 +349,7 @@ export function SkillQuestionCard({
           "Your quiz session has ended. Please answer the question again to continue."
         );
       } else {
-        setError(err.message);
+        setError(errorMessage);
       }
       setLoading(false);
       setCheckoutLoading(false);
@@ -330,7 +365,7 @@ export function SkillQuestionCard({
 
   const totalPricePence = quantity * ticketPricePence;
   const sliderPercentage = maxPurchase <= 1 ? 100 : ((quantity - 1) / (maxPurchase - 1)) * 100;
-  const bulkTiers = getBulkTiers(maxPurchase);
+  const bulkTiers = getBulkTiers(maxPurchase, valueAwareMaxPurchase);
 
   if (quizPassId && remainingTickets === 0) {
     return (

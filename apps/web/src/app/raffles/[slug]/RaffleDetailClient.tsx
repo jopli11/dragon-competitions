@@ -115,7 +115,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
           <div className="min-w-0 space-y-8">
             {/* Main Image Card */}
             <div className="w-full max-w-full min-w-0 overflow-hidden rounded-4xl border border-black/5 bg-white shadow-xl">
-              <div className="relative aspect-[16/10] w-full max-w-full overflow-hidden">
+              <div className="relative aspect-16/10 w-full max-w-full overflow-hidden">
                 {raffle.heroImageUrl ? (
                   <Image
                     src={raffle.heroImageUrl}
@@ -257,6 +257,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
               </GlassCard>
             ) : !isSoldOut ? (
               <SkillQuestionCard
+                raffleTitle={raffle.title}
                 slug={slug}
                 question={raffle.skillQuestion}
                 options={raffle.answerOptions}
