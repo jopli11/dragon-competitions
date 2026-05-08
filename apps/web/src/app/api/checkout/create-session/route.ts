@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchRaffleBySlug } from "@/lib/contentful/raffles";
+import { fetchRaffleBySlug, getEffectivePrice } from "@/lib/contentful/raffles";
 import { adminDb, adminAuth, admin } from "@/lib/firebase/admin";
 import {
   getCheckoutAccessToken,
@@ -94,7 +94,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const amountPence = raffle.ticketPricePence * quantity;
+    const pricing = getEffectivePrice(raffle);
+    if (pricing.isFree) {
+      return NextResponse.json(
+        { error: "Use free entry endpoint" },
+        { status: 400 }
+      );
+    }
+
+    const amountPence = pricing.effectivePence * quantity;
     const invoiceId = crypto.randomUUID();
 
     await adminDb.collection("orders").doc(invoiceId).set({

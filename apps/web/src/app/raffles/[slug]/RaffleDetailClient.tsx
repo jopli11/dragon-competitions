@@ -8,6 +8,7 @@ import { RaffleMobileCTA } from "@/components/RaffleMobileCTA";
 import { DnaScript } from "@/components/DnaScript";
 import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
 import { BrandBadge, GlassCard, GradientText } from "@/lib/styles";
+import { getEffectivePrice } from "@/lib/pricing";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { BLOCKS, INLINES } from "@contentful/rich-text-types";
 
@@ -33,11 +34,20 @@ const RICH_TEXT_OPTIONS = {
   },
 };
 
+function DiscountRibbon({ label }: { label: string }) {
+  return (
+    <div className="pointer-events-none absolute top-7 -right-14 z-20 w-48 rotate-35 bg-amber-500 py-2 text-center text-[10px] font-black uppercase tracking-widest text-white shadow-lg ring-1 ring-white/30">
+      {label}
+    </div>
+  );
+}
+
 export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any; initialStats: any; slug: string }) {
   const { stats: liveStats } = useRaffleStats(slug, initialStats);
   const currentTicketsSold = liveStats.ticketsSold;
 
   function formatGBPFromPence(pence: number) {
+    if (pence === 0) return "Free";
     if (pence < 100) return `${pence}p`;
     return new Intl.NumberFormat("en-GB", {
       style: "currency",
@@ -46,12 +56,17 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
     }).format(pence / 100);
   }
 
-  const ticketPriceFormatted = formatGBPFromPence(raffle.ticketPricePence);
+  const pricing = getEffectivePrice(raffle);
+  const ticketPriceFormatted = formatGBPFromPence(pricing.effectivePence);
+  const discountRibbonLabel = pricing.isDiscounted
+    ? raffle.discountLabel || (pricing.isFree ? "FREE ENTRY" : `-${pricing.discountPercent}% OFF`)
+    : null;
   const maxTickets = raffle.maxTickets || 5000;
   const progress = Math.min(100, Math.max(2, (currentTicketsSold / maxTickets) * 100));
   const isSoldOut = currentTicketsSold >= maxTickets;
   const isAwaitingDraw = raffle.status === "awaitingDraw";
   const isEnded = raffle.status === "ended";
+  const showDiscount = !!discountRibbonLabel && !isSoldOut && !isAwaitingDraw && !isEnded;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -61,7 +76,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
     "image": raffle.heroImageUrl,
     "offers": {
       "@type": "Offer",
-      "price": raffle.ticketPricePence / 100,
+      "price": pricing.effectivePence / 100,
       "priceCurrency": "GBP",
       "availability": "https://schema.org/InStock",
       "validThrough": raffle.endAt,
@@ -103,8 +118,15 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
           <div className="mt-3 flex items-center gap-6 text-xs font-bold uppercase tracking-widest text-brand-midnight/60">
             <div className="flex items-center gap-2">
               <span className="text-brand-secondary">Just</span>
-              <span className="text-lg text-brand-midnight">{ticketPriceFormatted}</span>
-              <span>per entry</span>
+              {pricing.isDiscounted && !pricing.isFree && (
+                <span className="text-sm text-brand-midnight/30 line-through">
+                  {formatGBPFromPence(raffle.ticketPricePence)}
+                </span>
+              )}
+              <span className={`text-lg ${pricing.isFree ? "text-green-600" : "text-brand-midnight"}`}>
+                {pricing.isFree ? "FREE" : ticketPriceFormatted}
+              </span>
+              <span>{pricing.isFree ? "to enter" : "per entry"}</span>
             </div>
           </div>
         </Container>
@@ -116,6 +138,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
             {/* Main Image Card */}
             <div className="w-full max-w-full min-w-0 overflow-hidden rounded-4xl border border-black/5 bg-white shadow-xl">
               <div className="relative aspect-16/10 w-full max-w-full overflow-hidden">
+                {showDiscount && <DiscountRibbon label={discountRibbonLabel} />}
                 {raffle.heroImageUrl ? (
                   <Image
                     src={raffle.heroImageUrl}
@@ -256,15 +279,35 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
                 </Link>
               </GlassCard>
             ) : !isSoldOut ? (
-              <SkillQuestionCard
-                raffleTitle={raffle.title}
-                slug={slug}
-                question={raffle.skillQuestion}
-                options={raffle.answerOptions}
-                ticketPricePence={raffle.ticketPricePence}
-                maxTickets={maxTickets}
-                ticketsSold={currentTicketsSold}
-              />
+              <>
+                {pricing.isDiscounted && (
+                  <div className="rounded-3xl border border-amber-500/20 bg-amber-50 p-5 text-center shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700/70">
+                      Limited time offer
+                    </p>
+                    <p className="mt-1 text-sm font-black uppercase tracking-tight text-brand-midnight">
+                      {pricing.isFree
+                        ? `Claim up to ${raffle.freeEntryMaxPerUser || 1} free ${
+                            (raffle.freeEntryMaxPerUser || 1) === 1 ? "entry" : "entries"
+                          }`
+                        : `${pricing.discountPercent}% off entries today`}
+                    </p>
+                  </div>
+                )}
+                <SkillQuestionCard
+                  raffleTitle={raffle.title}
+                  slug={slug}
+                  question={raffle.skillQuestion}
+                  options={raffle.answerOptions}
+                  ticketPricePence={raffle.ticketPricePence}
+                  effectivePricePence={pricing.effectivePence}
+                  isFreeEntry={pricing.isFree}
+                  freeEntryMaxPerUser={raffle.freeEntryMaxPerUser || 1}
+                  discountPercent={pricing.discountPercent}
+                  maxTickets={maxTickets}
+                  ticketsSold={currentTicketsSold}
+                />
+              </>
             ) : (
               <GlassCard className="p-8 text-center border-red-500/20 bg-red-500/5">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500 mb-4">

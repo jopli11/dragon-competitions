@@ -155,6 +155,10 @@ export function SkillQuestionCard({
   options,
   slug,
   ticketPricePence,
+  effectivePricePence = ticketPricePence,
+  isFreeEntry = false,
+  freeEntryMaxPerUser = 1,
+  discountPercent = 0,
   maxTickets,
   ticketsSold,
 }: {
@@ -163,6 +167,10 @@ export function SkillQuestionCard({
   options: string[];
   slug: string;
   ticketPricePence: number;
+  effectivePricePence?: number;
+  isFreeEntry?: boolean;
+  freeEntryMaxPerUser?: number;
+  discountPercent?: number;
   maxTickets: number;
   ticketsSold: number;
 }) {
@@ -179,11 +187,13 @@ export function SkillQuestionCard({
   const currentTicketsSold = liveStats.ticketsSold;
 
   const remainingTickets = Math.max(0, maxTickets - currentTicketsSold);
-  const maxPurchase = remainingTickets;
+  const maxPurchase = isFreeEntry
+    ? Math.min(remainingTickets, Math.max(1, freeEntryMaxPerUser))
+    : remainingTickets;
   const prizeValuePence = parsePrizeValuePence(raffleTitle);
   const valueAwareMaxPurchase =
-    prizeValuePence && ticketPricePence > 0
-      ? Math.min(maxPurchase, Math.max(1, Math.floor(prizeValuePence / ticketPricePence)))
+    prizeValuePence && effectivePricePence > 0
+      ? Math.min(maxPurchase, Math.max(1, Math.floor(prizeValuePence / effectivePricePence)))
       : maxPurchase;
 
   useEffect(() => {
@@ -249,6 +259,31 @@ export function SkillQuestionCard({
 
     try {
       const idToken = await user.getIdToken();
+
+      if (isFreeEntry) {
+        const res = await fetch("/api/checkout/free-entry", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({
+            slug,
+            quantity,
+            quizPassId,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to claim free entry");
+        }
+
+        sessionStorage.removeItem(`quiz_pass_${slug}`);
+        router.push(`/raffles/${slug}/success?invoiceId=${data.invoiceId}`);
+        return;
+      }
 
       const res = await fetch("/api/checkout/create-session", {
         method: "POST",
@@ -357,15 +392,17 @@ export function SkillQuestionCard({
   }
 
   function formatGBP(pence: number) {
+    if (pence === 0) return "Free";
     return new Intl.NumberFormat("en-GB", {
       style: "currency",
       currency: "GBP",
     }).format(pence / 100);
   }
 
-  const totalPricePence = quantity * ticketPricePence;
+  const totalPricePence = quantity * effectivePricePence;
   const sliderPercentage = maxPurchase <= 1 ? 100 : ((quantity - 1) / (maxPurchase - 1)) * 100;
   const bulkTiers = getBulkTiers(maxPurchase, valueAwareMaxPurchase);
+  const hasDiscount = discountPercent > 0 && effectivePricePence < ticketPricePence;
 
   if (quizPassId && remainingTickets === 0) {
     return (
@@ -394,10 +431,12 @@ export function SkillQuestionCard({
             <div className="h-14 w-14 animate-spin rounded-full border-4 border-brand-primary/20 border-t-brand-primary" />
             <div>
               <p className="text-sm font-black uppercase tracking-widest text-brand-midnight">
-                Preparing Secure Checkout
+                {isFreeEntry ? "Claiming Free Entry" : "Preparing Secure Checkout"}
               </p>
               <p className="mt-2 text-xs font-medium text-brand-midnight/60">
-                Opening DNA Payments. This usually takes a few seconds.
+                {isFreeEntry
+                  ? "Allocating your ticket numbers. This usually takes a few seconds."
+                  : "Opening DNA Payments. This usually takes a few seconds."}
               </p>
             </div>
           </div>
@@ -439,6 +478,13 @@ export function SkillQuestionCard({
             </div>
           </div>
 
+          {isFreeEntry && (
+            <p className="mt-3 rounded-xl bg-green-50 px-4 py-3 text-center text-[11px] font-bold uppercase tracking-widest text-green-700">
+              Free giveaway limited to {freeEntryMaxPerUser}{" "}
+              {freeEntryMaxPerUser === 1 ? "entry" : "entries"} per user
+            </p>
+          )}
+
           <SliderRoot className="mt-6">
             <SliderTrack>
               <SliderRange width={`${sliderPercentage}%`} />
@@ -476,7 +522,7 @@ export function SkillQuestionCard({
                           ? "border-brand-primary bg-brand-primary/5 shadow-md shadow-brand-primary/10"
                           : "border-brand-primary/10 bg-white hover:border-brand-primary/30 hover:bg-brand-primary/2"
                       }`}
-                      aria-label={`Select ${tier} tickets for ${formatGBP(tier * ticketPricePence)}`}
+                      aria-label={`Select ${tier} tickets for ${formatGBP(tier * effectivePricePence)}`}
                     >
                       {isTopTier && (
                         <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-brand-secondary px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-white shadow-sm">
@@ -487,7 +533,7 @@ export function SkillQuestionCard({
                         {tier}
                       </div>
                       <div className="text-[10px] font-bold uppercase tracking-wider text-brand-midnight/50">
-                        {formatGBP(tier * ticketPricePence)}
+                        {formatGBP(tier * effectivePricePence)}
                       </div>
                     </button>
                   );
@@ -503,7 +549,13 @@ export function SkillQuestionCard({
             {formatGBP(totalPricePence)}
           </div>
           <p className="mt-1 text-[10px] font-medium text-white/60 uppercase tracking-widest">
-            {quantity} {quantity === 1 ? 'Entry' : 'Entries'} @ {formatGBP(ticketPricePence)}
+            {quantity} {quantity === 1 ? 'Entry' : 'Entries'} @{" "}
+            {hasDiscount && (
+              <span className="mr-1 text-white/35 line-through">
+                {formatGBP(ticketPricePence)}
+              </span>
+            )}
+            <span>{formatGBP(effectivePricePence)}</span>
           </p>
         </div>
 
@@ -519,7 +571,13 @@ export function SkillQuestionCard({
           size="lg"
           className="mt-6"
         >
-          {loading ? "Preparing checkout..." : "Proceed to Payment"}
+          {loading
+            ? isFreeEntry
+              ? "Claiming entry..."
+              : "Preparing checkout..."
+            : isFreeEntry
+              ? "Claim Free Entry"
+              : "Proceed to Payment"}
         </BrandButton>
       </section>
       </>

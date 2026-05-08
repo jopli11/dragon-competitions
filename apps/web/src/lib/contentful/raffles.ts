@@ -2,6 +2,9 @@ import { cache } from "react";
 import type { Entry, EntrySkeletonType } from "contentful";
 import { getContentfulPublicClient } from "@/lib/contentful/publicClient";
 import { adminGetEntries } from "@/lib/contentful/adminClient";
+import { getEffectivePrice } from "@/lib/pricing";
+
+export { getEffectivePrice } from "@/lib/pricing";
 
 type RaffleStatus = "draft" | "live" | "awaitingDraw" | "ended";
 type DrawType = "auto" | "live";
@@ -13,6 +16,10 @@ type RaffleEntryFields = {
   drawType?: DrawType;
   isReoccurring?: boolean;
   maxTickets: number;
+  discountActive?: boolean;
+  discountPercent?: number;
+  discountLabel?: string;
+  freeEntryMaxPerUser?: number;
   startAt: string;
   endAt: string;
   ticketPricePence: number;
@@ -47,8 +54,14 @@ export type RaffleSummary = {
   drawType: DrawType;
   isReoccurring: boolean;
   maxTickets: number;
+  discountActive: boolean;
+  discountPercent: number;
+  discountLabel?: string;
+  freeEntryMaxPerUser: number;
   endAt: string;
   ticketPricePence: number;
+  effectivePricePence: number;
+  isFreeEntry: boolean;
   heroImageUrl?: string;
 };
 
@@ -80,6 +93,7 @@ function toUrlMaybe(url?: string) {
 function toSummary(entry: Entry<RaffleSkeleton>): RaffleSummary {
   // Contentful typings can represent localized fields; we normalize to our expected shape.
   const fields = entry.fields as unknown as RaffleEntryFields;
+  const pricing = getEffectivePrice(fields);
   return {
     id: entry.sys.id,
     title: fields.title,
@@ -88,8 +102,14 @@ function toSummary(entry: Entry<RaffleSkeleton>): RaffleSummary {
     drawType: fields.drawType || "auto",
     isReoccurring: !!fields.isReoccurring,
     maxTickets: fields.maxTickets || 5000,
+    discountActive: !!fields.discountActive,
+    discountPercent: pricing.discountPercent,
+    discountLabel: fields.discountLabel,
+    freeEntryMaxPerUser: fields.freeEntryMaxPerUser || 1,
     endAt: fields.endAt,
     ticketPricePence: fields.ticketPricePence,
+    effectivePricePence: pricing.effectivePence,
+    isFreeEntry: pricing.isFree,
     heroImageUrl: toUrlMaybe(fields.heroImage?.fields?.file?.url),
   };
 }
@@ -103,9 +123,14 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     drawType: "auto",
     isReoccurring: false,
     maxTickets: 5000,
+    discountActive: false,
+    discountPercent: 0,
+    freeEntryMaxPerUser: 1,
     startAt: new Date().toISOString(),
     endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toISOString(),
     ticketPricePence: 18,
+    effectivePricePence: 18,
+    isFreeEntry: false,
     skillQuestion: "What is the capital of France?",
     answerOptions: ["London", "Paris", "Berlin"],
     heroImageUrl: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=2000&auto=format&fit=crop",
@@ -118,9 +143,14 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     drawType: "live",
     isReoccurring: false,
     maxTickets: 1000,
+    discountActive: false,
+    discountPercent: 0,
+    freeEntryMaxPerUser: 1,
     startAt: new Date().toISOString(),
     endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 5).toISOString(),
     ticketPricePence: 18,
+    effectivePricePence: 18,
+    isFreeEntry: false,
     skillQuestion: "Which company makes the Model S?",
     answerOptions: ["Ford", "Tesla", "BMW"],
     heroImageUrl: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=2000&auto=format&fit=crop",
@@ -133,9 +163,14 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     drawType: "auto",
     isReoccurring: true,
     maxTickets: 2500,
+    discountActive: false,
+    discountPercent: 0,
+    freeEntryMaxPerUser: 1,
     startAt: new Date().toISOString(),
     endAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(),
     ticketPricePence: 18,
+    effectivePricePence: 18,
+    isFreeEntry: false,
     skillQuestion: "Who manufactures the PlayStation?",
     answerOptions: ["Microsoft", "Sony", "Nintendo"],
     heroImageUrl: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?q=80&w=2000&auto=format&fit=crop",
@@ -146,7 +181,24 @@ export const fetchLiveRaffles = cache(async (): Promise<RaffleSummary[]> => {
   const client = getContentfulPublicClient();
   if (!client) {
     // Return mock data if Contentful is not configured
-    return MOCK_RAFFLES.map(({ skillQuestion, answerOptions, startAt, ...rest }) => rest);
+    return MOCK_RAFFLES.map((raffle) => ({
+      id: raffle.id,
+      title: raffle.title,
+      slug: raffle.slug,
+      status: raffle.status,
+      drawType: raffle.drawType,
+      isReoccurring: raffle.isReoccurring,
+      maxTickets: raffle.maxTickets,
+      discountActive: raffle.discountActive,
+      discountPercent: raffle.discountPercent,
+      discountLabel: raffle.discountLabel,
+      freeEntryMaxPerUser: raffle.freeEntryMaxPerUser,
+      endAt: raffle.endAt,
+      ticketPricePence: raffle.ticketPricePence,
+      effectivePricePence: raffle.effectivePricePence,
+      isFreeEntry: raffle.isFreeEntry,
+      heroImageUrl: raffle.heroImageUrl,
+    }));
   }
 
   const query = {
@@ -161,6 +213,10 @@ export const fetchLiveRaffles = cache(async (): Promise<RaffleSummary[]> => {
       "fields.drawType",
       "fields.isReoccurring",
       "fields.maxTickets",
+      "fields.discountActive",
+      "fields.discountPercent",
+      "fields.discountLabel",
+      "fields.freeEntryMaxPerUser",
       "fields.endAt",
       "fields.ticketPricePence",
       "fields.heroImage",
@@ -225,6 +281,10 @@ export const fetchEndedRaffles = cache(async (): Promise<EndedRaffleSummary[]> =
       "fields.slug",
       "fields.drawType",
       "fields.heroImage",
+      "fields.discountActive",
+      "fields.discountPercent",
+      "fields.discountLabel",
+      "fields.freeEntryMaxPerUser",
       "fields.winnerDisplayName",
       "fields.winnerTicketNumber",
       "fields.drawDate",

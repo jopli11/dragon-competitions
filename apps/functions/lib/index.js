@@ -322,6 +322,10 @@ async function handleReoccurring(slug) {
         delete newFields.winnerDisplayName;
         delete newFields.winnerTicketNumber;
         delete newFields.drawDate;
+        delete newFields.discountActive;
+        delete newFields.discountPercent;
+        delete newFields.discountLabel;
+        delete newFields.freeEntryMaxPerUser;
         // Archive original as ended
         originalEntry.fields.status["en-US"] = "ended";
         await originalEntry.update();

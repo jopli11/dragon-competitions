@@ -1,8 +1,5 @@
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Container } from "@/components/Container";
-import { fetchRaffleBySlug } from "@/lib/contentful/raffles";
+import { fetchRaffleBySlug, getEffectivePrice } from "@/lib/contentful/raffles";
 import { getRaffleStats } from "@/lib/firebase/raffle-stats";
 import { Metadata } from "next";
 import { RaffleDetailClient } from "./RaffleDetailClient";
@@ -20,9 +17,14 @@ export async function generateMetadata({
 
   if (!raffle) return { title: "Competition Not Found" };
 
+  const pricing = getEffectivePrice(raffle);
+  const entryPriceDescription = pricing.isFree
+    ? "free entry"
+    : `just £${(pricing.effectivePence / 100).toFixed(2)}`;
+
   return {
     title: raffle.title,
-    description: `Win ${raffle.title} with Coast Competitions. Answer the skill question and enter now for just £${(raffle.ticketPricePence / 100).toFixed(2)}!`,
+    description: `Win ${raffle.title} with Coast Competitions. Answer the skill question and enter now for ${entryPriceDescription}!`,
     openGraph: {
       title: `${raffle.title} · Coast Competitions`,
       description: `Win ${raffle.title} with Coast Competitions.`,

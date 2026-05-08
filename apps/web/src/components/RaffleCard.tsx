@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BrandButtonLabel } from "@/lib/styles";
 import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
+import { getEffectivePrice } from "@/lib/pricing";
 import type { RaffleSummary } from "@/lib/contentful/raffles";
 
 interface RaffleCardProps {
@@ -13,6 +14,7 @@ interface RaffleCardProps {
 }
 
 function formatGBPFromPence(pence: number) {
+  if (pence === 0) return "Free";
   if (pence < 100) return `${pence}p`;
   return new Intl.NumberFormat("en-GB", {
     style: "currency",
@@ -21,14 +23,77 @@ function formatGBPFromPence(pence: number) {
   }).format(pence / 100);
 }
 
+function getDiscountRibbonLabel(
+  raffle: RaffleSummary,
+  pricing: ReturnType<typeof getEffectivePrice>,
+) {
+  if (!pricing.isDiscounted) return null;
+  return raffle.discountLabel || (pricing.isFree ? "FREE ENTRY" : `-${pricing.discountPercent}% OFF`);
+}
+
+function DiscountRibbon({ label }: { label: string }) {
+  return (
+    <div className="pointer-events-none absolute top-5 -right-13 z-20 w-44 rotate-35 bg-amber-500 py-1.5 text-center text-[10px] font-black uppercase tracking-widest text-white shadow-lg ring-1 ring-white/30">
+      {label}
+    </div>
+  );
+}
+
+function PriceLine({
+  originalPricePence,
+  effectivePricePence,
+  isFree,
+  hasDiscount,
+}: {
+  originalPricePence: number;
+  effectivePricePence: number;
+  isFree: boolean;
+  hasDiscount: boolean;
+}) {
+  if (isFree) {
+    return <span className="text-green-600">FREE TO ENTER</span>;
+  }
+
+  if (hasDiscount) {
+    return (
+      <>
+        <span className="mr-1 text-brand-midnight/30 line-through">
+          {formatGBPFromPence(originalPricePence)}
+        </span>
+        <span className="text-brand-secondary">
+          {formatGBPFromPence(effectivePricePence)}
+        </span>
+      </>
+    );
+  }
+
+  return (
+    <span className="text-brand-secondary">
+      {formatGBPFromPence(originalPricePence)}
+    </span>
+  );
+}
+
 export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: RaffleCardProps) {
   const { stats: liveStats } = useRaffleStats(raffle.slug, { ticketsSold: initialTicketsSold });
   const currentTicketsSold = liveStats.ticketsSold;
+  const pricing = getEffectivePrice(raffle);
   
   const maxTickets = raffle.maxTickets || 5000;
   const progress = Math.min(100, Math.max(2, (currentTicketsSold / maxTickets) * 100));
   const isSoldOut = currentTicketsSold >= maxTickets;
   const isAwaitingDraw = raffle.status === "awaitingDraw";
+  const showDiscount = pricing.isDiscounted && !isSoldOut && !isAwaitingDraw;
+  const discountRibbonLabel = showDiscount ? getDiscountRibbonLabel(raffle, pricing) : null;
+  const ctaLabel = isAwaitingDraw
+    ? "View Details"
+    : isSoldOut
+      ? "View Results"
+      : pricing.isFree
+        ? "Claim Free Entry"
+        : pricing.isDiscounted
+          ? `Enter Now (${pricing.discountPercent}% Off)`
+          : "Enter Now";
 
   if (variant === "compact") {
     return (
@@ -40,6 +105,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
             <div className={`absolute top-3 left-3 z-10 rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
               {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
             </div>
+            {discountRibbonLabel && <DiscountRibbon label={discountRibbonLabel} />}
             {raffle.heroImageUrl ? (
               <Image
                 src={raffle.heroImageUrl}
@@ -78,11 +144,29 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
                 </p>
               ) : (
                 <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
-                  Just <span className="text-brand-secondary">{formatGBPFromPence(raffle.ticketPricePence)}</span> per entry
+                  {pricing.isFree ? (
+                    <PriceLine
+                      originalPricePence={raffle.ticketPricePence}
+                      effectivePricePence={pricing.effectivePence}
+                      isFree={pricing.isFree}
+                      hasDiscount={pricing.isDiscounted}
+                    />
+                  ) : (
+                    <>
+                      Just{" "}
+                      <PriceLine
+                        originalPricePence={raffle.ticketPricePence}
+                        effectivePricePence={pricing.effectivePence}
+                        isFree={pricing.isFree}
+                        hasDiscount={pricing.isDiscounted}
+                      />{" "}
+                      per entry
+                    </>
+                  )}
                 </p>
               )}
               <BrandButtonLabel fullWidth className="mt-4" variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
-                {isAwaitingDraw ? "View Details" : isSoldOut ? "View Results" : "Enter Now"}
+                {ctaLabel}
               </BrandButtonLabel>
             </div>
           </div>
@@ -100,6 +184,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
           <div className={`absolute top-4 left-4 z-10 rounded-lg px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider shadow-lg ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
             {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
           </div>
+          {discountRibbonLabel && <DiscountRibbon label={discountRibbonLabel} />}
           {raffle.heroImageUrl ? (
             <Image
               src={raffle.heroImageUrl}
@@ -144,11 +229,29 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
               </p>
             ) : (
               <p className="text-[10px] font-black text-brand-midnight/50 uppercase tracking-[0.2em] mb-4">
-                Just <span className="text-brand-secondary">{formatGBPFromPence(raffle.ticketPricePence)}</span> per entry
+                {pricing.isFree ? (
+                  <PriceLine
+                    originalPricePence={raffle.ticketPricePence}
+                    effectivePricePence={pricing.effectivePence}
+                    isFree={pricing.isFree}
+                    hasDiscount={pricing.isDiscounted}
+                  />
+                ) : (
+                  <>
+                    Just{" "}
+                    <PriceLine
+                      originalPricePence={raffle.ticketPricePence}
+                      effectivePricePence={pricing.effectivePence}
+                      isFree={pricing.isFree}
+                      hasDiscount={pricing.isDiscounted}
+                    />{" "}
+                    per entry
+                  </>
+                )}
               </p>
             )}
             <BrandButtonLabel fullWidth variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
-              {isAwaitingDraw ? "View Details" : isSoldOut ? "View Results" : "Enter Now"}
+              {ctaLabel}
             </BrandButtonLabel>
           </div>
         </div>
