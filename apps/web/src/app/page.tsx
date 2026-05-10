@@ -6,7 +6,7 @@ import { HomeCountdown } from "@/components/HomeCountdown";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
 import dynamic from "next/dynamic";
-import { RaffleCard } from "@/components/RaffleCard";
+import { HomeRaffleCarousel } from "@/components/HomeRaffleCarousel";
 import { BrandLinkButton } from "@/lib/styles";
 import { FloatingPaymentPrompt } from "@/components/FloatingPaymentPrompt";
 
@@ -36,9 +36,6 @@ export default async function Home() {
         title: "New Competitions Coming Soon",
       }];
 
-  // Keep the homepage grid balanced with the standard three-card competition row.
-  const featuredRaffles = raffles.slice(0, 3);
-
   // Find the raffle ending soonest for the countdown (exclude awaitingDraw raffles)
   const activeRaffles = raffles.filter(r => r.status !== "awaitingDraw");
   const nextEndingRaffle = [...activeRaffles].sort((a, b) => 
@@ -65,18 +62,11 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 px-4 sm:px-0">
-          {featuredRaffles.map((r) => (
-            <RaffleCard 
-              key={r.id}
-              raffle={r}
-              initialTicketsSold={stats[r.slug]?.ticketsSold || 0}
-              variant="compact"
-            />
-          ))}
-        </div>
+        {raffles.length > 0 && (
+          <HomeRaffleCarousel raffles={raffles} stats={stats} />
+        )}
 
-        {featuredRaffles.length === 0 && (
+        {raffles.length === 0 && (
           <div className="mt-20 text-center">
             <p className="text-sm font-bold text-brand-midnight/40 uppercase tracking-widest">
               No live competitions yet.

@@ -2,7 +2,7 @@ import { Container } from "@/components/Container";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
 import { BrandSectionHeading, GradientText } from "@/lib/styles";
-import { RaffleCard } from "@/components/RaffleCard";
+import { RaffleFiltersGrid } from "@/components/RaffleFiltersGrid";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 10;
@@ -25,16 +25,7 @@ export default async function RafflesPage() {
           </p>
         </div>
 
-      <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {raffles.map((r) => (
-          <RaffleCard 
-            key={r.id}
-            raffle={r}
-            initialTicketsSold={stats[r.slug]?.ticketsSold || 0}
-            variant="compact"
-          />
-        ))}
-      </div>
+      <RaffleFiltersGrid raffles={raffles} stats={stats} />
 
       {raffles.length === 0 ? (
         <div className="mt-20 text-center">

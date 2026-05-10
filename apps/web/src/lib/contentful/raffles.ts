@@ -204,9 +204,10 @@ export const fetchLiveRaffles = cache(async (): Promise<RaffleSummary[]> => {
   const query = {
     content_type: "raffle",
     "fields.status[in]": "live,awaitingDraw",
-    order: ["fields.endAt"],
+    order: ["-sys.createdAt"],
     select: [
       "sys.id",
+      "sys.createdAt",
       "fields.title",
       "fields.slug",
       "fields.status",
