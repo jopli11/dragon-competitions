@@ -88,7 +88,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-white pb-20">
+    <div className="min-h-screen overflow-x-clip bg-white pb-20">
       <DnaScript />
       <script
         type="application/ld+json"
@@ -209,35 +209,98 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
                     </div>
                   </div>
                 )}
+
+                {raffle.cashAlternativeEnabled && (
+                  <div className="mt-12 rounded-2xl bg-brand-accent p-6">
+                    <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-3">
+                      Cash <GradientText>Alternative</GradientText>
+                    </h3>
+                    {raffle.cashAlternativeAmountPence ? (
+                      <p className="mb-4 text-2xl font-black text-brand-midnight">
+                        {formatGBPFromPence(raffle.cashAlternativeAmountPence)}
+                      </p>
+                    ) : null}
+                    {raffle.cashAlternativeCopy ? (
+                      <div className="text-base leading-relaxed">
+                        {documentToReactComponents(raffle.cashAlternativeCopy, RICH_TEXT_OPTIONS)}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-medium text-brand-midnight/70">
+                        A cash alternative is available for this competition.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </GlassCard>
 
-            {/* FAQ / Rules Placeholder */}
             <GlassCard className="p-6 sm:p-8">
               <h2 className="text-xl font-black uppercase tracking-tight text-brand-midnight">
                 Competition <GradientText>Rules</GradientText>
               </h2>
-              <ul className="mt-6 space-y-4">
-                {[
-                  "Entrants must be 18 years or older.",
-                  "Open to residents of the United Kingdom only.",
-                  "Correct answer to the skill question is required for entry.",
-                  "Draw will be conducted live on our social media channels.",
-                  "Free postal entry is available — see our Terms & Conditions for full details.",
-                ].map((rule, i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm font-medium text-brand-midnight/60">
-                    <span className="shrink-0 w-5 h-5 rounded-full bg-brand-accent flex items-center justify-center text-brand-secondary text-[10px] font-bold">
-                      {i + 1}
-                    </span>
-                    {rule}
-                  </li>
-                ))}
-              </ul>
+              {raffle.pricingRules ? (
+                <div className="mt-6 text-sm font-medium leading-relaxed text-brand-midnight/70">
+                  {documentToReactComponents(raffle.pricingRules, RICH_TEXT_OPTIONS)}
+                </div>
+              ) : (
+                <ul className="mt-6 space-y-4">
+                  {[
+                    "Entrants must be 18 years or older.",
+                    "Open to residents of the United Kingdom only.",
+                    "Correct answer to the skill question is required for entry.",
+                    "Draw will be conducted live on our social media channels.",
+                    "Free postal entry is available — see our Terms & Conditions for full details.",
+                  ].map((rule, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm font-medium text-brand-midnight/60">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-brand-accent flex items-center justify-center text-brand-secondary text-[10px] font-bold">
+                        {i + 1}
+                      </span>
+                      {rule}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </GlassCard>
+
+            {raffle.perRaffleFaqs?.length > 0 && (
+              <GlassCard className="p-6 sm:p-8">
+                <h2 className="text-xl font-black uppercase tracking-tight text-brand-midnight">
+                  Competition <GradientText>FAQs</GradientText>
+                </h2>
+                <div className="mt-6 space-y-4">
+                  {raffle.perRaffleFaqs.map((faq: { question: string; answer?: any }) => (
+                    <details
+                      key={faq.question}
+                      className="rounded-2xl border border-brand-primary/10 bg-white p-5"
+                    >
+                      <summary className="cursor-pointer text-sm font-black uppercase tracking-tight text-brand-midnight">
+                        {faq.question}
+                      </summary>
+                      {faq.answer && (
+                        <div className="mt-4 text-sm font-medium leading-relaxed text-brand-midnight/65">
+                          {documentToReactComponents(faq.answer, RICH_TEXT_OPTIONS)}
+                        </div>
+                      )}
+                    </details>
+                  ))}
+                </div>
+              </GlassCard>
+            )}
+
+            {raffle.termsAndConditions && (
+              <GlassCard className="p-6 sm:p-8">
+                <h2 className="text-xl font-black uppercase tracking-tight text-brand-midnight">
+                  Terms <GradientText>& Conditions</GradientText>
+                </h2>
+                <div className="mt-6 text-sm font-medium leading-relaxed text-brand-midnight/70">
+                  {documentToReactComponents(raffle.termsAndConditions, RICH_TEXT_OPTIONS)}
+                </div>
+              </GlassCard>
+            )}
           </div>
 
           {/* Sticky Sidebar */}
-          <div className="min-w-0 space-y-6 lg:sticky lg:top-24">
+          <div className="min-w-0 space-y-6 lg:sticky lg:top-24 lg:self-start">
             {isAwaitingDraw ? (
               <GlassCard className="p-8 text-center border-amber-500/20 bg-amber-50">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 mb-4">

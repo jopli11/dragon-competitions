@@ -33,6 +33,17 @@ type RaffleEntryFields = {
   };
   raffleDescription?: any;
   prizeDetails?: any;
+  cashAlternativeEnabled?: boolean;
+  cashAlternativeAmountPence?: number;
+  cashAlternativeCopy?: any;
+  perRaffleFaqs?: {
+    fields?: {
+      question?: string;
+      answer?: any;
+    };
+  }[];
+  pricingRules?: any;
+  termsAndConditions?: any;
   galleryImages?: {
     fields?: {
       title?: string;
@@ -71,6 +82,15 @@ export type RaffleDetail = RaffleSummary & {
   answerOptions: string[];
   raffleDescription?: any;
   prizeDetails?: any;
+  cashAlternativeEnabled: boolean;
+  cashAlternativeAmountPence?: number;
+  cashAlternativeCopy?: any;
+  perRaffleFaqs: {
+    question: string;
+    answer?: any;
+  }[];
+  pricingRules?: any;
+  termsAndConditions?: any;
   galleryImageUrls?: string[];
 };
 
@@ -133,6 +153,8 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     isFreeEntry: false,
     skillQuestion: "What is the capital of France?",
     answerOptions: ["London", "Paris", "Berlin"],
+    cashAlternativeEnabled: false,
+    perRaffleFaqs: [],
     heroImageUrl: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=2000&auto=format&fit=crop",
   },
   {
@@ -153,6 +175,8 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     isFreeEntry: false,
     skillQuestion: "Which company makes the Model S?",
     answerOptions: ["Ford", "Tesla", "BMW"],
+    cashAlternativeEnabled: false,
+    perRaffleFaqs: [],
     heroImageUrl: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=2000&auto=format&fit=crop",
   },
   {
@@ -173,6 +197,8 @@ const MOCK_RAFFLES: RaffleDetail[] = [
     isFreeEntry: false,
     skillQuestion: "Who manufactures the PlayStation?",
     answerOptions: ["Microsoft", "Sony", "Nintendo"],
+    cashAlternativeEnabled: false,
+    perRaffleFaqs: [],
     heroImageUrl: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?q=80&w=2000&auto=format&fit=crop",
   }
 ];
@@ -245,6 +271,7 @@ export const fetchRaffleBySlug = cache(async (
     content_type: "raffle",
     "fields.slug": slug,
     limit: 1,
+    include: 2,
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -255,6 +282,14 @@ export const fetchRaffleBySlug = cache(async (
 
   const fields = entry.fields as unknown as RaffleEntryFields;
   const summary = toSummary(entry);
+  const perRaffleFaqs: RaffleDetail["perRaffleFaqs"] = (fields.perRaffleFaqs || [])
+    .reduce<RaffleDetail["perRaffleFaqs"]>((items, faq) => {
+      const question = faq.fields?.question;
+      if (!question) return items;
+      items.push({ question, answer: faq.fields?.answer });
+      return items;
+    }, []);
+
   return {
     ...summary,
     startAt: fields.startAt,
@@ -262,6 +297,12 @@ export const fetchRaffleBySlug = cache(async (
     answerOptions: fields.answerOptions,
     raffleDescription: fields.raffleDescription,
     prizeDetails: fields.prizeDetails,
+    cashAlternativeEnabled: !!fields.cashAlternativeEnabled,
+    cashAlternativeAmountPence: fields.cashAlternativeAmountPence,
+    cashAlternativeCopy: fields.cashAlternativeCopy,
+    perRaffleFaqs,
+    pricingRules: fields.pricingRules,
+    termsAndConditions: fields.termsAndConditions,
     galleryImageUrls: fields.galleryImages?.map(img => toUrlMaybe(img.fields?.file?.url)).filter(Boolean) as string[],
   };
 });

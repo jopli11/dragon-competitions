@@ -23,6 +23,14 @@ function formatGBPFromPence(pence: number) {
   }).format(pence / 100);
 }
 
+function formatShortDate(dateString: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "Europe/London",
+  }).format(new Date(dateString));
+}
+
 function getDiscountRibbonLabel(
   raffle: RaffleSummary,
   pricing: ReturnType<typeof getEffectivePrice>,
@@ -128,7 +136,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
                 <span>{isAwaitingDraw ? 'Sold Out · Draw Pending' : `${currentTicketsSold} / ${maxTickets} Sold`}</span>
               </div>
               {!isAwaitingDraw && (
-                <span>Ends: {new Date(raffle.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+                <span>Ends: {formatShortDate(raffle.endAt)}</span>
               )}
             </div>
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-brand-accent">
@@ -213,7 +221,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
               <span>{isAwaitingDraw ? 'Sold Out · Draw Pending' : `${currentTicketsSold} / ${maxTickets} Sold`}</span>
             </div>
             {!isAwaitingDraw && (
-              <span>Ends: {new Date(raffle.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+              <span>Ends: {formatShortDate(raffle.endAt)}</span>
             )}
           </div>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-brand-accent/50 border border-brand-primary/5">
