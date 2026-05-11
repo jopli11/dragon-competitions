@@ -6,7 +6,7 @@ import { HomeCountdown } from "@/components/HomeCountdown";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
 import dynamic from "next/dynamic";
-import { HomeRaffleCarousel } from "@/components/HomeRaffleCarousel";
+import { RaffleCard } from "@/components/RaffleCard";
 import { BrandLinkButton } from "@/lib/styles";
 import { FloatingPaymentPrompt } from "@/components/FloatingPaymentPrompt";
 
@@ -62,9 +62,16 @@ export default async function Home() {
           </p>
         </div>
 
-        {raffles.length > 0 && (
-          <HomeRaffleCarousel raffles={raffles} stats={stats} />
-        )}
+        <div className="mt-12 grid gap-6 px-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-3">
+          {raffles.map((raffle) => (
+            <RaffleCard
+              key={raffle.id}
+              raffle={raffle}
+              initialTicketsSold={stats[raffle.slug]?.ticketsSold || 0}
+              variant="compact"
+            />
+          ))}
+        </div>
 
         {raffles.length === 0 && (
           <div className="mt-20 text-center">
@@ -80,7 +87,7 @@ export default async function Home() {
         {raffles.length > 3 && (
           <div className="mt-12 text-center">
             <BrandLinkButton href="/raffles" variant="outline" size="lg">
-              View All Competitions
+              Filter Competitions
             </BrandLinkButton>
           </div>
         )}
