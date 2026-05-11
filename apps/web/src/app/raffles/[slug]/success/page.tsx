@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { AnimatedIn } from "@/components/AnimatedIn";
 import { adminDb } from "@/lib/firebase/admin";
+import { TRUSTPILOT_REVIEW_URL } from "@/lib/trustpilot";
 import { redirect } from "next/navigation";
 
 export default async function SuccessPage({
@@ -168,6 +169,26 @@ export default async function SuccessPage({
           <p className="mt-6 text-xs text-brand-midnight/40 font-medium">
             A confirmation email with your ticket details is on its way.
           </p>
+
+          <div className="mt-8 rounded-3xl border border-brand-primary/10 bg-brand-accent/20 p-6 text-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary">
+              Share Your Experience
+            </p>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-brand-midnight">
+              Enjoyed checking out?
+            </h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm font-medium text-brand-midnight/60">
+              A quick Trustpilot review helps other players feel confident entering Coast Competitions.
+            </p>
+            <a
+              href={TRUSTPILOT_REVIEW_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-[#00B67A] px-7 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#00B67A]/20 transition-all hover:scale-105"
+            >
+              Leave a Trustpilot Review
+            </a>
+          </div>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link

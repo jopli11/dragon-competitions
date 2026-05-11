@@ -1,5 +1,6 @@
 import * as postmark from "postmark";
 import { getOptionalEnv } from "@/lib/env";
+import { TRUSTPILOT_REVIEW_URL } from "@/lib/trustpilot";
 
 const serverToken = getOptionalEnv("POSTMARK_SERVER_TOKEN");
 export const postmarkClient = serverToken ? new postmark.ServerClient(serverToken) : null;
@@ -43,13 +44,18 @@ export async function sendPurchaseConfirmation({
       From: FROM_EMAIL,
       To: to,
       Subject: `Confirmation: You're entered in ${raffleTitle}!`,
-      TextBody: `Thank you for your purchase! You have been entered into the "${raffleTitle}" competition. Your ticket numbers are: ${rangeStr}. Order ID: ${orderId}`,
+      TextBody: `Thank you for your purchase! You have been entered into the "${raffleTitle}" competition. Your ticket numbers are: ${rangeStr}. Order ID: ${orderId}\n\nEnjoyed your checkout experience? We'd really appreciate a quick review on Trustpilot: ${TRUSTPILOT_REVIEW_URL}`,
       HtmlBody: `
         <h1>Entry Confirmation</h1>
         <p>Thank you for your purchase!</p>
         <p>You have been entered into the <strong>${escapeHtml(raffleTitle)}</strong> competition.</p>
         <p><strong>Your ticket numbers:</strong> ${rangeStr}</p>
         <p>Order ID: ${escapeHtml(orderId)}</p>
+        <div style="margin: 24px 0; padding: 20px; border-radius: 12px; background: #f5fffd; border: 1px solid #d7f3ef;">
+          <h2 style="margin: 0 0 8px; font-size: 18px;">How did we do?</h2>
+          <p style="margin: 0 0 16px;">If checkout was smooth, we'd be grateful if you could leave Coast Competitions a quick review on Trustpilot.</p>
+          <a href="${TRUSTPILOT_REVIEW_URL}" style="display: inline-block; padding: 12px 18px; border-radius: 999px; background: #35B1AB; color: #ffffff; font-weight: 700; text-decoration: none;">Leave a Trustpilot review</a>
+        </div>
         <p>Good luck!</p>
       `,
     });
