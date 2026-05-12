@@ -8,8 +8,8 @@ const winners = [
     winner: "Jess Cox",
     date: "April 24, 2026",
     quote: "Winning the Easter competition on Coast Competitions was such an amazing experience! The staff are very friendly and were quick at responding. I'll definitely be entering their competitions again. Thank you so much.",
-    image: "/winners/1/jess-cox-easter-giveaway-main.jpg",
-    secondaryImage: "/winners/1/jess-cox-easter-giveaway-secondary.jpg",
+    image: "/winners/1/jess-cox-easter-giveaway-secondary.jpg",
+    secondaryImage: "/winners/1/jess-cox-easter-giveaway-main.jpg",
     instagramUrl: "https://www.instagram.com/p/DWrmfKfDLxB/?hl=en",
   },
 ];
@@ -28,13 +28,13 @@ export default function WinnersPage() {
         <div className="grid gap-12 sm:gap-24 grid-cols-1">
           {winners.map((winner, i) => (
             <div key={i} className="group grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] bg-white rounded-[2.5rem] sm:rounded-[3.5rem] overflow-hidden border border-brand-primary/5 shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:shadow-brand hover:border-brand-secondary/20">
-              <div className="relative h-[300px] lg:h-full min-h-[400px]">
+              <div className="relative h-[300px] lg:h-full min-h-[400px] bg-brand-midnight/5">
                 <Image
                   src={winner.image}
                   alt={winner.winner}
                   fill
                   sizes="(min-width: 1024px) 45vw, 100vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-fill transition-transform duration-700"
                 />
                 <div className="absolute top-6 right-6 z-20 bg-[#00b67a] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
                   <svg fill="currentColor" viewBox="0 0 20 20" className="w-3 h-3">
