@@ -1,6 +1,7 @@
 import { Container } from "@/components/Container";
 import { GradientText } from "@/lib/styles";
 import { SOCIAL_LINKS } from "@/lib/socials";
+import { FloatingBusinessPrompt } from "@/components/FloatingBusinessPrompt";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -190,6 +191,8 @@ export default function AboutPage() {
           </p>
         </Container>
       </div>
+
+      <FloatingBusinessPrompt />
     </div>
   );
 }

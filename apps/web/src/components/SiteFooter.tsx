@@ -79,6 +79,7 @@ export function SiteFooter() {
             <nav className="mt-6 flex flex-col gap-3">
               <FooterLink href="/faqs">FAQs</FooterLink>
               <FooterLink href="/contact">Contact Us</FooterLink>
+              <FooterLink href="/partners">For Business</FooterLink>
               <FooterLink href="/terms">Terms & Conditions</FooterLink>
               <FooterLink href="/privacy">Privacy Policy</FooterLink>
               <FooterLink href="/cookies">Cookie Policy</FooterLink>

@@ -59,7 +59,14 @@ export type AnalyticsEvent =
   | "social_instagram_click"
   | "social_tiktok_click"
   | "social_facebook_click"
-  | "social_linkedin_click";
+  | "social_linkedin_click"
+  // B2B partners
+  | "business_prompt_view"
+  | "business_prompt_click"
+  | "business_prompt_dismiss"
+  | "partner_enquiry_submit"
+  | "partner_enquiry_success"
+  | "partner_enquiry_error";
 
 const firedOnce = new Set<string>();
 

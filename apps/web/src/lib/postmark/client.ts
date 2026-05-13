@@ -230,3 +230,93 @@ export async function sendContactFormEmail({
     throw error;
   }
 }
+
+export async function sendPartnerEnquiry({
+  businessName,
+  contactName,
+  email,
+  phone,
+  websiteOrSocial,
+  campaignType,
+  prizeDescription,
+  prizeValueGbp,
+  message,
+}: {
+  businessName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  websiteOrSocial?: string;
+  campaignType: string;
+  prizeDescription: string;
+  prizeValueGbp?: number;
+  message: string;
+}) {
+  if (!postmarkClient) {
+    console.warn("Postmark not configured. Skipping partner enquiry email.");
+    return;
+  }
+
+  const prizeValueLabel =
+    typeof prizeValueGbp === "number" ? `£${prizeValueGbp.toLocaleString("en-GB")}` : "—";
+
+  const adminTextLines = [
+    `New B2B enquiry from ${businessName}`,
+    ``,
+    `Contact: ${contactName} <${email}>`,
+    phone ? `Phone: ${phone}` : null,
+    websiteOrSocial ? `Website / Social: ${websiteOrSocial}` : null,
+    `Campaign type: ${campaignType}`,
+    `Approx. prize value: ${prizeValueLabel}`,
+    ``,
+    `Prize / product:`,
+    prizeDescription,
+    ``,
+    `Message:`,
+    message,
+  ].filter(Boolean);
+
+  try {
+    // 1. Admin notification — distinct subject so it stands out from regular support tickets.
+    await postmarkClient.sendEmail({
+      From: FROM_EMAIL,
+      To: ADMIN_EMAIL,
+      ReplyTo: email,
+      Subject: `[B2B ENQUIRY] ${businessName} – ${campaignType}`,
+      TextBody: adminTextLines.join("\n"),
+      HtmlBody: `
+        <h1>New B2B Enquiry</h1>
+        <table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:14px;">
+          <tr><td style="padding:4px 12px 4px 0;"><strong>Business</strong></td><td>${escapeHtml(businessName)}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;"><strong>Contact</strong></td><td>${escapeHtml(contactName)} &lt;${escapeHtml(email)}&gt;</td></tr>
+          ${phone ? `<tr><td style="padding:4px 12px 4px 0;"><strong>Phone</strong></td><td>${escapeHtml(phone)}</td></tr>` : ""}
+          ${websiteOrSocial ? `<tr><td style="padding:4px 12px 4px 0;"><strong>Website / Social</strong></td><td>${escapeHtml(websiteOrSocial)}</td></tr>` : ""}
+          <tr><td style="padding:4px 12px 4px 0;"><strong>Campaign type</strong></td><td>${escapeHtml(campaignType)}</td></tr>
+          <tr><td style="padding:4px 12px 4px 0;"><strong>Approx. value</strong></td><td>${escapeHtml(prizeValueLabel)}</td></tr>
+        </table>
+        <h2 style="margin-top:24px;">Prize / product</h2>
+        <p style="white-space:pre-wrap;">${escapeHtml(prizeDescription)}</p>
+        <h2 style="margin-top:24px;">Message</h2>
+        <p style="white-space:pre-wrap;">${escapeHtml(message)}</p>
+      `,
+    });
+
+    // 2. Confirmation to submitter.
+    await postmarkClient.sendEmail({
+      From: FROM_EMAIL,
+      To: email,
+      Subject: `We've received your enquiry – Coast Competitions`,
+      TextBody: `Hi ${contactName},\n\nThanks for getting in touch about a collaboration with Coast Competitions. We've received your enquiry for ${businessName} and we'll review it shortly. If it looks like a good fit, we'll come back to you with next steps.\n\nBest regards,\nThe Coast Competitions Team`,
+      HtmlBody: `
+        <h1>Enquiry Received</h1>
+        <p>Hi ${escapeHtml(contactName)},</p>
+        <p>Thanks for getting in touch about a collaboration with Coast Competitions. We&rsquo;ve received your enquiry for <strong>${escapeHtml(businessName)}</strong> and we&rsquo;ll review it shortly.</p>
+        <p>If it looks like a good fit, we&rsquo;ll come back to you with next steps.</p>
+        <p>Best regards,<br>The Coast Competitions Team</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Error sending partner enquiry emails:", error);
+    throw error;
+  }
+}
