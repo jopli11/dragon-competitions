@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import styled from "@emotion/styled";
 import { BrandButton } from "@/lib/styles";
 import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
+import { track } from "@/lib/analytics";
 
 const OptionButton = styled.button<{ active: boolean; isWrong: boolean }>`
   display: flex;
@@ -215,6 +216,7 @@ export function SkillQuestionCard({
     setLoading(true);
     setError(null);
     setIsWrong(false);
+    track("raffle_skill_answer_submit");
 
     try {
       const res = await fetch(`/api/raffles/${slug}/check-answer`, {
@@ -230,9 +232,11 @@ export function SkillQuestionCard({
       }
 
       if (data.isCorrect) {
+        track("raffle_skill_answer_correct");
         setQuizPassId(data.quizPassId);
         sessionStorage.setItem(`quiz_pass_${slug}`, data.quizPassId);
       } else {
+        track("raffle_skill_answer_incorrect");
         setIsWrong(true);
         setError("Incorrect answer. Please try again.");
       }
@@ -261,6 +265,7 @@ export function SkillQuestionCard({
       const idToken = await user.getIdToken();
 
       if (isFreeEntry) {
+        track("raffle_free_entry_click");
         const res = await fetch("/api/checkout/free-entry", {
           method: "POST",
           headers: {
@@ -285,6 +290,7 @@ export function SkillQuestionCard({
         return;
       }
 
+      track("raffle_proceed_to_payment_click");
       const res = await fetch("/api/checkout/create-session", {
         method: "POST",
         headers: {
@@ -303,6 +309,8 @@ export function SkillQuestionCard({
       if (!res.ok) {
         throw new Error(data.error || "Failed to create checkout session");
       }
+
+      track("checkout_session_created");
 
       const isTestMode =
         (process.env.NEXT_PUBLIC_DNA_ENV || "test") === "test";
@@ -328,6 +336,7 @@ export function SkillQuestionCard({
         paymentMethods,
         events: {
           opened: () => {
+            track("dna_widget_opened");
             setCheckoutLoading(false);
           },
           paid: () => {
@@ -337,12 +346,14 @@ export function SkillQuestionCard({
             );
           },
           declined: () => {
+            track("dna_payment_declined");
             setError("Payment declined. Please try again.");
             window.DNAPayments.closePaymentWidget();
             setLoading(false);
             setCheckoutLoading(false);
           },
           cancelled: () => {
+            track("dna_payment_cancelled");
             setLoading(false);
             setCheckoutLoading(false);
           },
@@ -371,6 +382,7 @@ export function SkillQuestionCard({
         auth: data.auth,
       });
     } catch (err) {
+      track("checkout_session_error");
       const errorMessage = getErrorMessage(err, "Failed to create checkout session");
       const msg = errorMessage.toLowerCase();
       if (
@@ -449,6 +461,7 @@ export function SkillQuestionCard({
           </h2>
           <button 
             onClick={() => {
+              track("raffle_quiz_change_answer");
               sessionStorage.removeItem(`quiz_pass_${slug}`);
               setQuizPassId(null);
             }}
@@ -516,7 +529,10 @@ export function SkillQuestionCard({
                     <button
                       key={tier}
                       type="button"
-                      onClick={() => setQuantity(tier)}
+                      onClick={() => {
+                        track("raffle_quick_select_quantity");
+                        setQuantity(tier);
+                      }}
                       className={`relative rounded-xl border-2 px-2 py-3 text-center transition-all ${
                         isActive
                           ? "border-brand-primary bg-brand-primary/5 shadow-md shadow-brand-primary/10"

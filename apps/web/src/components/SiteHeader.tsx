@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { auth as firebaseAuth } from "@/lib/firebase/client";
 import { signOut } from "firebase/auth";
+import { track } from "@/lib/analytics";
 
 const BRAND_LOGO_SRC = "/coast_competitions_hi_res-removebg-preview.png";
 
@@ -155,6 +156,7 @@ export function SiteHeader() {
 
   const handleLogout = async () => {
     if (!firebaseAuth) return;
+    track("auth_logout");
     await signOut(firebaseAuth);
     setIsOpen(false);
     router.push("/");
@@ -210,8 +212,15 @@ export function SiteHeader() {
                 Login
               </Link>
             )}
-            <HeaderButton href="/raffles">Enter Now</HeaderButton>
-            <HamburgerButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+            <HeaderButton href="/raffles" onClick={() => track("nav_enter_now_click")}>Enter Now</HeaderButton>
+            <HamburgerButton
+              isOpen={isOpen}
+              onClick={() => {
+                if (!isOpen) track("nav_mobile_menu_open");
+                setIsOpen(!isOpen);
+              }}
+              aria-label="Toggle menu"
+            >
               <div />
               <div />
               <div />

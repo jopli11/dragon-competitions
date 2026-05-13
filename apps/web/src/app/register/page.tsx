@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@/components/Container";
 import { BrandButton, BrandSectionHeading, GradientText } from "@/lib/styles";
 import Link from "next/link";
+import { track } from "@/lib/analytics";
 
 function RegisterContent() {
   const [email, setEmail] = useState("");
@@ -43,12 +44,15 @@ function RegisterContent() {
     
     setLoading(true);
     setError("");
-    
+    track("auth_register_email_submit");
+
     try {
       await createUserWithEmailAndPassword(auth, email, password);
+      track("auth_register_success");
       router.push(redirect);
       router.refresh();
     } catch (err: any) {
+      track("auth_register_failure");
       setError(err.message || "Failed to create account.");
       console.error(err);
     } finally {
@@ -58,16 +62,19 @@ function RegisterContent() {
 
   const handleGoogleRegister = async () => {
     if (!auth) return;
-    
+
     setLoading(true);
     setError("");
-    
+    track("auth_register_google_submit");
+
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      track("auth_register_success");
       router.push(redirect);
       router.refresh();
     } catch (err: any) {
+      track("auth_register_failure");
       setError("Google sign-up failed. Please try again.");
       console.error(err);
     } finally {

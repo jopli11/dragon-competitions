@@ -3,10 +3,26 @@
 import { useMemo, useState } from "react";
 import { RaffleCard } from "@/components/RaffleCard";
 import type { RaffleSummary } from "@/lib/contentful/raffles";
+import { track, type AnalyticsEvent } from "@/lib/analytics";
 
 type RaffleStatsMap = Record<string, { ticketsSold: number }>;
 type FilterKey = "all" | "free" | "discounted" | "ending-soon" | "best-odds";
 type SortKey = "newest" | "ending-soon" | "price-low" | "most-available";
+
+const FILTER_EVENT_BY_KEY: Record<FilterKey, AnalyticsEvent | null> = {
+  all: null,
+  free: "raffles_filter_free",
+  discounted: "raffles_filter_discounted",
+  "ending-soon": "raffles_filter_ending_soon",
+  "best-odds": "raffles_filter_best_odds",
+};
+
+const SORT_EVENT_BY_KEY: Record<SortKey, AnalyticsEvent | null> = {
+  newest: null,
+  "ending-soon": "raffles_sort_ending_soon",
+  "price-low": "raffles_sort_price_low",
+  "most-available": "raffles_sort_most_available",
+};
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All" },
@@ -53,6 +69,20 @@ export function RaffleFiltersGrid({
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [sortBy, setSortBy] = useState<SortKey>("newest");
 
+  const handleFilterChange = (key: FilterKey) => {
+    if (key === activeFilter) return;
+    const event = FILTER_EVENT_BY_KEY[key];
+    if (event) track(event);
+    setActiveFilter(key);
+  };
+
+  const handleSortChange = (key: SortKey) => {
+    if (key === sortBy) return;
+    const event = SORT_EVENT_BY_KEY[key];
+    if (event) track(event);
+    setSortBy(key);
+  };
+
   const filteredRaffles = useMemo(() => {
     const filtered = raffles.filter((raffle) => {
       if (activeFilter === "free") return raffle.isFreeEntry;
@@ -94,7 +124,7 @@ export function RaffleFiltersGrid({
                   <button
                     key={filter.key}
                     type="button"
-                    onClick={() => setActiveFilter(filter.key)}
+                    onClick={() => handleFilterChange(filter.key)}
                     className={`rounded-full border px-4 py-2 text-xs font-black uppercase tracking-widest transition-colors ${
                       isActive
                         ? "border-brand-primary bg-brand-primary text-white shadow-sm"
@@ -112,7 +142,7 @@ export function RaffleFiltersGrid({
             Sort by
             <select
               value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as SortKey)}
+              onChange={(event) => handleSortChange(event.target.value as SortKey)}
               className="rounded-full border border-brand-primary/10 bg-white px-4 py-3 text-xs font-black uppercase tracking-widest text-brand-midnight shadow-sm outline-none transition-colors focus:border-brand-primary"
             >
               {SORTS.map((sort) => (
@@ -143,7 +173,7 @@ export function RaffleFiltersGrid({
           </p>
           <button
             type="button"
-            onClick={() => setActiveFilter("all")}
+            onClick={() => handleFilterChange("all")}
             className="mt-4 text-xs font-black uppercase tracking-widest text-brand-primary underline"
           >
             Show all competitions

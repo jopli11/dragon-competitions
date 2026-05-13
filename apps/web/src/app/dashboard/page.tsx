@@ -7,6 +7,14 @@ import { BrandSectionHeading, GradientText, GlassCard } from "@/lib/styles";
 import { getUserOrders, getUserWins, type UserOrder } from "@/lib/firebase/user-stats";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { track, type AnalyticsEvent } from "@/lib/analytics";
+
+type DashboardTab = "entries" | "wins";
+
+const DASHBOARD_TAB_EVENT: Record<DashboardTab, AnalyticsEvent> = {
+  entries: "dashboard_tab_entries",
+  wins: "dashboard_tab_wins",
+};
 
 function formatGBPFromPence(pence: number) {
   return new Intl.NumberFormat("en-GB", {
@@ -20,8 +28,14 @@ export default function DashboardPage() {
   const [orders, setOrders] = useState<UserOrder[]>([]);
   const [wins, setWins] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true);
-  const [activeTab, setActiveTab] = useState<"entries" | "wins">("entries");
+  const [activeTab, setActiveTab] = useState<DashboardTab>("entries");
   const router = useRouter();
+
+  const handleTabChange = (tab: DashboardTab) => {
+    if (tab === activeTab) return;
+    track(DASHBOARD_TAB_EVENT[tab]);
+    setActiveTab(tab);
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -88,7 +102,7 @@ export default function DashboardPage() {
       {/* Tabs */}
       <div className="flex border-b border-brand-primary/10 mb-8">
         <button
-          onClick={() => setActiveTab("entries")}
+          onClick={() => handleTabChange("entries")}
           className={`px-8 py-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 ${
             activeTab === "entries" 
               ? "border-brand-primary text-brand-primary" 
@@ -98,7 +112,7 @@ export default function DashboardPage() {
           My Entries
         </button>
         <button
-          onClick={() => setActiveTab("wins")}
+          onClick={() => handleTabChange("wins")}
           className={`px-8 py-4 text-xs font-black uppercase tracking-widest transition-all border-b-2 ${
             activeTab === "wins" 
               ? "border-brand-primary text-brand-primary" 

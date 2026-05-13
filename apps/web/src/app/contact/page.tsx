@@ -4,6 +4,12 @@ import { Container } from "@/components/Container";
 import { BrandSectionHeading, GradientText } from "@/lib/styles";
 import { submitContactForm } from "./actions";
 import { useState } from "react";
+import { track, type AnalyticsEvent } from "@/lib/analytics";
+
+const SOCIAL_EVENT_BY_NAME: Record<string, AnalyticsEvent> = {
+  Instagram: "social_instagram_click",
+  TikTok: "social_tiktok_click",
+};
 
 export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -12,16 +18,20 @@ export default function ContactPage() {
   async function handleSubmit(formData: FormData) {
     setStatus("loading");
     setErrorMessage("");
-    
+    track("contact_form_submit");
+
     try {
       const result = await submitContactForm(formData);
       if (result?.error) {
+        track("contact_form_error");
         setStatus("error");
         setErrorMessage(result.error);
       } else {
+        track("contact_form_success");
         setStatus("success");
       }
     } catch {
+      track("contact_form_error");
       setStatus("error");
       setErrorMessage("Something went wrong. Please try again.");
     }
@@ -170,7 +180,18 @@ export default function ContactPage() {
                       </svg>
                     )},
                   ].map((social) => (
-                    <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-brand-secondary transition-all duration-300 hover:-translate-y-1 active:translate-y-0" title={social.name}>
+                    <a
+                      key={social.name}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        const event = SOCIAL_EVENT_BY_NAME[social.name];
+                        if (event) track(event);
+                      }}
+                      className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-brand-secondary transition-all duration-300 hover:-translate-y-1 active:translate-y-0"
+                      title={social.name}
+                    >
                       {social.icon}
                     </a>
                   ))}

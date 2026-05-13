@@ -4,6 +4,7 @@ import { AnimatedIn } from "@/components/AnimatedIn";
 import { adminDb } from "@/lib/firebase/admin";
 import { TRUSTPILOT_REVIEW_URL } from "@/lib/trustpilot";
 import { redirect } from "next/navigation";
+import { SuccessAnalytics, TrustpilotReviewLink } from "@/components/SuccessAnalytics";
 
 export default async function SuccessPage({
   params,
@@ -73,6 +74,7 @@ export default async function SuccessPage({
   if (orderData.status === "failed") {
     return (
       <Container className="py-20 text-center">
+        <SuccessAnalytics status="failed" invoiceId={invoiceId} />
         <AnimatedIn>
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
@@ -96,6 +98,7 @@ export default async function SuccessPage({
   if (orderData.status === "refunded_oversold" || orderData.status === "refunded_pass_reuse" || orderData.status === "refunded") {
     return (
       <Container className="py-20 text-center">
+        <SuccessAnalytics status="refunded_oversold" invoiceId={invoiceId} />
         <AnimatedIn>
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-8 w-8">
@@ -120,6 +123,7 @@ export default async function SuccessPage({
 
   return (
     <Container className="py-20 text-center">
+      <SuccessAnalytics status="paid" invoiceId={invoiceId} />
       <AnimatedIn>
         <div className="max-w-lg mx-auto">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-500/10 text-green-500">
@@ -180,14 +184,12 @@ export default async function SuccessPage({
             <p className="mx-auto mt-2 max-w-sm text-sm font-medium text-brand-midnight/60">
               A quick Trustpilot review helps other players feel confident entering Coast Competitions.
             </p>
-            <a
+            <TrustpilotReviewLink
               href={TRUSTPILOT_REVIEW_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-[#00B67A] px-7 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#00B67A]/20 transition-all hover:scale-105"
             >
               Leave a Trustpilot Review
-            </a>
+            </TrustpilotReviewLink>
           </div>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

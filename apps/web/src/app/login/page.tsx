@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@/components/Container";
 import { BrandButton, BrandSectionHeading, GradientText } from "@/lib/styles";
 import Link from "next/link";
+import { track } from "@/lib/analytics";
 
 function LoginContent() {
   const [email, setEmail] = useState("");
@@ -22,15 +23,18 @@ function LoginContent() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth) return;
-    
+
     setLoading(true);
     setError("");
-    
+    track("auth_login_email_submit");
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      track("auth_login_success");
       router.push(redirect);
       router.refresh();
     } catch (err: any) {
+      track("auth_login_failure");
       setError("Invalid email or password. Please try again.");
       console.error(err);
     } finally {
@@ -44,24 +48,25 @@ function LoginContent() {
       setError("Authentication system is not ready. Please refresh the page.");
       return;
     }
-    
+
     setLoading(true);
     setError("");
-    
+    track("auth_login_google_submit");
+
     try {
       console.log("Starting Google Sign-in...");
       const provider = new GoogleAuthProvider();
-      // Add custom parameters to force account selection if needed
       provider.setCustomParameters({ prompt: 'select_account' });
-      
+
       const result = await signInWithPopup(auth, provider);
       console.log("Google Sign-in successful", result.user.email);
-      
+      track("auth_login_success");
+
       router.push(redirect);
       router.refresh();
     } catch (err: any) {
+      track("auth_login_failure");
       console.error("Google Sign-in Error:", err);
-      // Handle specific Firebase errors
       if (err.code === 'auth/popup-blocked') {
         setError("Sign-in popup was blocked by your browser. Please allow popups for this site.");
       } else if (err.code === 'auth/cancelled-popup-request') {

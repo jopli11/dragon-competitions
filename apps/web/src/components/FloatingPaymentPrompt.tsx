@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PaymentMethodBadges } from "@/components/PaymentMethodBadges";
+import { track } from "@/lib/analytics";
 
 const DISMISS_KEY = "coast-payment-prompt-dismissed";
 
@@ -13,6 +14,7 @@ export function FloatingPaymentPrompt() {
   }, []);
 
   const dismiss = () => {
+    track("payment_prompt_dismiss");
     sessionStorage.setItem(DISMISS_KEY, "true");
     setIsVisible(false);
   };
