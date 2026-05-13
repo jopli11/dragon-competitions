@@ -13,6 +13,33 @@ function formatGBPFromPence(pence: number) {
   }).format(pence / 100);
 }
 
+function formatTimeRemaining(endAt: string | undefined): { label: string; tone: "live" | "soon" | "ended" } {
+  if (!endAt) return { label: "—", tone: "live" };
+  const end = new Date(endAt).getTime();
+  if (!Number.isFinite(end)) return { label: "—", tone: "live" };
+  const now = Date.now();
+  const diffMs = end - now;
+  if (diffMs <= 0) return { label: "Ended", tone: "ended" };
+
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  const days = Math.floor(diffMs / day);
+  const hours = Math.floor((diffMs % day) / hour);
+  const minutes = Math.floor((diffMs % hour) / minute);
+
+  const tone: "soon" | "live" = diffMs < day ? "soon" : "live";
+
+  if (days >= 1) {
+    return { label: `${days}d ${hours}h`, tone };
+  }
+  if (hours >= 1) {
+    return { label: `${hours}h ${minutes}m`, tone };
+  }
+  return { label: `${minutes}m`, tone };
+}
+
 const STATUS_STYLES: Record<string, string> = {
   completed: "bg-green-100 text-green-700",
   refunded: "bg-gray-200 text-gray-600",
@@ -40,6 +67,7 @@ type AdminOrder = {
   dnaRefundId?: string;
   createdAt?: string;
   refundedAt?: string;
+  isTestOrder?: boolean;
 };
 
 type AdminRaffle = {
@@ -47,11 +75,12 @@ type AdminRaffle = {
   slug?: string;
   title?: string;
   ticketsSold?: number;
-  totalTickets?: number;
+  maxTickets?: number;
   endAt?: string;
   drawStatus?: string;
   status?: string;
   isSoldOut?: boolean;
+  isFreeEntry?: boolean;
 };
 
 type AdminWinner = {
@@ -86,6 +115,62 @@ type ConfirmWinnerResult = {
   success: boolean;
   message: string;
 };
+
+function SortIcon({ direction }: { direction: "asc" | "desc" | null }) {
+  if (direction === null) {
+    return (
+      <svg className="w-3 h-3 text-brand-midnight/20" viewBox="0 0 12 12" aria-hidden>
+        <path fill="currentColor" d="M6 1.5L9 5H3L6 1.5zM6 10.5L3 7H9L6 10.5z" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="w-3 h-3 text-brand-primary" viewBox="0 0 12 12" aria-hidden>
+      {direction === "asc" ? (
+        <path fill="currentColor" d="M6 2L10 8H2L6 2z" />
+      ) : (
+        <path fill="currentColor" d="M6 10L2 4H10L6 10z" />
+      )}
+    </svg>
+  );
+}
+
+type SortableHeaderProps<K extends string> = {
+  label: string;
+  sortKey: K;
+  activeKey: K;
+  direction: "asc" | "desc";
+  onClick: (key: K) => void;
+  align?: "left" | "right";
+};
+
+function SortableHeader<K extends string>({
+  label,
+  sortKey,
+  activeKey,
+  direction,
+  onClick,
+  align = "left",
+}: SortableHeaderProps<K>) {
+  const isActive = sortKey === activeKey;
+  const justify = align === "right" ? "justify-end" : "justify-start";
+  return (
+    <th
+      scope="col"
+      aria-sort={isActive ? (direction === "asc" ? "ascending" : "descending") : "none"}
+      className={`px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 ${align === "right" ? "text-right" : ""}`}
+    >
+      <button
+        type="button"
+        onClick={() => onClick(sortKey)}
+        className={`inline-flex items-center gap-1.5 ${justify} hover:text-brand-primary transition-colors`}
+      >
+        <span>{label}</span>
+        <SortIcon direction={isActive ? direction : null} />
+      </button>
+    </th>
+  );
+}
 
 function OrderStatusBadge({ status }: { status?: string }) {
   const s = status || "unknown";
@@ -240,6 +325,22 @@ function AdminPage() {
 
   const [orderFilter, setOrderFilter] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState<"all" | "completed" | "refunded" | "pending" | "failed">("all");
+  const [hideTestOrders, setHideTestOrders] = useState(true);
+  type OrderSortKey = "createdAt" | "email" | "raffleSlug" | "quantity" | "amount" | "status";
+  const [orderSortKey, setOrderSortKey] = useState<OrderSortKey>("createdAt");
+  const [orderSortDir, setOrderSortDir] = useState<"asc" | "desc">("desc");
+
+  function toggleOrderSort(key: OrderSortKey) {
+    setOrderSortKey((prev) => {
+      if (prev === key) {
+        setOrderSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        return prev;
+      }
+      // Sensible defaults per column: text A→Z, numbers/dates large→small first.
+      setOrderSortDir(key === "email" || key === "raffleSlug" || key === "status" ? "asc" : "desc");
+      return key;
+    });
+  }
   const [refundOrder, setRefundOrder] = useState<AdminOrder | null>(null);
   const [refundReason, setRefundReason] = useState("");
   const [refundLoading, setRefundLoading] = useState(false);
@@ -497,19 +598,26 @@ function AdminPage() {
             <div className="rounded-[2.5rem] border border-brand-primary/5 bg-white p-8 shadow-sm">
               <h3 className="text-lg font-black uppercase tracking-tight text-brand-midnight mb-6">Live Raffles</h3>
               <div className="space-y-4">
-                {stats.raffles.slice(0, 3).map((raffle) => (
-                  <div key={raffle.id} className="flex items-center justify-between p-4 rounded-2xl bg-brand-accent/20">
-                    <div>
-                      <div className="font-bold text-sm text-brand-midnight">{raffle.title}</div>
-                      <div className="text-[10px] text-brand-midnight/40 font-bold uppercase tracking-wider">
-                        {raffle.ticketsSold || 0} / {raffle.totalTickets || 0} tickets
+                {stats.raffles
+                  .filter((r) => r.drawStatus !== "completed")
+                  .map((raffle) => {
+                    const sold = raffle.ticketsSold || 0;
+                    const total = raffle.maxTickets || 0;
+                    const pct = total > 0 ? Math.min(100, (sold / total) * 100) : 0;
+                    return (
+                      <div key={raffle.id} className="flex items-center justify-between p-4 rounded-2xl bg-brand-accent/20">
+                        <div>
+                          <div className="font-bold text-sm text-brand-midnight">{raffle.title}</div>
+                          <div className="text-[10px] text-brand-midnight/40 font-bold uppercase tracking-wider">
+                            {sold} / {total || "—"} tickets
+                          </div>
+                        </div>
+                        <div className="h-1.5 w-20 bg-brand-accent rounded-full overflow-hidden">
+                          <div className="h-full bg-brand-secondary" style={{ width: `${pct}%` }} />
+                        </div>
                       </div>
-                    </div>
-                    <div className="h-1.5 w-20 bg-brand-accent rounded-full overflow-hidden">
-                      <div className="h-full bg-brand-secondary" style={{ width: `${((raffle.ticketsSold || 0) / (raffle.totalTickets || 1)) * 100}%` }} />
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
               </div>
             </div>
 
@@ -535,73 +643,89 @@ function AdminPage() {
       {activeTab === "raffles" && (
         <section>
           <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
-                <tr>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Raffle</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Tickets Sold</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">End Date</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Status</th>
-                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-primary/5">
-                {stats.raffles.map((raffle) => (
-                  <tr key={raffle.id}>
-                    <td className="px-8 py-4">
-                      <div className="font-bold text-brand-midnight">{raffle.title}</div>
-                      <div className="text-[10px] font-mono text-brand-midnight/40">{raffle.slug}</div>
-                    </td>
-                    <td className="px-8 py-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-brand-midnight">{raffle.ticketsSold || 0}</span>
-                        <span className="text-brand-midnight/20">/</span>
-                        <span className="text-brand-midnight/40">{raffle.totalTickets || 0}</span>
-                      </div>
-                      <div className="mt-1.5 h-1 w-24 bg-brand-accent rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-brand-secondary" 
-                          style={{ width: `${((raffle.ticketsSold || 0) / (raffle.totalTickets || 1)) * 100}%` }}
-                        />
-                      </div>
-                    </td>
-                    <td className="px-8 py-4 font-medium text-brand-midnight">
-                      {raffle.endAt ? new Date(raffle.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' }) : "—"}
-                    </td>
-                    <td className="px-8 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                        raffle.drawStatus === "completed" ? "bg-gray-100 text-gray-700" :
-                        raffle.status === "awaitingDraw" ? "bg-amber-100 text-amber-700" :
-                        raffle.isSoldOut ? "bg-red-100 text-red-700" :
-                        "bg-green-100 text-green-700"
-                      }`}>
-                        {raffle.drawStatus === "completed" ? "Drawn" :
-                         raffle.status === "awaitingDraw" ? "Awaiting Draw" :
-                         raffle.isSoldOut ? "Sold Out" :
-                         raffle.status || "Live"}
-                      </span>
-                    </td>
-                    <td className="px-8 py-4 text-right space-x-2">
-                      {(raffle.isSoldOut || raffle.drawStatus === "completed") && (
-                        <button
-                          onClick={() => handleExportTickets(raffle.slug || raffle.id)}
-                          disabled={exportLoading === (raffle.slug || raffle.id)}
-                          className="text-brand-primary font-bold text-xs hover:underline disabled:opacity-50"
-                        >
-                          {exportLoading === (raffle.slug || raffle.id) ? "Exporting..." : "Export Tickets"}
-                        </button>
-                      )}
-                      <button
-                        onClick={() => { setLookupSlug(raffle.slug || raffle.id); setActiveTab("settings"); }}
-                        className="text-brand-primary font-bold text-xs hover:underline"
-                      >
-                        Lookup
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm min-w-[920px]">
+                <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
+                  <tr>
+                    <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Raffle</th>
+                    <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Tickets Sold</th>
+                    <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">End Date</th>
+                    <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Time Remaining</th>
+                    <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Status</th>
+                    <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-brand-primary/5">
+                  {stats.raffles.map((raffle) => {
+                    const sold = raffle.ticketsSold || 0;
+                    const total = raffle.maxTickets || 0;
+                    const pct = total > 0 ? Math.min(100, (sold / total) * 100) : 0;
+                    const remaining = formatTimeRemaining(raffle.endAt);
+                    const remainingClass =
+                      remaining.tone === "ended"
+                        ? "text-gray-500"
+                        : remaining.tone === "soon"
+                          ? "text-red-600"
+                          : "text-brand-midnight";
+                    return (
+                      <tr key={raffle.id}>
+                        <td className="px-8 py-4">
+                          <div className="font-bold text-brand-midnight">{raffle.title}</div>
+                          <div className="text-[10px] font-mono text-brand-midnight/40">{raffle.slug}</div>
+                        </td>
+                        <td className="px-8 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-brand-midnight">{sold}</span>
+                            <span className="text-brand-midnight/20">/</span>
+                            <span className="text-brand-midnight/40">{total || "—"}</span>
+                          </div>
+                          <div className="mt-1.5 h-1 w-24 bg-brand-accent rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-brand-secondary"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </td>
+                        <td className="px-8 py-4 font-medium text-brand-midnight">
+                          {raffle.endAt ? new Date(raffle.endAt).toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric' }) : "—"}
+                        </td>
+                        <td className={`px-8 py-4 font-bold ${remainingClass}`}>{remaining.label}</td>
+                        <td className="px-8 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                            raffle.drawStatus === "completed" ? "bg-gray-100 text-gray-700" :
+                            raffle.status === "awaitingDraw" ? "bg-amber-100 text-amber-700" :
+                            raffle.isSoldOut ? "bg-red-100 text-red-700" :
+                            "bg-green-100 text-green-700"
+                          }`}>
+                            {raffle.drawStatus === "completed" ? "Drawn" :
+                             raffle.status === "awaitingDraw" ? "Awaiting Draw" :
+                             raffle.isSoldOut ? "Sold Out" :
+                             raffle.status || "Live"}
+                          </span>
+                        </td>
+                        <td className="px-8 py-4 text-right space-x-2">
+                          {(raffle.isSoldOut || raffle.drawStatus === "completed") && (
+                            <button
+                              onClick={() => handleExportTickets(raffle.slug || raffle.id)}
+                              disabled={exportLoading === (raffle.slug || raffle.id)}
+                              className="text-brand-primary font-bold text-xs hover:underline disabled:opacity-50"
+                            >
+                              {exportLoading === (raffle.slug || raffle.id) ? "Exporting..." : "Export Tickets"}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => { setLookupSlug(raffle.slug || raffle.id); setActiveTab("settings"); }}
+                            className="text-brand-primary font-bold text-xs hover:underline"
+                          >
+                            Lookup
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
       )}
@@ -635,17 +759,64 @@ function AdminPage() {
             </div>
           </div>
 
+          <label className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hideTestOrders}
+              onChange={(e) => setHideTestOrders(e.target.checked)}
+              className="h-3.5 w-3.5 accent-brand-primary"
+            />
+            Hide test orders
+          </label>
+
           <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[920px]">
                 <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
                   <tr>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Order</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Customer</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Raffle</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Tickets</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 text-right">Amount</th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Status</th>
+                    <SortableHeader
+                      label="Order / Date"
+                      sortKey="createdAt"
+                      activeKey={orderSortKey}
+                      direction={orderSortDir}
+                      onClick={toggleOrderSort}
+                    />
+                    <SortableHeader
+                      label="Customer"
+                      sortKey="email"
+                      activeKey={orderSortKey}
+                      direction={orderSortDir}
+                      onClick={toggleOrderSort}
+                    />
+                    <SortableHeader
+                      label="Raffle"
+                      sortKey="raffleSlug"
+                      activeKey={orderSortKey}
+                      direction={orderSortDir}
+                      onClick={toggleOrderSort}
+                    />
+                    <SortableHeader
+                      label="Tickets"
+                      sortKey="quantity"
+                      activeKey={orderSortKey}
+                      direction={orderSortDir}
+                      onClick={toggleOrderSort}
+                    />
+                    <SortableHeader
+                      label="Amount"
+                      sortKey="amount"
+                      activeKey={orderSortKey}
+                      direction={orderSortDir}
+                      onClick={toggleOrderSort}
+                      align="right"
+                    />
+                    <SortableHeader
+                      label="Status"
+                      sortKey="status"
+                      activeKey={orderSortKey}
+                      direction={orderSortDir}
+                      onClick={toggleOrderSort}
+                    />
                     <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -653,6 +824,7 @@ function AdminPage() {
                   {(() => {
                     const allOrders = stats.orders || stats.recentOrders || [];
                     const filtered = allOrders.filter((o) => {
+                      if (hideTestOrders && o.isTestOrder) return false;
                       if (orderStatusFilter !== "all" && o.status !== orderStatusFilter) return false;
                       if (orderFilter) {
                         const q = orderFilter.toLowerCase();
@@ -665,7 +837,32 @@ function AdminPage() {
                       return true;
                     });
 
-                    if (filtered.length === 0) {
+                    const dir = orderSortDir === "asc" ? 1 : -1;
+                    const sortable = filtered.slice().sort((a, b) => {
+                      const getValue = (o: AdminOrder): string | number => {
+                        switch (orderSortKey) {
+                          case "createdAt":
+                            return o.createdAt ? new Date(o.createdAt).getTime() : 0;
+                          case "email":
+                            return (o.email || "").toLowerCase();
+                          case "raffleSlug":
+                            return (o.raffleSlug || "").toLowerCase();
+                          case "quantity":
+                            return o.quantity || 0;
+                          case "amount":
+                            return o.amountTotal ?? o.amountPence ?? 0;
+                          case "status":
+                            return (o.status || "").toLowerCase();
+                        }
+                      };
+                      const av = getValue(a);
+                      const bv = getValue(b);
+                      if (av < bv) return -1 * dir;
+                      if (av > bv) return 1 * dir;
+                      return 0;
+                    });
+
+                    if (sortable.length === 0) {
                       return (
                         <tr>
                           <td colSpan={7} className="px-6 py-12 text-center text-brand-midnight/40 text-sm font-medium">
@@ -675,16 +872,34 @@ function AdminPage() {
                       );
                     }
 
-                    return filtered.map((order) => {
+                    return sortable.map((order) => {
                       const amount = order.amountTotal ?? order.amountPence ?? 0;
                       const isRefundable = order.status === "completed" && !!order.dnaTransactionId;
                       const isRefunded = order.status === "refunded";
+                      const created = order.createdAt ? new Date(order.createdAt) : null;
+                      const createdLabel = created
+                        ? created.toLocaleString("en-GB", {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "—";
                       return (
                         <tr key={order.id} className={`hover:bg-brand-accent/5 transition-colors ${isRefunded ? "opacity-70" : ""}`}>
                           <td className="px-6 py-4">
-                            <div className="font-mono text-[11px] font-bold text-brand-midnight">{order.id.slice(0, 8)}...{order.id.slice(-4)}</div>
+                            <div className="flex items-center gap-2">
+                              <div className="font-mono text-[11px] font-bold text-brand-midnight">{order.id.slice(0, 8)}...{order.id.slice(-4)}</div>
+                              {order.isTestOrder && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-orange-100 text-orange-700">
+                                  Test
+                                </span>
+                              )}
+                            </div>
                             <div className="text-[10px] text-brand-midnight/40 mt-0.5">
-                              {order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                              {createdLabel}
                             </div>
                           </td>
                           <td className="px-6 py-4 font-medium text-brand-midnight text-xs break-all">{order.email || "—"}</td>

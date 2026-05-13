@@ -57,7 +57,9 @@ export type AnalyticsEvent =
   | "contact_form_success"
   | "contact_form_error"
   | "social_instagram_click"
-  | "social_tiktok_click";
+  | "social_tiktok_click"
+  | "social_facebook_click"
+  | "social_linkedin_click";
 
 const firedOnce = new Set<string>();
 

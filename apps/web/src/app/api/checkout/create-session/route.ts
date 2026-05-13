@@ -104,6 +104,7 @@ export async function POST(request: Request) {
 
     const amountPence = pricing.effectivePence * quantity;
     const invoiceId = crypto.randomUUID();
+    const isTestOrder = (process.env.DNA_ENV || "test") !== "live";
 
     await adminDb.collection("orders").doc(invoiceId).set({
       raffleSlug: slug,
@@ -114,6 +115,7 @@ export async function POST(request: Request) {
       uid: decodedToken.uid,
       status: "pending",
       provider: "dna",
+      isTestOrder,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
