@@ -1,6 +1,6 @@
 import { Container } from "@/components/Container";
 import { GradientText } from "@/lib/styles";
-import { SOCIAL_LINKS } from "@/components/SocialLinks";
+import { SOCIAL_LINKS } from "@/lib/socials";
 import Image from "next/image";
 import Link from "next/link";
 
