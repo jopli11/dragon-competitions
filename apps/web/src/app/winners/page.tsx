@@ -1,6 +1,8 @@
 import { Container } from "@/components/Container";
 import { GradientText, BrandSectionHeading } from "@/lib/styles";
 import Image from "next/image";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { JsonLd, buildWebPageSchema, SITE_URL } from "@/lib/seo/json-ld";
 
 const winners = [
   {
@@ -17,7 +19,21 @@ const winners = [
 export default function WinnersPage() {
   return (
     <div className="min-h-screen bg-white py-16 sm:py-24">
+      <JsonLd
+        id="schema-winners-webpage"
+        schema={buildWebPageSchema({
+          url: "/winners",
+          name: "Coast Competitions Winners · UK Prize Competition Winners",
+          description:
+            "Real Coast Competitions UK prize winners and their stories. Verified winners with photos and testimonials from our skill-based competition draws.",
+          breadcrumbId: `${SITE_URL}/winners#breadcrumb`,
+        })}
+      />
       <Container>
+        <Breadcrumbs
+          items={[{ label: "Winners", href: "/winners" }]}
+          className="mb-8"
+        />
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-24">
           <BrandSectionHeading>The <GradientText>Coast Winners Club</GradientText></BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium text-lg">

@@ -3,6 +3,8 @@ import { BrandSectionHeading, GradientText } from "@/lib/styles";
 import { getCompletedDraws } from "@/lib/firebase/raffle-stats";
 import { fetchEndedRaffles } from "@/lib/contentful/raffles";
 import { DrawResultsList } from "@/components/DrawResultsList";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { JsonLd, buildWebPageSchema, SITE_URL } from "@/lib/seo/json-ld";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 10;
@@ -85,7 +87,21 @@ export default async function DrawResultsPage() {
 
   return (
     <div className="min-h-screen bg-surface-mint py-16 sm:py-24">
+      <JsonLd
+        id="schema-results-webpage"
+        schema={buildWebPageSchema({
+          url: "/results",
+          name: "Draw Results · Coast Competitions",
+          description:
+            "Verifiable draw results for every Coast Competitions prize. Every automated draw uses a cryptographically secure random seed you can re-run yourself.",
+          breadcrumbId: `${SITE_URL}/results#breadcrumb`,
+        })}
+      />
       <Container>
+        <Breadcrumbs
+          items={[{ label: "Draw Results", href: "/results" }]}
+          className="mb-8"
+        />
         <div className="text-center max-w-2xl mx-auto mb-16">
           <BrandSectionHeading>Draw <GradientText>Results</GradientText></BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium text-lg">

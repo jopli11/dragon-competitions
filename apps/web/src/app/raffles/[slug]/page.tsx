@@ -3,6 +3,12 @@ import { fetchRaffleBySlug, getEffectivePrice } from "@/lib/contentful/raffles";
 import { getRaffleStats } from "@/lib/firebase/raffle-stats";
 import { Metadata } from "next";
 import { RaffleDetailClient } from "./RaffleDetailClient";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import {
+  JsonLd,
+  buildWebPageSchema,
+  SITE_URL,
+} from "@/lib/seo/json-ld";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 10;
@@ -53,11 +59,29 @@ export default async function RaffleDetailPage({
 
   if (!raffle) notFound();
 
+  const raffleUrl = `/raffles/${slug}`;
+  const breadcrumbItems = [
+    { label: "Current Competitions", href: "/raffles" },
+    { label: raffle.title, href: raffleUrl },
+  ];
+
   return (
-    <RaffleDetailClient 
-      raffle={raffle} 
-      initialStats={stats} 
-      slug={slug} 
-    />
+    <>
+      <JsonLd
+        id={`schema-raffle-webpage-${slug}`}
+        schema={buildWebPageSchema({
+          url: raffleUrl,
+          name: `${raffle.title} · Coast Competitions`,
+          description: `Win ${raffle.title} with Coast Competitions — a UK skill-based prize competition with a guaranteed live draw and no extensions.`,
+          breadcrumbId: `${SITE_URL}${raffleUrl}#breadcrumb`,
+        })}
+      />
+      <RaffleDetailClient
+        raffle={raffle}
+        initialStats={stats}
+        slug={slug}
+        breadcrumbs={<Breadcrumbs items={breadcrumbItems} />}
+      />
+    </>
   );
 }

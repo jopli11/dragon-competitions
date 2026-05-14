@@ -4,10 +4,25 @@ import { SOCIAL_LINKS } from "@/lib/socials";
 import { FloatingBusinessPrompt } from "@/components/FloatingBusinessPrompt";
 import Image from "next/image";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { JsonLd, buildWebPageSchema, SITE_URL } from "@/lib/seo/json-ld";
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
+      <JsonLd
+        id="schema-about-webpage"
+        schema={{
+          ...buildWebPageSchema({
+            url: "/about",
+            name: "About Coast Competitions · Family-Run UK Prize Competitions",
+            description:
+              "Coast Competitions is a family-run UK skill-based prize competition company. Learn about our mission, our DNA Payments-secured checkout, and our commitment to fairness.",
+            breadcrumbId: `${SITE_URL}/about#breadcrumb`,
+          }),
+          "@type": ["WebPage", "AboutPage"],
+        }}
+      />
       <section className="bg-brand-midnight text-white py-32 sm:py-48 text-center relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-40">
           <div className="absolute top-1/4 left-[20%] w-[40%] h-[40%] bg-brand-secondary/15 rounded-full blur-[120px]" />
@@ -16,6 +31,11 @@ export default function AboutPage() {
         <div className="absolute bottom-0 left-0 right-0 h-[250px] bg-linear-to-t from-white to-transparent z-10" />
         
         <Container className="relative z-20">
+          <Breadcrumbs
+            items={[{ label: "About", href: "/about" }]}
+            variant="dark"
+            className="mb-8 justify-center [&_ol]:justify-center"
+          />
           <span className="text-sm font-black uppercase tracking-[0.4em] text-brand-secondary mb-6 block">
             The Legend
           </span>

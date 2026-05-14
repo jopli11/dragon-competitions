@@ -9,6 +9,11 @@ import dynamic from "next/dynamic";
 import { RaffleCard } from "@/components/RaffleCard";
 import { BrandLinkButton } from "@/lib/styles";
 import { FloatingPaymentPrompt } from "@/components/FloatingPaymentPrompt";
+import {
+  JsonLd,
+  buildItemListSchema,
+  buildWebPageSchema,
+} from "@/lib/seo/json-ld";
 
 export const revalidate = 10;
 
@@ -44,6 +49,21 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white">
+      <JsonLd
+        id="schema-home-webpage"
+        schema={buildWebPageSchema({
+          url: "/",
+          name: "Coast Competitions UK · Win Incredible Prizes & Cash",
+          description:
+            "Enter Coast Competitions UK for your chance to win tax-free cash, luxury cars, and the latest tech. Skill-based UK prize competitions with transparent live draws and guaranteed winners.",
+        })}
+      />
+      {raffles.length > 0 ? (
+        <JsonLd
+          id="schema-home-itemlist"
+          schema={buildItemListSchema(raffles)}
+        />
+      ) : null}
       <FloatingPaymentPrompt />
 
       <BrandHeroCarousel slides={carouselSlides} />
@@ -86,7 +106,12 @@ export default async function Home() {
 
         {raffles.length > 3 && (
           <div className="mt-12 text-center">
-            <BrandLinkButton href="/raffles" variant="outline" size="lg">
+            <BrandLinkButton
+              href="/raffles"
+              variant="outline"
+              size="lg"
+              title="Filter and browse all live Coast Competitions UK prize draws"
+            >
               Filter Competitions
             </BrandLinkButton>
           </div>
