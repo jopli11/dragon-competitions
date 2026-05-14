@@ -163,20 +163,57 @@ export function SiteHeader() {
     router.refresh();
   };
 
-  const navLinks = [
-    { href: "/raffles", label: "Current Competitions" },
-    { href: "/results", label: "Draw Results" },
-    { href: "/about", label: "About Us" },
-    { href: "/winners", label: "Winners" },
-    ...(user ? [{ href: "/dashboard", label: "My Dashboard" }] : []),
-    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  const navLinks: { href: string; label: string; title: string }[] = [
+    {
+      href: "/raffles",
+      label: "Current Competitions",
+      title: "Browse current Coast Competitions UK prize competitions",
+    },
+    {
+      href: "/results",
+      label: "Draw Results",
+      title: "View verifiable draw results from past Coast Competitions",
+    },
+    {
+      href: "/about",
+      label: "About Us",
+      title: "Learn about Coast Competitions, the family-run UK prize competition company",
+    },
+    {
+      href: "/winners",
+      label: "Winners",
+      title: "Meet real Coast Competitions UK prize winners",
+    },
+    ...(user
+      ? [
+          {
+            href: "/dashboard",
+            label: "My Dashboard",
+            title: "View your Coast Competitions entries and wins",
+          },
+        ]
+      : []),
+    ...(isAdmin
+      ? [
+          {
+            href: "/admin",
+            label: "Admin",
+            title: "Coast Competitions admin dashboard",
+          },
+        ]
+      : []),
   ];
 
   return (
     <>
       <HeaderWrapper>
         <Container className="flex w-full items-center justify-between">
-          <Link href="/" className="block shrink-0" onClick={() => setIsOpen(false)}>
+          <Link
+            href="/"
+            className="block shrink-0"
+            onClick={() => setIsOpen(false)}
+            title="Coast Competitions home — UK skill-based prize competitions"
+          >
             <div className="relative h-12 w-40 overflow-hidden sm:h-14 sm:w-52">
               <Image
                 src={BRAND_LOGO_SRC}
@@ -190,7 +227,7 @@ export function SiteHeader() {
 
           <nav className="hidden items-center gap-8 md:flex">
             {navLinks.map((link) => (
-              <NavLink key={link.href} href={link.href}>
+              <NavLink key={link.href} href={link.href} title={link.title}>
                 {link.label}
               </NavLink>
             ))}
@@ -208,11 +245,18 @@ export function SiteHeader() {
               <Link
                 href="/login"
                 className="hidden text-sm font-medium text-brand-midnight/80 transition-colors hover:text-brand-primary sm:block"
+                title="Log in to your Coast Competitions account"
               >
                 Login
               </Link>
             )}
-            <HeaderButton href="/raffles" onClick={() => track("nav_enter_now_click")}>Enter Now</HeaderButton>
+            <HeaderButton
+              href="/raffles"
+              onClick={() => track("nav_enter_now_click")}
+              title="Enter Coast Competitions UK prize draws now"
+            >
+              Enter Now
+            </HeaderButton>
             <HamburgerButton
               isOpen={isOpen}
               onClick={() => {
@@ -242,7 +286,12 @@ export function SiteHeader() {
         </div>
         <nav className="flex flex-col">
           {navLinks.map((link) => (
-            <MobileNavLink key={link.href} href={link.href} onClick={() => setIsOpen(false)}>
+            <MobileNavLink
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsOpen(false)}
+              title={link.title}
+            >
               {link.label}
             </MobileNavLink>
           ))}
@@ -254,13 +303,23 @@ export function SiteHeader() {
               Logout
             </button>
           ) : (
-            <MobileNavLink href="/login" onClick={() => setIsOpen(false)}>
+            <MobileNavLink
+              href="/login"
+              onClick={() => setIsOpen(false)}
+              title="Log in or register a Coast Competitions account"
+            >
               Login / Register
             </MobileNavLink>
           )}
         </nav>
         <div className="mt-auto">
-          <BrandLinkButton fullWidth size="lg" href="/raffles" onClick={() => setIsOpen(false)}>
+          <BrandLinkButton
+            fullWidth
+            size="lg"
+            href="/raffles"
+            onClick={() => setIsOpen(false)}
+            title="View all live Coast Competitions UK prize draws"
+          >
             View All Competitions
           </BrandLinkButton>
           <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-widest text-brand-midnight/20">

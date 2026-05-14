@@ -6,6 +6,8 @@ import { SocialLinks } from "@/components/SocialLinks";
 import { submitContactForm } from "./actions";
 import { useState } from "react";
 import { track } from "@/lib/analytics";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { JsonLd, buildWebPageSchema, SITE_URL } from "@/lib/seo/json-ld";
 
 export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -35,7 +37,24 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-white py-16 sm:py-32">
+      <JsonLd
+        id="schema-contact-webpage"
+        schema={{
+          ...buildWebPageSchema({
+            url: "/contact",
+            name: "Contact Coast Competitions · UK Prize Competition Support",
+            description:
+              "Get in touch with the Coast Competitions UK support team. Mon-Fri 9am-6pm, Sat-Sun 10am-4pm. Email support, social channels, and contact form.",
+            breadcrumbId: `${SITE_URL}/contact#breadcrumb`,
+          }),
+          "@type": ["WebPage", "ContactPage"],
+        }}
+      />
       <Container>
+        <Breadcrumbs
+          items={[{ label: "Contact", href: "/contact" }]}
+          className="mb-8"
+        />
         <div className="text-center mb-16 sm:mb-24">
           <BrandSectionHeading>Get in <GradientText>Touch</GradientText></BrandSectionHeading>
           <p className="mt-4 text-brand-midnight/60 font-medium uppercase tracking-widest text-sm">

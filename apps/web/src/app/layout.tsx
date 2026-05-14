@@ -6,6 +6,11 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import EmotionRegistry from "@/lib/emotion-registry";
 import { AuthProvider } from "@/lib/auth-context";
+import {
+  JsonLd,
+  buildOrganizationSchema,
+  buildWebSiteSchema,
+} from "@/lib/seo/json-ld";
 
 const nunitoSans = Nunito_Sans({
   variable: "--font-nunito-sans",
@@ -98,6 +103,8 @@ export default function RootLayout({
           src="https://www.crumbless.io/tracker.js"
           strategy="afterInteractive"
         />
+        <JsonLd id="schema-organization" schema={buildOrganizationSchema()} />
+        <JsonLd id="schema-website" schema={buildWebSiteSchema()} />
       </head>
       <body className={`${nunitoSans.variable} antialiased`}>
         <AuthProvider>

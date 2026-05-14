@@ -10,6 +10,7 @@ import { SocialLinks } from "@/components/SocialLinks";
 import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
 import { BrandBadge, GlassCard, GradientText } from "@/lib/styles";
 import { getEffectivePrice } from "@/lib/pricing";
+import { JsonLd, buildProductSchema } from "@/lib/seo/json-ld";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { BLOCKS, INLINES } from "@contentful/rich-text-types";
 
@@ -43,7 +44,17 @@ function DiscountRibbon({ label }: { label: string }) {
   );
 }
 
-export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any; initialStats: any; slug: string }) {
+export function RaffleDetailClient({
+  raffle,
+  initialStats,
+  slug,
+  breadcrumbs,
+}: {
+  raffle: any;
+  initialStats: any;
+  slug: string;
+  breadcrumbs?: React.ReactNode;
+}) {
   const { stats: liveStats } = useRaffleStats(slug, initialStats);
   const currentTicketsSold = liveStats.ticketsSold;
 
@@ -69,32 +80,21 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
   const isEnded = raffle.status === "ended";
   const showDiscount = !!discountRibbonLabel && !isSoldOut && !isAwaitingDraw && !isEnded;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": raffle.title,
-    "description": raffle.raffleDescription || `Win ${raffle.title} with Coast Competitions.`,
-    "image": raffle.heroImageUrl,
-    "offers": {
-      "@type": "Offer",
-      "price": pricing.effectivePence / 100,
-      "priceCurrency": "GBP",
-      "availability": "https://schema.org/InStock",
-      "validThrough": raffle.endAt,
-    },
-    "brand": {
-      "@type": "Brand",
-      "name": "Coast Competitions"
-    }
-  };
+  const productSchema = buildProductSchema({
+    title: raffle.title,
+    slug,
+    heroImageUrl: raffle.heroImageUrl,
+    endAt: raffle.endAt,
+    effectivePricePence: pricing.effectivePence,
+    isAwaitingDraw,
+    isEnded,
+    isSoldOut,
+  });
 
   return (
     <div className="min-h-screen overflow-x-clip bg-white pb-20">
       <DnaScript />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd id={`schema-raffle-product-${slug}`} schema={productSchema} />
       {/* Hero Section */}
       <div className="relative h-[20vh] min-h-[240px] w-full overflow-hidden bg-brand-midnight">
         {raffle.heroImageUrl && (
@@ -110,6 +110,7 @@ export function RaffleDetailClient({ raffle, initialStats, slug }: { raffle: any
         <div className="absolute inset-0 bg-linear-to-t from-white via-brand-midnight/40 to-transparent" />
         
         <Container className="relative h-full flex flex-col justify-end pb-6">
+          {breadcrumbs ? <div className="mb-4">{breadcrumbs}</div> : null}
           <BrandBadge className={`mb-3 self-start ${isAwaitingDraw ? 'bg-amber-500 text-white' : isEnded ? 'bg-gray-500 text-white' : isSoldOut ? 'bg-red-500 text-white' : ''}`}>
             {isAwaitingDraw ? 'Awaiting Live Draw' : isEnded ? 'Draw Complete' : isSoldOut ? 'Sold Out' : 'Entries Open'}
           </BrandBadge>

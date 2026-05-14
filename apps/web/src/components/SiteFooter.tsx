@@ -9,6 +9,72 @@ import styled from "@emotion/styled";
 
 const BRAND_LOGO_SRC = "/coast_competitions_hi_res-removebg-preview.png";
 
+const QUICK_LINKS: { href: string; label: string; title: string }[] = [
+  {
+    href: "/raffles",
+    label: "Current Competitions",
+    title: "Browse live UK prize competitions on Coast Competitions",
+  },
+  {
+    href: "/results",
+    label: "Draw Results",
+    title: "View verifiable draw results from past Coast Competitions",
+  },
+  {
+    href: "/winners",
+    label: "Winners",
+    title: "Meet Coast Competitions UK prize winners",
+  },
+  {
+    href: "/about",
+    label: "About Us",
+    title: "About Coast Competitions, a family-run UK prize competition company",
+  },
+];
+
+const SUPPORT_LINKS: { href: string; label: string; title: string }[] = [
+  {
+    href: "/faqs",
+    label: "FAQs",
+    title: "Frequently asked questions about UK prize competitions and Coast Competitions",
+  },
+  {
+    href: "/contact",
+    label: "Contact Us",
+    title: "Contact the Coast Competitions UK support team",
+  },
+  {
+    href: "/partners",
+    label: "For Business",
+    title: "Partner with Coast Competitions on a UK prize competition",
+  },
+  {
+    href: "/terms",
+    label: "Terms & Conditions",
+    title: "Coast Competitions Terms and Conditions, including free postal entry",
+  },
+  {
+    href: "/privacy",
+    label: "Privacy Policy",
+    title: "Coast Competitions Privacy Policy",
+  },
+  {
+    href: "/cookies",
+    label: "Cookie Policy",
+    title: "Coast Competitions Cookie Policy",
+  },
+  {
+    href: "/refunds",
+    label: "Refund Policy",
+    title: "Coast Competitions Refund Policy",
+  },
+  {
+    href: "/responsible-gaming",
+    label: "Responsible Gaming",
+    title: "Responsible gaming information for UK competition entrants",
+  },
+];
+
 const FooterWrapper = styled.footer`
   background: #232F3E;
   color: white;
@@ -32,7 +98,11 @@ export function SiteFooter() {
       <Container>
         <div className="grid gap-12 md:grid-cols-4">
           <div className="col-span-2">
-            <Link href="/" className="inline-flex rounded-2xl bg-white p-2">
+            <Link
+              href="/"
+              className="inline-flex rounded-2xl bg-white p-2"
+              title="Coast Competitions home — UK skill-based prize competitions"
+            >
               <div className="relative h-16 w-60 overflow-hidden">
                 <Image
                   src={BRAND_LOGO_SRC}
@@ -65,10 +135,11 @@ export function SiteFooter() {
               Quick Links
             </h3>
             <nav className="mt-6 flex flex-col gap-3">
-              <FooterLink href="/raffles">Current Competitions</FooterLink>
-              <FooterLink href="/results">Draw Results</FooterLink>
-              <FooterLink href="/winners">Winners</FooterLink>
-              <FooterLink href="/about">About Us</FooterLink>
+              {QUICK_LINKS.map((link) => (
+                <FooterLink key={link.href} href={link.href} title={link.title}>
+                  {link.label}
+                </FooterLink>
+              ))}
             </nav>
           </div>
 
@@ -77,14 +148,11 @@ export function SiteFooter() {
               Support
             </h3>
             <nav className="mt-6 flex flex-col gap-3">
-              <FooterLink href="/faqs">FAQs</FooterLink>
-              <FooterLink href="/contact">Contact Us</FooterLink>
-              <FooterLink href="/partners">For Business</FooterLink>
-              <FooterLink href="/terms">Terms & Conditions</FooterLink>
-              <FooterLink href="/privacy">Privacy Policy</FooterLink>
-              <FooterLink href="/cookies">Cookie Policy</FooterLink>
-              <FooterLink href="/refunds">Refund Policy</FooterLink>
-              <FooterLink href="/responsible-gaming">Responsible Gaming</FooterLink>
+              {SUPPORT_LINKS.map((link) => (
+                <FooterLink key={link.href} href={link.href} title={link.title}>
+                  {link.label}
+                </FooterLink>
+              ))}
             </nav>
             <SocialLinks className="mt-8" />
           </div>
@@ -101,10 +169,20 @@ export function SiteFooter() {
             </p>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/responsible-gaming" className="text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors">
+            <Link
+              href="/responsible-gaming"
+              className="text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors"
+              title="Coast Competitions responsible gaming information for UK entrants"
+            >
               18+ Only
             </Link>
-            <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors">
+            <a
+              href="https://www.begambleaware.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] font-bold text-white/20 uppercase tracking-widest hover:text-white/40 transition-colors"
+              title="BeGambleAware — independent UK gambling support charity"
+            >
               BeGambleAware
             </a>
           </div>
