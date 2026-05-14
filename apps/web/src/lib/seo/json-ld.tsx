@@ -181,11 +181,15 @@ export function buildBreadcrumbSchema(items: BreadcrumbItem[]) {
   };
 }
 
-export function buildFaqPageSchema(faqs: FaqItem[]) {
+export function buildFaqPageSchema(
+  faqs: FaqItem[],
+  pageUrl: string = `${SITE_URL}/faqs`,
+) {
+  const absolute = absoluteUrl(pageUrl);
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "@id": `${SITE_URL}/faqs#faqpage`,
+    "@id": `${absolute}#faqpage`,
     mainEntity: faqs.map((faq) => ({
       "@type": "Question",
       name: faq.question,
@@ -194,6 +198,47 @@ export function buildFaqPageSchema(faqs: FaqItem[]) {
         text: faq.answer,
       },
     })),
+  };
+}
+
+type ArticleSchemaInput = {
+  url: string;
+  headline: string;
+  description: string;
+  datePublished: string;
+  dateModified: string;
+  imageUrl?: string;
+  articleSection?: string;
+  keywords?: string[];
+};
+
+export function buildArticleSchema({
+  url,
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  imageUrl,
+  articleSection,
+  keywords,
+}: ArticleSchemaInput) {
+  const absolute = absoluteUrl(url);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${absolute}#article`,
+    headline,
+    description,
+    mainEntityOfPage: { "@id": `${absolute}#webpage` },
+    inLanguage: "en-GB",
+    datePublished,
+    dateModified,
+    author: { "@id": ORGANIZATION_ID },
+    publisher: { "@id": ORGANIZATION_ID },
+    isPartOf: { "@id": WEBSITE_ID },
+    ...(imageUrl ? { image: imageUrl } : { image: absoluteUrl(LOGO_PATH) }),
+    ...(articleSection ? { articleSection } : {}),
+    ...(keywords?.length ? { keywords: keywords.join(", ") } : {}),
   };
 }
 

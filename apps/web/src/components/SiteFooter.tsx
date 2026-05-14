@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Container } from "@/components/Container";
 import { PaymentMethodBadges } from "@/components/PaymentMethodBadges";
 import { SocialLinks } from "@/components/SocialLinks";
+import { GUIDES } from "@/lib/seo/guides-data";
 import styled from "@emotion/styled";
 
 const BRAND_LOGO_SRC = "/coast_competitions_hi_res-removebg-preview.png";
@@ -30,6 +31,19 @@ const QUICK_LINKS: { href: string; label: string; title: string }[] = [
     label: "About Us",
     title: "About Coast Competitions, a family-run UK prize competition company",
   },
+];
+
+const GUIDE_LINKS: { href: string; label: string; title: string }[] = [
+  {
+    href: "/guides",
+    label: "All Guides",
+    title: "Browse all Coast Competitions UK prize competition guides",
+  },
+  ...GUIDES.map((guide) => ({
+    href: `/guides/${guide.slug}`,
+    label: guide.shortTitle,
+    title: guide.metaDescription,
+  })),
 ];
 
 const SUPPORT_LINKS: { href: string; label: string; title: string }[] = [
@@ -96,8 +110,8 @@ export function SiteFooter() {
   return (
     <FooterWrapper>
       <Container>
-        <div className="grid gap-12 md:grid-cols-4">
-          <div className="col-span-2">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
+          <div className="lg:col-span-2">
             <Link
               href="/"
               className="inline-flex rounded-2xl bg-white p-2"
@@ -136,6 +150,19 @@ export function SiteFooter() {
             </h3>
             <nav className="mt-6 flex flex-col gap-3">
               {QUICK_LINKS.map((link) => (
+                <FooterLink key={link.href} href={link.href} title={link.title}>
+                  {link.label}
+                </FooterLink>
+              ))}
+            </nav>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-bold tracking-widest text-white uppercase">
+              Guides
+            </h3>
+            <nav className="mt-6 flex flex-col gap-3">
+              {GUIDE_LINKS.map((link) => (
                 <FooterLink key={link.href} href={link.href} title={link.title}>
                   {link.label}
                 </FooterLink>
