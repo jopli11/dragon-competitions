@@ -320,6 +320,7 @@ function AdminPage() {
   const [lookupResult, setLookupResult] = useState<TicketLookupResult | null>(null);
   const [lookupLoading, setLookupLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState<string | null>(null);
+  const [ordersExportLoading, setOrdersExportLoading] = useState<string | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [confirmResult, setConfirmResult] = useState<ConfirmWinnerResult | null>(null);
 
@@ -395,6 +396,67 @@ function AdminPage() {
       alert("Failed to export tickets. Please try again.");
     } finally {
       setExportLoading(null);
+    }
+  }
+
+  async function handleExportOrders(
+    options: {
+      raffleSlug?: string;
+      status?: "completed" | "refunded" | "pending" | "failed";
+      includeTestOrders?: boolean;
+      loadingKey?: string;
+    } = {}
+  ) {
+    const key = options.loadingKey || options.raffleSlug || "all";
+    setOrdersExportLoading(key);
+    try {
+      const user = auth?.currentUser;
+      if (!user) {
+        alert("Not authenticated. Please sign in again.");
+        return;
+      }
+      const idToken = await user.getIdToken();
+
+      const params = new URLSearchParams();
+      if (options.raffleSlug) params.set("raffleSlug", options.raffleSlug);
+      if (options.status) params.set("status", options.status);
+      if (options.includeTestOrders) params.set("includeTestOrders", "true");
+
+      const res = await fetch(`/api/admin/export-orders?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!res.ok) {
+        let errorMessage = `Export failed (${res.status})`;
+        try {
+          const data = (await res.json()) as { error?: string };
+          if (data.error) errorMessage = data.error;
+        } catch {
+          // response wasn't JSON — keep generic message
+        }
+        throw new Error(errorMessage);
+      }
+
+      const disposition = res.headers.get("Content-Disposition") || "";
+      const match = /filename="?([^";]+)"?/i.exec(disposition);
+      const fallbackName = `orders-${options.raffleSlug || "all"}-${new Date()
+        .toISOString()
+        .slice(0, 10)}.csv`;
+      const filename = match?.[1] || fallbackName;
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Orders export error:", err);
+      alert(err instanceof Error ? err.message : "Failed to export orders.");
+    } finally {
+      setOrdersExportLoading(null);
     }
   }
 
@@ -703,7 +765,7 @@ function AdminPage() {
                              raffle.status || "Live"}
                           </span>
                         </td>
-                        <td className="px-8 py-4 text-right space-x-2">
+                        <td className="px-8 py-4 text-right space-x-3">
                           {(raffle.isSoldOut || raffle.drawStatus === "completed") && (
                             <button
                               onClick={() => handleExportTickets(raffle.slug || raffle.id)}
@@ -713,6 +775,14 @@ function AdminPage() {
                               {exportLoading === (raffle.slug || raffle.id) ? "Exporting..." : "Export Tickets"}
                             </button>
                           )}
+                          <button
+                            onClick={() => handleExportOrders({ raffleSlug: raffle.slug || raffle.id })}
+                            disabled={ordersExportLoading === (raffle.slug || raffle.id)}
+                            className="text-brand-primary font-bold text-xs hover:underline disabled:opacity-50"
+                            title="Download a CSV of every order placed for this raffle."
+                          >
+                            {ordersExportLoading === (raffle.slug || raffle.id) ? "Exporting..." : "Export Orders"}
+                          </button>
                           <button
                             onClick={() => { setLookupSlug(raffle.slug || raffle.id); setActiveTab("settings"); }}
                             className="text-brand-primary font-bold text-xs hover:underline"
@@ -759,15 +829,37 @@ function AdminPage() {
             </div>
           </div>
 
-          <label className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={hideTestOrders}
-              onChange={(e) => setHideTestOrders(e.target.checked)}
-              className="h-3.5 w-3.5 accent-brand-primary"
-            />
-            Hide test orders
-          </label>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <label className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hideTestOrders}
+                onChange={(e) => setHideTestOrders(e.target.checked)}
+                className="h-3.5 w-3.5 accent-brand-primary"
+              />
+              Hide test orders
+            </label>
+
+            <button
+              type="button"
+              onClick={() =>
+                handleExportOrders({
+                  status: orderStatusFilter === "all" ? undefined : orderStatusFilter,
+                  includeTestOrders: !hideTestOrders,
+                  loadingKey: "all",
+                })
+              }
+              disabled={ordersExportLoading === "all"}
+              title="Download every order matching the current Status and Test Order filters as a CSV file."
+              className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2 rounded-full border border-brand-primary/20 bg-white text-[10px] font-black uppercase tracking-widest text-brand-midnight hover:border-brand-primary hover:text-brand-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" aria-hidden>
+                <path d="M8 1.5v8m0 0L4.5 6M8 9.5L11.5 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 11.5v1A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5v-1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+              {ordersExportLoading === "all" ? "Preparing CSV..." : "Download CSV"}
+            </button>
+          </div>
 
           <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
             <div className="overflow-x-auto">
