@@ -202,6 +202,15 @@ export function SkillQuestionCard({
     if (savedPass) {
       setQuizPassId(savedPass);
     }
+    // Restore quantity if user was bounced through login mid-checkout.
+    const savedQty = sessionStorage.getItem(`quiz_qty_${slug}`);
+    if (savedQty) {
+      const parsedQty = parseInt(savedQty, 10);
+      if (Number.isFinite(parsedQty) && parsedQty >= 1) {
+        setQuantity(parsedQty);
+      }
+      sessionStorage.removeItem(`quiz_qty_${slug}`);
+    }
   }, [slug]);
 
   useEffect(() => {
@@ -253,6 +262,9 @@ export function SkillQuestionCard({
     const { auth: firebaseAuth } = await import("@/lib/firebase/client");
     const user = firebaseAuth?.currentUser;
     if (!user) {
+      // Persist quantity so it survives the login round-trip and remount.
+      sessionStorage.setItem(`quiz_qty_${slug}`, String(quantity));
+      track("raffle_checkout_login_redirect");
       router.push(`/login?redirect=/raffles/${slug}`);
       return;
     }
@@ -331,6 +343,24 @@ export function SkillQuestionCard({
         });
       }
 
+      const abandonPendingOrder = async (reason: "cancelled" | "declined") => {
+        try {
+          const cancelToken = await user.getIdToken();
+          await fetch("/api/checkout/cancel", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${cancelToken}`,
+            },
+            body: JSON.stringify({ invoiceId: data.invoiceId, reason }),
+            keepalive: true,
+          });
+        } catch (cancelErr) {
+          // Non-fatal: server-side sweep will catch it eventually.
+          console.warn("Failed to mark order as cancelled:", cancelErr);
+        }
+      };
+
       window.DNAPayments.configure({
         isTestMode,
         paymentMethods,
@@ -351,11 +381,13 @@ export function SkillQuestionCard({
             window.DNAPayments.closePaymentWidget();
             setLoading(false);
             setCheckoutLoading(false);
+            void abandonPendingOrder("declined");
           },
           cancelled: () => {
             track("dna_payment_cancelled");
             setLoading(false);
             setCheckoutLoading(false);
+            void abandonPendingOrder("cancelled");
           },
         },
       });
@@ -463,6 +495,7 @@ export function SkillQuestionCard({
             onClick={() => {
               track("raffle_quiz_change_answer");
               sessionStorage.removeItem(`quiz_pass_${slug}`);
+              sessionStorage.removeItem(`quiz_qty_${slug}`);
               setQuizPassId(null);
             }}
             className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/30 hover:text-brand-midnight"

@@ -106,6 +106,36 @@ export async function POST(request: Request) {
     const invoiceId = crypto.randomUUID();
     const isTestOrder = (process.env.DNA_ENV || "test") !== "live";
 
+    // Abandon any earlier pending orders for the same quiz pass so they don't
+    // get stuck displayed as "Processing" in the user's dashboard when they
+    // open a new checkout session (e.g. after the login-then-retry flow).
+    try {
+      const orphanQuery = await adminDb
+        .collection("orders")
+        .where("quizPassId", "==", quizPassId)
+        .where("status", "==", "pending")
+        .get();
+
+      if (!orphanQuery.empty) {
+        const batch = adminDb.batch();
+        orphanQuery.docs.forEach((doc) => {
+          batch.update(doc.ref, {
+            status: "abandoned",
+            abandonedAt: admin.firestore.FieldValue.serverTimestamp(),
+            abandonedReason: "superseded_by_new_session",
+          });
+        });
+        await batch.commit();
+      }
+    } catch (orphanErr) {
+      // Non-fatal — proceed with the new order even if cleanup fails.
+      console.warn(
+        "Failed to abandon prior pending orders for quizPass",
+        quizPassId,
+        orphanErr
+      );
+    }
+
     await adminDb.collection("orders").doc(invoiceId).set({
       raffleSlug: slug,
       quizPassId,

@@ -11,6 +11,15 @@ export interface UserOrder {
   status: string;
 }
 
+// Statuses that represent checkout sessions the user never paid for. They
+// should be excluded from the dashboard so they don't appear permanently as
+// "Processing" (or any other noise) after the user moves on.
+const HIDDEN_ORDER_STATUSES = new Set([
+  "abandoned",
+  "cancelled",
+  "declined",
+]);
+
 export async function getUserOrders(email: string) {
   if (!db) {
     console.error("Firestore not initialized on client");
@@ -27,18 +36,22 @@ export async function getUserOrders(email: string) {
     );
     
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        raffleSlug: data.raffleSlug,
-        quantity: data.quantity ?? 0,
-        amountTotal: data.amountTotal ?? data.amountPence ?? 0,
-        ticketRange: data.ticketRange ?? undefined,
-        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-        status: data.status ?? "unknown",
-      } as UserOrder;
-    });
+    return snapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          raffleSlug: data.raffleSlug,
+          quantity: data.quantity ?? 0,
+          amountTotal: data.amountTotal ?? data.amountPence ?? 0,
+          ticketRange: data.ticketRange ?? undefined,
+          createdAt:
+            data.createdAt?.toDate?.()?.toISOString() ||
+            new Date().toISOString(),
+          status: data.status ?? "unknown",
+        } as UserOrder;
+      })
+      .filter((order) => !HIDDEN_ORDER_STATUSES.has(order.status));
   } catch (error) {
     console.error("Error fetching user orders:", error);
     return [];

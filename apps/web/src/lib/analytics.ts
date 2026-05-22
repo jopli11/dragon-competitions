@@ -18,6 +18,7 @@ export type AnalyticsEvent =
   | "raffle_quiz_change_answer"
   | "raffle_quick_select_quantity"
   | "raffle_proceed_to_payment_click"
+  | "raffle_checkout_login_redirect"
   | "raffle_free_entry_click"
   | "checkout_session_created"
   | "checkout_session_error"
