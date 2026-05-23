@@ -95,6 +95,48 @@ exports.scheduledDraw = functions.runWith({
     }
     return null;
 });
+/**
+ * Resolves a winner's contact details from their order. Walks
+ * orders/{orderId} → users/{uid}. Backwards-compat: legacy orders without a
+ * uid, or users without a completed profile, fall through to email_only.
+ *
+ * Kept inline here (rather than imported from apps/web) because the functions
+ * codebase is built and deployed independently.
+ */
+async function getWinnerContact(orderId, fallbackEmail) {
+    const emailOnly = {
+        email: fallbackEmail,
+        uid: null,
+        firstName: null,
+        lastName: null,
+        mobile: null,
+        source: "email_only",
+    };
+    if (!orderId)
+        return emailOnly;
+    const orderSnap = await db.collection("orders").doc(orderId).get();
+    if (!orderSnap.exists)
+        return emailOnly;
+    const orderData = orderSnap.data() || {};
+    const uid = orderData.uid;
+    const email = orderData.email || fallbackEmail;
+    if (!uid)
+        return { ...emailOnly, email };
+    const userSnap = await db.collection("users").doc(uid).get();
+    if (!userSnap.exists)
+        return { ...emailOnly, email, uid };
+    const userData = userSnap.data() || {};
+    if (!userData.profileCompletedAt)
+        return { ...emailOnly, email, uid };
+    return {
+        email,
+        uid,
+        firstName: userData.firstName || null,
+        lastName: userData.lastName || null,
+        mobile: userData.mobile || null,
+        source: "users_doc",
+    };
+}
 async function performDraw(raffleDoc) {
     const raffleId = raffleDoc.id;
     const raffleData = raffleDoc.data();
@@ -173,16 +215,56 @@ async function performDraw(raffleDoc) {
                         },
                     });
                     const raffleTitle = raffleData.title || raffleId;
-                    return { email: winningTicketData.email, title: raffleTitle, ticket: winningTicketNumber };
+                    return {
+                        email: winningTicketData.email,
+                        orderId: winningTicketData.orderId,
+                        title: raffleTitle,
+                        ticket: winningTicketNumber,
+                    };
                 }
             }
             throw new Error(`Failed to find a valid winner after ${maxAttempts} attempts`);
         });
         console.log(`Draw complete for ${raffleId}. Winner: ${drawResult.email}, Ticket: #${drawResult.ticket}`);
+        // Resolve contact details (first/last/mobile) from users/{uid}. Persist
+        // them to the admin-only draw_audit doc — the public raffles doc only
+        // gets the non-PII profileSource flag. Done outside the transaction
+        // because firestore transactions can't safely perform out-of-band reads.
+        let contact = {
+            email: drawResult.email,
+            uid: null,
+            firstName: null,
+            lastName: null,
+            mobile: null,
+            source: "email_only",
+        };
+        try {
+            contact = await getWinnerContact(drawResult.orderId, drawResult.email);
+            await Promise.all([
+                raffleDoc.ref.update({ winnerProfileSource: contact.source }),
+                db.collection("draw_audit").doc(`${raffleId}_auto`).set({
+                    raffleSlug: raffleId,
+                    drawType: "auto",
+                    winnerEmail: contact.email,
+                    winnerFirstName: contact.firstName,
+                    winnerLastName: contact.lastName,
+                    winnerMobile: contact.mobile,
+                    winnerProfileSource: contact.source,
+                    winningTicketNumber: drawResult.ticket,
+                    winnerOrderId: drawResult.orderId,
+                    confirmedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    totalTicketsSold: totalTickets,
+                }),
+            ]);
+        }
+        catch (enrichError) {
+            // Non-fatal — the winner is already recorded; admin still has email.
+            console.warn(`Failed to enrich winner profile for ${raffleId}:`, enrichError?.message || enrichError);
+        }
         // Send emails (outside the transaction)
         console.log(`Sending winner notification email to ${drawResult.email}...`);
         try {
-            await sendWinnerEmail(drawResult.email, drawResult.title, drawResult.ticket, totalTickets);
+            await sendWinnerEmail(drawResult.email, drawResult.title, drawResult.ticket, totalTickets, contact);
             console.log(`Winner email sent successfully for ${raffleId}`);
         }
         catch (emailError) {
@@ -344,14 +426,14 @@ async function handleReoccurring(slug) {
         console.error(`Error in handleReoccurring for ${slug}:`, error);
     }
 }
-async function sendWinnerEmail(email, raffleTitle, ticketNumber, totalTickets) {
+async function sendWinnerEmail(email, raffleTitle, ticketNumber, totalTickets, contact) {
     const serverToken = process.env.POSTMARK_SERVER_TOKEN;
     const fromEmail = process.env.POSTMARK_FROM_EMAIL || BUSINESS_NOTIFICATION_EMAIL;
     const adminEmails = Array.from(new Set([
         process.env.ADMIN_NOTIFICATION_EMAIL,
         BUSINESS_NOTIFICATION_EMAIL,
     ].filter((recipient) => Boolean(recipient))));
-    console.log(`sendWinnerEmail called: to=${email}, raffle=${raffleTitle}, ticket=#${ticketNumber}, from=${fromEmail}, adminTo=${adminEmails.join(",")}, hasToken=${!!serverToken}`);
+    console.log(`sendWinnerEmail called: to=${email}, raffle=${raffleTitle}, ticket=#${ticketNumber}, from=${fromEmail}, adminTo=${adminEmails.join(",")}, hasToken=${!!serverToken}, profileSource=${contact.source}`);
     if (!serverToken) {
         console.error("POSTMARK_SERVER_TOKEN is empty/undefined. Cannot send winner email.");
         throw new Error("Postmark not configured");
@@ -373,20 +455,39 @@ async function sendWinnerEmail(email, raffleTitle, ticketNumber, totalTickets) {
     `,
     });
     console.log(`Winner email sent: MessageID=${winnerResult.MessageID}, To=${winnerResult.To}`);
-    // Send to Admin
+    // Send to Admin — include enriched contact details so they can call/text
+    // the winner directly. When the profile is missing (legacy users), flag it
+    // prominently so the admin knows to do email-only outreach.
+    const winnerName = [contact.firstName, contact.lastName].filter(Boolean).join(" ");
+    const contactHtml = contact.source === "users_doc"
+        ? `
+      <p><strong>Name:</strong> ${winnerName || "(profile incomplete)"}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Mobile:</strong> ${contact.mobile || "(not provided)"}</p>
+    `
+        : `
+      <p><strong>Email:</strong> ${email}</p>
+      <p style="padding:8px 12px;background:#fff3cd;border:1px solid #ffeeba;border-radius:6px;color:#856404;">
+        ⚠ This winner registered before we collected contact details. Reach out by email — no mobile on file.
+      </p>
+    `;
+    const contactText = contact.source === "users_doc"
+        ? `Name: ${winnerName || "(profile incomplete)"}\nEmail: ${email}\nMobile: ${contact.mobile || "(not provided)"}`
+        : `Email: ${email}\n[WARN] Legacy account — no first/last/mobile on file. Email outreach only.`;
     console.log(`Sending admin notification to ${adminEmails.join(", ")}...`);
     const adminResult = await client.sendEmail({
         From: fromEmail,
         To: adminEmails.join(","),
         Subject: `[ADMIN] Draw Complete: ${raffleTitle}`,
-        TextBody: `The draw for "${raffleTitle}" is complete. Winner: ${email}. Winning Ticket: #${ticketNumber}. Total entries: ${totalTickets}.`,
+        TextBody: `The draw for "${raffleTitle}" is complete.\n\nWinning Ticket: #${ticketNumber}\nTotal Entries: ${totalTickets}\n\n${contactText}`,
         HtmlBody: `
       <h1>Draw Completed</h1>
       <p>The automated draw for <strong>${raffleTitle}</strong> has finished.</p>
-      <p><strong>Winner:</strong> ${email}</p>
       <p><strong>Winning Ticket:</strong> #${ticketNumber}</p>
       <p><strong>Total Entries:</strong> ${totalTickets}</p>
-      <p>The raffle document in Firestore has been updated with the audit trail.</p>
+      <h2 style="margin-top:24px;">Winner contact</h2>
+      ${contactHtml}
+      <p style="margin-top:24px;color:#666;font-size:12px;">The raffle document in Firestore has been updated with the audit trail.</p>
     `,
     });
     console.log(`Admin email sent: MessageID=${adminResult.MessageID}, To=${adminResult.To}`);

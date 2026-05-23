@@ -48,6 +48,7 @@ export async function getAdminStats() {
       rafflesSnapshot,
       completedOrdersSnapshot,
       ordersSnapshot,
+      drawAuditSnapshot,
       liveRaffles,
     ] = await Promise.all([
       adminDb.collection("raffles").get(),
@@ -56,11 +57,25 @@ export async function getAdminStats() {
         .orderBy("createdAt", "desc")
         .limit(500)
         .get(),
+      // Admin-only collection that holds winner PII (first/last/mobile) for
+      // both live and auto draws. Joined into the winners list below.
+      adminDb.collection("draw_audit").get(),
       fetchLiveRaffles().catch((err) => {
         console.error("Failed to fetch Contentful raffles for admin stats:", err);
         return [];
       }),
     ]);
+
+    // Index audit docs by raffleSlug. Doc IDs are `${slug}_live` or `${slug}_auto`,
+    // and a raffle has at most one of either, so a slug → audit map is unambiguous.
+    const auditBySlug = new Map<string, Record<string, unknown>>();
+    for (const doc of drawAuditSnapshot.docs) {
+      const data = doc.data();
+      const slug = data.raffleSlug;
+      if (typeof slug === "string") {
+        auditBySlug.set(slug, data);
+      }
+    }
 
     const fsRafflesById = new Map<string, Record<string, unknown>>();
     for (const doc of rafflesSnapshot.docs) {
@@ -108,9 +123,19 @@ export async function getAdminStats() {
         pendingDraws++;
       }
       if (data.drawStatus === "completed" && data.winningTicketNumber > 0) {
+        const audit = auditBySlug.get(doc.id) ?? {};
+        const fullName = [audit.winnerFirstName, audit.winnerLastName]
+          .filter(Boolean)
+          .join(" ");
         winners.push({
           id: doc.id,
-          name: data.winnerEmail || "Unknown",
+          name: fullName || data.winnerEmail || "Unknown",
+          email: data.winnerEmail || null,
+          mobile: audit.winnerMobile || null,
+          profileSource:
+            (audit.winnerProfileSource as string | undefined) ||
+            data.winnerProfileSource ||
+            "email_only",
           prize: data.title || doc.id,
           date: data.drawnAt?.toDate?.()?.toLocaleDateString("en-GB") || "Unknown",
           ticket: data.winningTicketNumber,

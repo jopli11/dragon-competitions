@@ -10,6 +10,22 @@ service cloud.firestore {
       allow write: if false; // Admin status can only be changed via Firebase Console or Admin SDK
     }
 
+    // User Profiles Collection
+    // Stores winner-contact info (first/last name, mobile) keyed by uid.
+    // Owner-only access; email is bound to the auth token to prevent spoofing.
+    // Profile fields (firstName/lastName/mobile/displayName) are owner-writable;
+    // server-managed fields (profileCompletedAt, profileSchemaVersion, createdAt,
+    // updatedAt) should only be set via Admin SDK in practice — clients may write
+    // them but rules don't enforce shape here to keep the change minimal.
+    match /users/{uid} {
+      allow read, update: if request.auth != null && request.auth.uid == uid;
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.uid == uid
+                    && request.resource.data.email == request.auth.token.email;
+      allow delete: if false;
+    }
+
     // Raffles Collection
     // Publicly readable so users can see competition details and stats
     match /raffles/{raffleId} {
@@ -44,6 +60,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
     match /webhook_events/{eventId} {
+      allow read, write: if false;
+    }
+
+    // Draw Audit Trail
+    // Carries winner PII (firstName, lastName, mobile) for both live and auto
+    // draws. Admin SDK only — clients should never read or write directly.
+    match /draw_audit/{auditId} {
       allow read, write: if false;
     }
 

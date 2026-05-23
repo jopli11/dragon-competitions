@@ -86,6 +86,9 @@ type AdminRaffle = {
 type AdminWinner = {
   id: string;
   name?: string;
+  email?: string | null;
+  mobile?: string | null;
+  profileSource?: "users_doc" | "email_only";
   prize?: string;
   date?: string;
   ticket?: number;
@@ -1049,25 +1052,40 @@ function AdminPage() {
 
       {activeTab === "winners" && (
         <section>
-          <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[800px]">
               <thead className="bg-brand-accent/30 border-b border-brand-primary/5">
                 <tr>
                   <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Winner</th>
+                  <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Contact</th>
                   <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Prize</th>
                   <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60">Date</th>
                   <th className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-brand-midnight/60 text-right">Ticket</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/5">
-                {(stats.winners || []).map((winner) => (
-                  <tr key={winner.id}>
-                    <td className="px-8 py-4 font-bold text-brand-midnight">{winner.name}</td>
-                    <td className="px-8 py-4 font-medium text-brand-midnight">{winner.prize}</td>
-                    <td className="px-8 py-4 font-medium text-brand-midnight/60">{winner.date}</td>
-                    <td className="px-8 py-4 font-black text-brand-secondary text-right">#{winner.ticket}</td>
-                  </tr>
-                ))}
+                {(stats.winners || []).map((winner) => {
+                  const missingProfile = winner.profileSource !== "users_doc";
+                  return (
+                    <tr key={winner.id}>
+                      <td className="px-8 py-4">
+                        <div className="font-bold text-brand-midnight">{winner.name}</div>
+                        {missingProfile && (
+                          <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700">
+                            No profile — email only
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-8 py-4">
+                        <div className="text-xs font-medium text-brand-midnight/80">{winner.email || "—"}</div>
+                        <div className="mt-1 font-mono text-xs text-brand-midnight/60">{winner.mobile || "—"}</div>
+                      </td>
+                      <td className="px-8 py-4 font-medium text-brand-midnight">{winner.prize}</td>
+                      <td className="px-8 py-4 font-medium text-brand-midnight/60">{winner.date}</td>
+                      <td className="px-8 py-4 font-black text-brand-secondary text-right">#{winner.ticket}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

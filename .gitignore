@@ -31,3 +31,4 @@ next-env.d.ts
 # cursor and agents
 .cursor/
 .agents/
+.claude/

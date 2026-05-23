@@ -11,6 +11,13 @@ export interface UserOrder {
   status: string;
 }
 
+export interface UserWin {
+  raffleId: string;
+  raffleTitle: string;
+  winningTicketNumber: number;
+  drawnAt: string;
+}
+
 // Statuses that represent checkout sessions the user never paid for. They
 // should be excluded from the dashboard so they don't appear permanently as
 // "Processing" (or any other noise) after the user moves on.
@@ -81,7 +88,7 @@ export async function getUserWins(email: string) {
         raffleTitle: data.title || doc.id,
         winningTicketNumber: data.winningTicketNumber,
         drawnAt: data.drawnAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-      };
+      } as UserWin;
     });
   } catch (error) {
     console.error("Error fetching user wins:", error);

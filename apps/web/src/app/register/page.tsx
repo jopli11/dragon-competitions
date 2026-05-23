@@ -1,21 +1,38 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  getAdditionalUserInfo,
+  signInWithPopup,
+  updateProfile,
+} from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@/components/Container";
 import { BrandButton, BrandSectionHeading, GradientText } from "@/lib/styles";
 import Link from "next/link";
 import { track } from "@/lib/analytics";
+import { saveUserProfile } from "@/app/profile/actions";
+import {
+  buildDisplayName,
+  validateProfileInput,
+} from "@/lib/firebase/user-profile";
+
+type FieldKey = "firstName" | "lastName" | "mobile";
 
 function RegisterContent() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [confirmAge, setConfirmAge] = useState(false);
   const [error, setError] = useState("");
+  const [errorField, setErrorField] = useState<FieldKey | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,34 +43,75 @@ function RegisterContent() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth) return;
-    
+
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setErrorField(null);
       return;
     }
 
     if (!agreedToTerms || !confirmAge) {
       setError("You must agree to the terms and confirm you are 18+.");
+      setErrorField(null);
       return;
     }
 
-    if (!agreedToTerms || !confirmAge) {
-      setError("You must agree to the terms and confirm you are 18+.");
+    // Validate the profile fields up-front so we don't create an orphan auth
+    // account if e.g. the mobile number is malformed.
+    const validationError = validateProfileInput({ firstName, lastName, mobile });
+    if (validationError) {
+      setError(validationError.message);
+      setErrorField(validationError.field);
       return;
     }
-    
+
     setLoading(true);
     setError("");
+    setErrorField(null);
     track("auth_register_email_submit");
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const idToken = await cred.user.getIdToken();
+
+      const saveResult = await saveUserProfile(idToken, {
+        firstName,
+        lastName,
+        mobile,
+      });
+
+      if (!saveResult.success) {
+        // Auth account exists but profile didn't save — send the user to the
+        // dedicated profile page to retry rather than leaving them stranded.
+        track("auth_register_failure");
+        console.warn("Profile save failed during register:", saveResult.error);
+        router.push(
+          `/profile/complete?redirect=${encodeURIComponent(redirect)}`
+        );
+        router.refresh();
+        return;
+      }
+
+      // Mirror displayName into the client Firebase Auth user so the dashboard
+      // greeting and any other `user.displayName` reads update immediately
+      // (the server action also mirrors via Admin SDK, but the client cache
+      // wouldn't otherwise refresh until the next token rotation).
+      try {
+        await updateProfile(cred.user, {
+          displayName: buildDisplayName(firstName, lastName),
+        });
+      } catch (mirrorErr) {
+        console.warn("Failed to mirror displayName on client:", mirrorErr);
+      }
+
       track("auth_register_success");
       router.push(redirect);
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       track("auth_register_failure");
-      setError(err.message || "Failed to create account.");
+      const message =
+        err instanceof Error ? err.message : "Failed to create account.";
+      setError(message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -65,15 +123,29 @@ function RegisterContent() {
 
     setLoading(true);
     setError("");
+    setErrorField(null);
     track("auth_register_google_submit");
 
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const additional = getAdditionalUserInfo(result);
       track("auth_register_success");
-      router.push(redirect);
+
+      if (additional?.isNewUser) {
+        // First-time Google sign-up — Google gives us a displayName and email
+        // but no mobile. Route through profile completion (which pre-fills the
+        // split displayName) before returning to the original destination.
+        router.push(
+          `/profile/complete?redirect=${encodeURIComponent(redirect)}`
+        );
+      } else {
+        // Returning Google user who happened to click the register button —
+        // treat as a normal login.
+        router.push(redirect);
+      }
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       track("auth_register_failure");
       setError("Google sign-up failed. Please try again.");
       console.error(err);
@@ -81,6 +153,13 @@ function RegisterContent() {
       setLoading(false);
     }
   };
+
+  const inputClass = (field: FieldKey | null) =>
+    `w-full bg-brand-accent/30 border rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+      field && errorField === field
+        ? "border-red-400 focus:ring-red-400/20"
+        : "border-brand-primary/5 focus:ring-brand-secondary/20"
+    }`;
 
   return (
     <div className="bg-white rounded-[2.5rem] border border-brand-primary/5 shadow-2xl p-8 sm:p-12">
@@ -128,6 +207,59 @@ function RegisterContent() {
       </div>
 
       <form onSubmit={handleRegister} className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label htmlFor="firstName" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              autoComplete="given-name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Jane"
+              required
+              className={inputClass("firstName")}
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="lastName" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              autoComplete="family-name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Doe"
+              required
+              className={inputClass("lastName")}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="mobile" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">
+            UK Mobile Number
+          </label>
+          <input
+            type="tel"
+            id="mobile"
+            autoComplete="tel"
+            inputMode="tel"
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value)}
+            placeholder="07700 900000"
+            required
+            className={inputClass("mobile")}
+          />
+          <p className="text-[10px] text-brand-midnight/40 ml-4">
+            We&apos;ll only use this to reach winners — never for marketing.
+          </p>
+        </div>
+
         <div className="space-y-2">
           <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 ml-4">
             Email Address
@@ -135,11 +267,12 @@ function RegisterContent() {
           <input
             type="email"
             id="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
             required
-            className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all"
+            className={inputClass(null)}
           />
         </div>
 
@@ -150,11 +283,12 @@ function RegisterContent() {
           <input
             type="password"
             id="password"
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
-            className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all"
+            className={inputClass(null)}
           />
         </div>
 
@@ -165,11 +299,12 @@ function RegisterContent() {
           <input
             type="password"
             id="confirmPassword"
+            autoComplete="new-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="••••••••"
             required
-            className="w-full bg-brand-accent/30 border border-brand-primary/5 rounded-2xl px-6 py-4 text-brand-midnight font-medium placeholder:text-brand-midnight/20 focus:outline-none focus:ring-2 focus:ring-brand-secondary/20 focus:bg-white transition-all"
+            className={inputClass(null)}
           />
         </div>
 

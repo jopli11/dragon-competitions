@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
+import { getWinnerContact } from "@/lib/firebase/user-profile-admin";
 import { FieldValue } from "firebase-admin/firestore";
 
 export const dynamic = "force-dynamic";
@@ -155,6 +156,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Enrich with profile data so the admin can contact the winner directly.
+    // Falls back to email-only for legacy users without a profile.
+    const contact = await getWinnerContact(owner.orderId, owner.email);
+
     // === STEP 3: Atomic transaction to prevent race conditions ===
     await adminDb.runTransaction(async (tx) => {
       const freshRaffleDoc = await tx.get(raffleRef);
@@ -164,9 +169,13 @@ export async function POST(req: NextRequest) {
         throw new Error("ALREADY_COMPLETED");
       }
 
+      // Public raffle doc — no PII beyond winnerEmail (already exposed today
+      // and masked in the /results UI). First name, last name and mobile go
+      // into the admin-only draw_audit doc below.
       tx.update(raffleRef, {
         drawStatus: "completed",
-        winnerEmail: owner.email,
+        winnerEmail: contact.email,
+        winnerProfileSource: contact.source,
         winningTicketNumber: ticketNum,
         drawnAt: FieldValue.serverTimestamp(),
         drawType: "live",
@@ -174,12 +183,18 @@ export async function POST(req: NextRequest) {
         confirmedBy: adminEmail,
       });
 
-      // Write a separate audit document for full traceability
+      // Admin-only audit doc — carries the full winner contact for outreach.
+      // Protected by absence of a matching Firestore rule (default-deny for
+      // clients); admin SDK bypasses for the dashboard read.
       const auditRef = adminDb.collection("draw_audit").doc(`${raffleSlug}_live`);
       tx.set(auditRef, {
         raffleSlug,
         drawType: "live",
-        winnerEmail: owner.email,
+        winnerEmail: contact.email,
+        winnerFirstName: contact.firstName,
+        winnerLastName: contact.lastName,
+        winnerMobile: contact.mobile,
+        winnerProfileSource: contact.source,
         winningTicketNumber: ticketNum,
         winnerOrderId: owner.orderId,
         confirmedBy: adminEmail,
@@ -191,12 +206,20 @@ export async function POST(req: NextRequest) {
 
     console.log(
       `[LIVE DRAW CONFIRMED] Raffle: ${raffleSlug}, Ticket: #${ticketNum}, ` +
-      `Winner: ${owner.email}, Confirmed by: ${adminEmail}`
+      `Winner: ${contact.email} (profile: ${contact.source}), ` +
+      `Confirmed by: ${adminEmail}`
     );
 
     return NextResponse.json({
       success: true,
       message: `Winner confirmed: ticket #${ticketNum}`,
+      winner: {
+        email: contact.email,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        mobile: contact.mobile,
+        profileSource: contact.source,
+      },
     });
   } catch (error: any) {
     if (error.message === "ALREADY_COMPLETED") {

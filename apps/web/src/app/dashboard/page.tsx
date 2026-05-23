@@ -4,10 +4,17 @@ import { useEffect, useState } from "react";
 import { Container } from "@/components/Container";
 import { useAuth } from "@/lib/auth-context";
 import { BrandSectionHeading, GradientText, GlassCard } from "@/lib/styles";
-import { getUserOrders, getUserWins, type UserOrder } from "@/lib/firebase/user-stats";
+import { getUserOrders, getUserWins, type UserOrder, type UserWin } from "@/lib/firebase/user-stats";
+import {
+  getUserProfile,
+  isProfileComplete,
+  type UserProfile,
+} from "@/lib/firebase/user-profile";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { track, type AnalyticsEvent } from "@/lib/analytics";
+import { track, trackOnce, type AnalyticsEvent } from "@/lib/analytics";
+
+const PROFILE_BANNER_DISMISS_KEY = "profile-banner-dismissed";
 
 type DashboardTab = "entries" | "wins";
 
@@ -26,9 +33,11 @@ function formatGBPFromPence(pence: number) {
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const [orders, setOrders] = useState<UserOrder[]>([]);
-  const [wins, setWins] = useState<any[]>([]);
+  const [wins, setWins] = useState<UserWin[]>([]);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [fetching, setFetching] = useState(true);
   const [activeTab, setActiveTab] = useState<DashboardTab>("entries");
+  const [bannerDismissed, setBannerDismissed] = useState(false);
   const router = useRouter();
 
   const handleTabChange = (tab: DashboardTab) => {
@@ -45,19 +54,52 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchData() {
-      if (user?.email) {
+      if (user?.email && user?.uid) {
         setFetching(true);
-        const [userOrders, userWins] = await Promise.all([
+        const [userOrders, userWins, userProfile] = await Promise.all([
           getUserOrders(user.email),
-          getUserWins(user.email)
+          getUserWins(user.email),
+          getUserProfile(user.uid),
         ]);
         setOrders(userOrders);
         setWins(userWins);
+        setProfile(userProfile);
         setFetching(false);
       }
     }
     fetchData();
   }, [user]);
+
+  // Restore per-session dismissal so the banner stays gone for this tab session
+  // but reappears on a fresh visit (sessionStorage scope = current tab/window).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (window.sessionStorage.getItem(PROFILE_BANNER_DISMISS_KEY) === "1") {
+        setBannerDismissed(true);
+      }
+    } catch {
+      // Storage may be unavailable in private mode — fall back to showing the banner.
+    }
+  }, []);
+
+  const showProfileBanner = !fetching && !isProfileComplete(profile) && !bannerDismissed;
+
+  useEffect(() => {
+    if (showProfileBanner) {
+      trackOnce("profile_banner_view", "dashboard");
+    }
+  }, [showProfileBanner]);
+
+  const handleDismissBanner = () => {
+    track("profile_banner_dismiss");
+    setBannerDismissed(true);
+    try {
+      window.sessionStorage.setItem(PROFILE_BANNER_DISMISS_KEY, "1");
+    } catch {
+      // Non-fatal; the banner will stay hidden until next reload.
+    }
+  };
 
   if (loading || fetching) {
     return (
@@ -82,6 +124,43 @@ export default function DashboardPage() {
           Welcome back, <span className="text-brand-midnight font-bold">{user.displayName || user.email}</span>. Track your entries and see your wins.
         </p>
       </div>
+
+      {showProfileBanner && (
+        <div
+          role="region"
+          aria-label="Complete your profile"
+          className="mb-8 flex flex-col gap-4 rounded-3xl border border-brand-secondary/20 bg-brand-secondary/5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"
+        >
+          <div className="flex-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-brand-secondary">
+              Action needed
+            </p>
+            <p className="mt-2 text-base font-bold text-brand-midnight">
+              Add your name and mobile number so we can contact you if you win.
+            </p>
+            <p className="mt-1 text-xs text-brand-midnight/60 font-medium">
+              We&apos;ll only use these to reach winners — never for marketing.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/profile/complete?redirect=/dashboard"
+              onClick={() => track("profile_banner_cta_click")}
+              className="inline-flex h-11 items-center justify-center rounded-full bg-brand-primary px-6 text-xs font-black uppercase tracking-widest text-white transition-all hover:scale-105 shadow-lg shadow-brand-primary/20"
+            >
+              Complete profile
+            </Link>
+            <button
+              type="button"
+              onClick={handleDismissBanner}
+              aria-label="Dismiss profile reminder"
+              className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/40 hover:text-brand-midnight/70 transition-colors"
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Stats Overview */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-12">
@@ -127,7 +206,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {orders.length === 0 ? (
             <GlassCard className="p-12 text-center">
-              <p className="text-brand-midnight/60 font-medium">You haven't entered any competitions yet.</p>
+              <p className="text-brand-midnight/60 font-medium">You haven&apos;t entered any competitions yet.</p>
               <Link href="/raffles" className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-brand-primary px-8 text-sm font-bold text-white transition-all hover:scale-105 shadow-lg shadow-brand-primary/20">
                 Enter a Competition Now
               </Link>

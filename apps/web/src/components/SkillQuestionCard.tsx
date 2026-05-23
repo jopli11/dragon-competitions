@@ -293,6 +293,18 @@ export function SkillQuestionCard({
 
         const data = await res.json();
 
+        if (res.status === 412 && data?.needsProfile) {
+          // Legacy user without a completed profile — persist quantity so the
+          // raffle page can resume from where they left off after they fill it
+          // in, then divert to /profile/complete.
+          sessionStorage.setItem(`quiz_qty_${slug}`, String(quantity));
+          track("raffle_checkout_profile_redirect");
+          router.push(
+            `/profile/complete?redirect=${encodeURIComponent(`/raffles/${slug}`)}`
+          );
+          return;
+        }
+
         if (!res.ok) {
           throw new Error(data.error || "Failed to claim free entry");
         }
@@ -317,6 +329,18 @@ export function SkillQuestionCard({
       });
 
       const data = await res.json();
+
+      if (res.status === 412 && data?.needsProfile) {
+        // Legacy user without a completed profile — persist quantity so the
+        // raffle page can resume from where they left off after they fill it
+        // in, then divert to /profile/complete.
+        sessionStorage.setItem(`quiz_qty_${slug}`, String(quantity));
+        track("raffle_checkout_profile_redirect");
+        router.push(
+          `/profile/complete?redirect=${encodeURIComponent(`/raffles/${slug}`)}`
+        );
+        return;
+      }
 
       if (!res.ok) {
         throw new Error(data.error || "Failed to create checkout session");

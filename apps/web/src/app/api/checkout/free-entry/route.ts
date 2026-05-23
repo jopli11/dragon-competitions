@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchRaffleBySlug, getEffectivePrice } from "@/lib/contentful/raffles";
 import { adminDb, adminAuth, admin } from "@/lib/firebase/admin";
+import { hasCompletedProfile } from "@/lib/firebase/user-profile-admin";
 import { sendPurchaseConfirmation } from "@/lib/postmark/client";
 
 class FreeEntryError extends Error {
@@ -31,6 +32,20 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Invalid token: missing email" },
         { status: 401 },
+      );
+    }
+
+    // Backwards-compat gate: legacy users created before we collected
+    // first/last/mobile must complete their profile before entering so we can
+    // contact them if they win. Returns 412 so the client can route to
+    // /profile/complete instead of treating it as a hard error.
+    if (!(await hasCompletedProfile(decodedToken.uid))) {
+      return NextResponse.json(
+        {
+          error: "Please complete your profile before entering.",
+          needsProfile: true,
+        },
+        { status: 412 },
       );
     }
 
