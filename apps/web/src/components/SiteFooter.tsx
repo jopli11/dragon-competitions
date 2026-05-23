@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Container } from "@/components/Container";
 import { PaymentMethodBadges } from "@/components/PaymentMethodBadges";
 import { SocialLinks } from "@/components/SocialLinks";
@@ -107,6 +108,11 @@ const FooterLink = styled(Link)`
 `;
 
 export function SiteFooter() {
+  const pathname = usePathname();
+
+  // The /links hub is a standalone QR-code landing — render no chrome.
+  if (pathname === "/links") return null;
+
   return (
     <FooterWrapper>
       <Container>

@@ -6,7 +6,7 @@ import { Container } from "@/components/Container";
 import styled from "@emotion/styled";
 import { BrandLinkButton } from "@/lib/styles";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { auth as firebaseAuth } from "@/lib/firebase/client";
 import { signOut } from "firebase/auth";
@@ -146,6 +146,7 @@ export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, isAdmin } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "unset";
@@ -153,6 +154,9 @@ export function SiteHeader() {
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  // The /links hub is a standalone QR-code landing — render no chrome.
+  if (pathname === "/links") return null;
 
   const handleLogout = async () => {
     if (!firebaseAuth) return;
