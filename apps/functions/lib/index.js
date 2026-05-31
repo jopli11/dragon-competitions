@@ -81,6 +81,17 @@ exports.scheduledDraw = functions.runWith({
         if (!isExpired && !isSoldOut) {
             continue; // Not ready for draw yet
         }
+        // Defensive guard: a ticket purchase merge can flip drawStatus back to
+        // "pending" on a raffle that was ALREADY drawn, which caused this function
+        // to re-draw a brand-new winner (and email them) every time someone bought.
+        // A raffle that already has a winner must never be auto-drawn again — only
+        // reoccurring raffles get a fresh round, and those run as a new doc/slug.
+        if (data.drawnAt || data.winningTicketNumber) {
+            console.warn(`Raffle ${raffleDoc.id} already drawn (ticket #${data.winningTicketNumber}) but drawStatus="${data.drawStatus}". ` +
+                `Restoring to "completed" and skipping re-draw.`);
+            await raffleDoc.ref.update({ drawStatus: "completed" });
+            continue;
+        }
         // 2. If drawType is 'live', don't auto-draw — but sync sold-out status to Contentful
         if (data.drawType === "live") {
             if (isSoldOut && !data.contentfulArchived) {

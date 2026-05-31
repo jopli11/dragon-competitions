@@ -154,17 +154,28 @@ export async function POST(request: Request) {
       const ticketStart = nextTicketNumber;
       const ticketEnd = nextTicketNumber + quantity - 1;
 
+      const alreadyDrawn = raffleDoc.exists && !!raffleDoc.data()?.drawnAt;
+
       const updateData: Record<string, unknown> = {
         nextTicketNumber: ticketEnd + 1,
         ticketsSold: admin.firestore.FieldValue.increment(quantity),
-        drawStatus: "pending",
         drawType: raffle.drawType || "auto",
         isReoccurring: !!raffle.isReoccurring,
         maxTickets,
         title: raffle.title || slug,
       };
 
-      if (raffle.endAt && (!raffleDoc.exists || !raffleDoc.data()?.endAt)) {
+      // A purchase must never re-open the draw on a raffle that has already been
+      // drawn — that flipped drawStatus back to "pending" and made the scheduler
+      // pick a fresh winner on every entry. Only set "pending" while undrawn.
+      if (!alreadyDrawn) {
+        updateData.drawStatus = "pending";
+      }
+
+      // Always sync endAt from Contentful so extending the end date in the CMS
+      // propagates to Firestore — a stale (past) endAt is what triggered the
+      // premature draws.
+      if (raffle.endAt) {
         updateData.endAt = admin.firestore.Timestamp.fromDate(
           new Date(raffle.endAt),
         );
