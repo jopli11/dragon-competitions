@@ -5,6 +5,7 @@ import Image from "next/image";
 import { BrandButtonLabel } from "@/lib/styles";
 import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
 import { getEffectivePrice } from "@/lib/pricing";
+import { CountdownPill } from "@/components/CountdownPill";
 import type { RaffleSummary } from "@/lib/contentful/raffles";
 
 interface RaffleCardProps {
@@ -93,6 +94,9 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
   const isAwaitingDraw = raffle.status === "awaitingDraw";
   const showDiscount = pricing.isDiscounted && !isSoldOut && !isAwaitingDraw;
   const discountRibbonLabel = showDiscount ? getDiscountRibbonLabel(raffle, pricing) : null;
+  // Show a live countdown on enterable raffles. Drop it below the discount
+  // ribbon when one is present so they don't collide in the top-right corner.
+  const showCountdown = !isAwaitingDraw && !isSoldOut;
   const ctaLabel = isAwaitingDraw
     ? "View Details"
     : isSoldOut
@@ -113,6 +117,11 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
             <div className={`absolute top-3 left-3 z-10 rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
               {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
             </div>
+            {showCountdown && (
+              <div className={`absolute right-3 z-10 ${discountRibbonLabel ? 'top-12' : 'top-3'}`}>
+                <CountdownPill endAt={raffle.endAt} />
+              </div>
+            )}
             {discountRibbonLabel && <DiscountRibbon label={discountRibbonLabel} />}
             {raffle.heroImageUrl ? (
               <Image
@@ -192,6 +201,11 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
           <div className={`absolute top-4 left-4 z-10 rounded-lg px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider shadow-lg ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
             {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
           </div>
+          {showCountdown && (
+            <div className={`absolute right-4 z-10 ${discountRibbonLabel ? 'top-14' : 'top-4'}`}>
+              <CountdownPill endAt={raffle.endAt} />
+            </div>
+          )}
           {discountRibbonLabel && <DiscountRibbon label={discountRibbonLabel} />}
           {raffle.heroImageUrl ? (
             <Image

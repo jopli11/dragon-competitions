@@ -43,9 +43,18 @@ export default async function Home() {
 
   // Find the raffle ending soonest for the countdown (exclude awaitingDraw raffles)
   const activeRaffles = raffles.filter(r => r.status !== "awaitingDraw");
-  const nextEndingRaffle = [...activeRaffles].sort((a, b) => 
+  const nextEndingRaffle = [...activeRaffles].sort((a, b) =>
     new Date(a.endAt).getTime() - new Date(b.endAt).getTime()
   )[0];
+
+  // Order the competitions grid by soonest-ending first. Sold-out / awaiting-draw
+  // raffles (whose end time has effectively passed) are pushed to the end.
+  const sortedRaffles = [...raffles].sort((a, b) => {
+    const aAwait = a.status === "awaitingDraw" ? 1 : 0;
+    const bAwait = b.status === "awaitingDraw" ? 1 : 0;
+    if (aAwait !== bAwait) return aAwait - bAwait;
+    return new Date(a.endAt).getTime() - new Date(b.endAt).getTime();
+  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -83,7 +92,7 @@ export default async function Home() {
         </div>
 
         <div className="mt-12 grid gap-6 px-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-3">
-          {raffles.map((raffle) => (
+          {sortedRaffles.map((raffle) => (
             <RaffleCard
               key={raffle.id}
               raffle={raffle}
