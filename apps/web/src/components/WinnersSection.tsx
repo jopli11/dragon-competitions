@@ -106,6 +106,13 @@ const Quote = styled.p`
 
 const winners = [
   {
+    prize: "£100 Cash",
+    winner: "Mathew Hulse",
+    date: "May 31, 2026",
+    quote: "I never win anything like this so was pleasantly surprised, only bought a few tickets, wasn't expecting to be drawn out as a winner. Turned £3 into £100 nice profit if you ask me.",
+    image: "/winners/2/main-cash.jpg",
+  },
+  {
     prize: "Easter Giveaway",
     winner: "Jess Cox",
     date: "Apr 24, 2026",

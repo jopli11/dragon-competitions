@@ -4,7 +4,23 @@ import Image from "next/image";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd, buildWebPageSchema, SITE_URL } from "@/lib/seo/json-ld";
 
-const winners = [
+const winners: {
+  prize: string;
+  winner: string;
+  date: string;
+  quote: string;
+  image: string;
+  secondaryImage?: string;
+  instagramUrl?: string;
+}[] = [
+  {
+    prize: "£100 Cash",
+    winner: "Mathew Hulse",
+    date: "May 31, 2026",
+    quote: "I never win anything like this so was pleasantly surprised, only bought a few tickets, wasn't expecting to be drawn out as a winner. Turned £3 into £100 nice profit if you ask me.",
+    image: "/winners/2/main-cash.jpg",
+    secondaryImage: "/winners/2/sec-cash.jpg",
+  },
   {
     prize: "Easter Giveaway",
     winner: "Jess Cox",
@@ -62,7 +78,7 @@ export default function WinnersPage() {
                   <div className="absolute bottom-6 left-6 z-20 h-24 w-24 overflow-hidden rounded-3xl border-4 border-white bg-white shadow-2xl sm:h-32 sm:w-32">
                     <Image
                       src={winner.secondaryImage}
-                      alt={`${winner.winner} with Easter Giveaway prize`}
+                      alt={`${winner.winner} with ${winner.prize} prize`}
                       fill
                       sizes="128px"
                       className="object-cover"
@@ -94,14 +110,16 @@ export default function WinnersPage() {
                     <span className="block text-[10px] font-bold uppercase text-brand-midnight/40 tracking-widest mb-1">Winner Announced</span>
                     <span className="text-lg font-bold text-brand-midnight">{winner.date}</span>
                   </div>
-                  <a
-                    href={winner.instagramUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-11 items-center rounded-full bg-brand-secondary px-6 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-brand-secondary/90"
-                  >
-                    View Instagram Post
-                  </a>
+                  {winner.instagramUrl && (
+                    <a
+                      href={winner.instagramUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-11 items-center rounded-full bg-brand-secondary px-6 text-xs font-black uppercase tracking-widest text-white transition-colors hover:bg-brand-secondary/90"
+                    >
+                      View Instagram Post
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

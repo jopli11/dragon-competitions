@@ -32,3 +32,5 @@ next-env.d.ts
 .cursor/
 .agents/
 .claude/
+apps/web/bont-emails.csv
+apps/web/scripts/bont-free-entry-emails.mjs
