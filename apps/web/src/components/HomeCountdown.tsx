@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import styled from "@emotion/styled";
 
-const CountdownContainer = styled.div`
+const CountdownContainer = styled(Link)`
   background: linear-gradient(135deg, #0E7E8B 0%, #35B1AB 100%);
   border-radius: 1.5rem;
   padding: 1rem 2.5rem;
@@ -15,16 +16,24 @@ const CountdownContainer = styled.div`
   z-index: 20;
   box-shadow: 0 15px 35px -8px rgba(14, 126, 139, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px -8px rgba(14, 126, 139, 0.5);
+  }
 
   @media (max-width: 768px) {
     padding: 1rem 1.5rem;
-    gap: 0.75rem;
+    gap: 0.5rem 0.75rem;
     flex-wrap: wrap;
     justify-content: center;
     margin-top: -1.5rem;
     border-radius: 1rem;
     width: calc(100% - 2rem);
-    max-width: 320px;
+    max-width: 340px;
   }
 `;
 
@@ -73,7 +82,15 @@ const CountdownDivider = styled.div`
   }
 `;
 
-export function HomeCountdown({ endAt }: { endAt?: string }) {
+export function HomeCountdown({
+  endAt,
+  title,
+  slug,
+}: {
+  endAt?: string;
+  title?: string;
+  slug?: string;
+}) {
   const [mounted, setMounted] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
@@ -102,9 +119,11 @@ export function HomeCountdown({ endAt }: { endAt?: string }) {
     return () => clearInterval(timer);
   }, [endAt]);
 
+  const href = slug ? `/raffles/${slug}` : "/raffles";
+
   return (
     <div className="flex justify-center">
-      <CountdownContainer>
+      <CountdownContainer className="group" href={href} aria-label={title ? `Ending soon: ${title}` : "View competitions ending soon"}>
         <CountdownItem>
           <span className="value">{mounted ? timeLeft.days : "--"}</span>
           <span className="label">Days</span>
@@ -124,13 +143,30 @@ export function HomeCountdown({ endAt }: { endAt?: string }) {
           <span className="value">{mounted ? String(timeLeft.seconds).padStart(2, '0') : "--"}</span>
           <span className="label">Secs</span>
         </CountdownItem>
+
+        {/* Name block — shown on mobile (full width below timers) and desktop (to the right). */}
         <div className="hidden h-10 w-px bg-white/10 sm:block" />
-        <div className="hidden flex-col justify-center text-left sm:flex">
+        <div className="flex w-full flex-col justify-center border-t border-white/15 pt-2 text-center sm:w-auto sm:max-w-50 sm:border-t-0 sm:pt-0 sm:text-left">
           <span className="text-[10px] font-black text-white/60 uppercase tracking-[0.15em]">
-            Next Draw
-          </span>
-          <span className="text-sm font-black text-white uppercase leading-none">
             Ending Soon
+          </span>
+          <span className="flex items-center justify-center gap-1.5 text-sm font-black text-white uppercase leading-tight sm:justify-start">
+            <span className="truncate underline decoration-white decoration-[2.5px] underline-offset-4 transition-all group-hover:decoration-[3px] group-hover:underline-offset-2">
+              {title || "Live Competitions"}
+            </span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              aria-hidden="true"
+            >
+              <path d="M7 17 17 7" />
+              <path d="M7 7h10v10" />
+            </svg>
           </span>
         </div>
       </CountdownContainer>

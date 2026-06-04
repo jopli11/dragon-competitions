@@ -77,7 +77,11 @@ export default async function Home() {
 
       <BrandHeroCarousel slides={carouselSlides} />
 
-      <HomeCountdown endAt={nextEndingRaffle?.endAt} />
+      <HomeCountdown
+        endAt={nextEndingRaffle?.endAt}
+        title={nextEndingRaffle?.title}
+        slug={nextEndingRaffle?.slug}
+      />
 
       {/* <div className="mt-6">
         <TrustpilotBadge />

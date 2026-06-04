@@ -109,39 +109,12 @@ const SliderThumb = styled.input`
   }
 `;
 
-// Choose 3 round bulk quantities that scale with remaining tickets and prize value.
-// Returns unique ascending values, each clamped to available stock.
-function getBulkTiers(maxPurchase: number, maxSuggestedPurchase = maxPurchase): number[] {
-  const effectiveMax = Math.min(maxPurchase, maxSuggestedPurchase);
-  if (effectiveMax < 2) return [];
+// Fixed quick-select bulk quantities. Only tiers that fit within the available
+// stock are shown, so we never offer more tickets than exist.
+const QUICK_SELECT_TIERS = [5, 10, 15];
 
-  const tierLadders: number[][] = [
-    [25, 100, 250],
-    [10, 50, 150],
-    [5, 25, 75],
-    [5, 25, 50],
-    [5, 15, 40],
-    [3, 10, 25],
-    [3, 5, 15],
-    [2, 5, 10],
-    [2, 3, 5],
-  ];
-  const ladder = tierLadders.find(([, , top]) => top <= effectiveMax);
-  const tiers = ladder ?? [2, Math.max(2, Math.floor(effectiveMax / 2)), effectiveMax];
-  const clamped = tiers.map((t) => Math.min(t, effectiveMax, maxPurchase));
-  return Array.from(new Set(clamped)).sort((a, b) => a - b);
-}
-
-function parsePrizeValuePence(title: string): number | null {
-  const match = title.match(/£\s*([\d,]+(?:\.\d{1,2})?)\s*([km])?/i);
-  if (!match) return null;
-
-  const amount = Number.parseFloat(match[1].replace(/,/g, ""));
-  if (!Number.isFinite(amount)) return null;
-
-  const suffix = match[2]?.toLowerCase();
-  const multiplier = suffix === "m" ? 1_000_000 : suffix === "k" ? 1_000 : 1;
-  return Math.round(amount * multiplier * 100);
+function getBulkTiers(maxPurchase: number): number[] {
+  return QUICK_SELECT_TIERS.filter((tier) => tier <= maxPurchase);
 }
 
 function getErrorMessage(error: unknown, fallback = "Something went wrong") {
@@ -191,11 +164,6 @@ export function SkillQuestionCard({
   const maxPurchase = isFreeEntry
     ? Math.min(remainingTickets, Math.max(1, freeEntryMaxPerUser))
     : remainingTickets;
-  const prizeValuePence = parsePrizeValuePence(raffleTitle);
-  const valueAwareMaxPurchase =
-    prizeValuePence && effectivePricePence > 0
-      ? Math.min(maxPurchase, Math.max(1, Math.floor(prizeValuePence / effectivePricePence)))
-      : maxPurchase;
 
   useEffect(() => {
     const savedPass = sessionStorage.getItem(`quiz_pass_${slug}`);
@@ -469,7 +437,7 @@ export function SkillQuestionCard({
 
   const totalPricePence = quantity * effectivePricePence;
   const sliderPercentage = maxPurchase <= 1 ? 100 : ((quantity - 1) / (maxPurchase - 1)) * 100;
-  const bulkTiers = getBulkTiers(maxPurchase, valueAwareMaxPurchase);
+  const bulkTiers = getBulkTiers(maxPurchase);
   const hasDiscount = discountPercent > 0 && effectivePricePence < ticketPricePence;
 
   if (quizPassId && remainingTickets === 0) {

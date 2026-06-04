@@ -94,8 +94,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
   const isAwaitingDraw = raffle.status === "awaitingDraw";
   const showDiscount = pricing.isDiscounted && !isSoldOut && !isAwaitingDraw;
   const discountRibbonLabel = showDiscount ? getDiscountRibbonLabel(raffle, pricing) : null;
-  // Show a live countdown on enterable raffles. Drop it below the discount
-  // ribbon when one is present so they don't collide in the top-right corner.
+  // Show a live countdown pill (in the info section) on enterable raffles.
   const showCountdown = !isAwaitingDraw && !isSoldOut;
   const ctaLabel = isAwaitingDraw
     ? "View Details"
@@ -114,14 +113,6 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
       >
         <Link href={`/raffles/${raffle.slug}`} className="block">
           <div className="relative aspect-11/6 overflow-hidden bg-brand-accent">
-            <div className={`absolute top-3 left-3 z-10 rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
-              {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
-            </div>
-            {showCountdown && (
-              <div className={`absolute right-3 z-10 ${discountRibbonLabel ? 'top-12' : 'top-3'}`}>
-                <CountdownPill endAt={raffle.endAt} />
-              </div>
-            )}
             {discountRibbonLabel && <DiscountRibbon label={discountRibbonLabel} />}
             {raffle.heroImageUrl ? (
               <Image
@@ -136,6 +127,12 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
             )}
           </div>
           <div className="p-6 bg-white">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <span className={`rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
+                {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
+              </span>
+              {showCountdown && <CountdownPill endAt={raffle.endAt} />}
+            </div>
             <h3 className="text-lg font-bold tracking-tight text-brand-midnight">
               {raffle.title}
             </h3>
@@ -198,14 +195,6 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
     >
       <Link href={`/raffles/${raffle.slug}`} className="block">
         <div className="relative aspect-11/6 overflow-hidden bg-brand-accent">
-          <div className={`absolute top-4 left-4 z-10 rounded-lg px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider shadow-lg ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
-            {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
-          </div>
-          {showCountdown && (
-            <div className={`absolute right-4 z-10 ${discountRibbonLabel ? 'top-14' : 'top-4'}`}>
-              <CountdownPill endAt={raffle.endAt} />
-            </div>
-          )}
           {discountRibbonLabel && <DiscountRibbon label={discountRibbonLabel} />}
           {raffle.heroImageUrl ? (
             <Image
@@ -226,6 +215,12 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
           )}
         </div>
         <div className="p-8">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <span className={`rounded-lg px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider shadow-lg ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
+              {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
+            </span>
+            {showCountdown && <CountdownPill endAt={raffle.endAt} />}
+          </div>
           <h3 className="text-lg font-black tracking-tight text-brand-midnight leading-tight min-h-14 line-clamp-2">
             {raffle.title}
           </h3>
