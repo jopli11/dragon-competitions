@@ -34,3 +34,4 @@ next-env.d.ts
 .claude/
 apps/web/bont-emails.csv
 apps/web/scripts/bont-free-entry-emails.mjs
+apps/web/scripts/incident-anker-check.mjs

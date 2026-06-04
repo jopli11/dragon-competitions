@@ -165,6 +165,18 @@ async function performDraw(raffleDoc) {
     }
     try {
         const drawResult = await db.runTransaction(async (transaction) => {
+            // Concurrency / idempotency guard. Read the raffle doc INSIDE the
+            // transaction and bail if it is no longer a pending, undrawn raffle.
+            // Cloud Scheduler delivers via Pub/Sub (at-least-once), so a single tick
+            // can spawn two concurrent invocations. Because this read is part of the
+            // transaction, if another invocation commits the draw first, Firestore
+            // forces this one to retry; on retry it sees "completed"/drawnAt and
+            // aborts. This guarantees exactly one winner is ever recorded.
+            const currentRaffle = await transaction.get(raffleDoc.ref);
+            const cur = currentRaffle.data();
+            if (!cur || cur.drawStatus !== "pending" || cur.drawnAt) {
+                return null;
+            }
             let winningTicketNumber;
             let winningTicketData = null;
             let attempts = 0;
@@ -236,6 +248,10 @@ async function performDraw(raffleDoc) {
             }
             throw new Error(`Failed to find a valid winner after ${maxAttempts} attempts`);
         });
+        if (!drawResult) {
+            console.log(`Draw for ${raffleId} skipped — already drawn by another invocation (idempotency guard).`);
+            return;
+        }
         console.log(`Draw complete for ${raffleId}. Winner: ${drawResult.email}, Ticket: #${drawResult.ticket}`);
         // Resolve contact details (first/last/mobile) from users/{uid}. Persist
         // them to the admin-only draw_audit doc — the public raffles doc only
