@@ -1,7 +1,6 @@
 import { Container } from "@/components/Container";
 import { BrandSectionHeading } from "@/lib/styles";
 import { BrandHeroCarousel } from "@/components/BrandHeroCarousel";
-// import { TrustpilotBadge } from "@/components/TrustpilotBadge";
 import { HomeCountdown } from "@/components/HomeCountdown";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
@@ -83,9 +82,6 @@ export default async function Home() {
         slug={nextEndingRaffle?.slug}
       />
 
-      {/* <div className="mt-6">
-        <TrustpilotBadge />
-      </div> */}
 
       <Container className="pt-6 pb-20">
         <div className="text-center">

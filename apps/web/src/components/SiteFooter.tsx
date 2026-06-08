@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { Container } from "@/components/Container";
 import { PaymentMethodBadges } from "@/components/PaymentMethodBadges";
 import { SocialLinks } from "@/components/SocialLinks";
+import { TrustpilotScore } from "@/components/TrustpilotScore";
+import type { TrustpilotSummary } from "@/lib/trustpilot";
 import { GUIDES } from "@/lib/seo/guides-data";
 import styled from "@emotion/styled";
 
@@ -107,7 +109,11 @@ const FooterLink = styled(Link)`
   }
 `;
 
-export function SiteFooter() {
+export function SiteFooter({
+  trustpilot,
+}: {
+  trustpilot?: TrustpilotSummary | null;
+}) {
   const pathname = usePathname();
 
   // The /links hub is a standalone QR-code landing — render no chrome.
@@ -148,6 +154,16 @@ export function SiteFooter() {
                 Secure checkout with major cards, Google Pay, and Apple Pay.
               </p>
             </div>
+            {trustpilot ? (
+              <div className="mt-8">
+                <h3 className="text-xs font-bold tracking-widest text-white uppercase">
+                  Rated on Trustpilot
+                </h3>
+                <div className="mt-3">
+                  <TrustpilotScore data={trustpilot} variant="dark" />
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div>

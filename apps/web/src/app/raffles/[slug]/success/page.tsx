@@ -2,9 +2,13 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { AnimatedIn } from "@/components/AnimatedIn";
 import { adminDb } from "@/lib/firebase/admin";
-import { TRUSTPILOT_REVIEW_URL } from "@/lib/trustpilot";
+import {
+  TRUSTPILOT_REVIEW_COLLECTOR_TOKEN,
+  TRUSTPILOT_TEMPLATES,
+} from "@/lib/trustpilot";
 import { redirect } from "next/navigation";
-import { SuccessAnalytics, TrustpilotReviewLink } from "@/components/SuccessAnalytics";
+import { SuccessAnalytics } from "@/components/SuccessAnalytics";
+import { TrustpilotWidget } from "@/components/TrustpilotWidget";
 
 export default async function SuccessPage({
   params,
@@ -184,12 +188,14 @@ export default async function SuccessPage({
             <p className="mx-auto mt-2 max-w-sm text-sm font-medium text-brand-midnight/60">
               A quick Trustpilot review helps other players feel confident entering Coast Competitions.
             </p>
-            <TrustpilotReviewLink
-              href={TRUSTPILOT_REVIEW_URL}
-              className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-[#00B67A] px-7 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#00B67A]/20 transition-all hover:scale-105"
-            >
-              Leave a Trustpilot Review
-            </TrustpilotReviewLink>
+            <div className="mt-5">
+              <TrustpilotWidget
+                templateId={TRUSTPILOT_TEMPLATES.reviewCollector}
+                token={TRUSTPILOT_REVIEW_COLLECTOR_TOKEN}
+                height="52px"
+                width="100%"
+              />
+            </div>
           </div>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

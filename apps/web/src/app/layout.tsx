@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { getTrustpilotSummary } from "@/lib/trustpilot";
 import EmotionRegistry from "@/lib/emotion-registry";
 import { AuthProvider } from "@/lib/auth-context";
 import {
@@ -89,11 +90,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const trustpilot = await getTrustpilotSummary();
   return (
     <html lang="en">
       <head>
@@ -101,6 +103,11 @@ export default function RootLayout({
           defer
           data-website-id="cmnagyy0z0001aad2m05fzyyg"
           src="https://www.crumbless.io/tracker.js"
+          strategy="afterInteractive"
+        />
+        {/* Trustpilot TrustBox bootstrap — powers the live review widgets. */}
+        <Script
+          src="https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js"
           strategy="afterInteractive"
         />
         <JsonLd id="schema-organization" schema={buildOrganizationSchema()} />
@@ -112,7 +119,7 @@ export default function RootLayout({
             <div className="flex min-h-screen flex-col bg-background text-foreground">
               <SiteHeader />
               <main className="grow">{children}</main>
-              <SiteFooter />
+              <SiteFooter trustpilot={trustpilot} />
             </div>
           </EmotionRegistry>
         </AuthProvider>
