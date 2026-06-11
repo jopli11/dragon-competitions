@@ -1,6 +1,8 @@
 import { Container } from "@/components/Container";
 import { BrandSectionHeading } from "@/lib/styles";
 import { BrandHeroCarousel } from "@/components/BrandHeroCarousel";
+import { TrustpilotBanner } from "@/components/TrustpilotBanner";
+import { getTrustpilotSummary } from "@/lib/trustpilot";
 import { HomeCountdown } from "@/components/HomeCountdown";
 import { fetchLiveRaffles } from "@/lib/contentful/raffles";
 import { getAllRaffleStats } from "@/lib/firebase/raffle-stats";
@@ -20,9 +22,10 @@ const HowItWorks = dynamic(() => import("@/components/HowItWorks").then(m => m.H
 const WinnersSection = dynamic(() => import("@/components/WinnersSection").then(m => m.WinnersSection));
 
 export default async function Home() {
-  const [raffles, stats] = await Promise.all([
+  const [raffles, stats, trustpilot] = await Promise.all([
     fetchLiveRaffles(),
-    getAllRaffleStats()
+    getAllRaffleStats(),
+    getTrustpilotSummary()
   ]);
   
   // Prepare slides for the hero carousel from live raffles
@@ -73,6 +76,9 @@ export default async function Home() {
         />
       ) : null}
       <FloatingPaymentPrompt />
+
+      {/* Thin Trustpilot trust strip — first thing visitors see, above the hero. */}
+      {trustpilot ? <TrustpilotBanner data={trustpilot} /> : null}
 
       <BrandHeroCarousel slides={carouselSlides} />
 

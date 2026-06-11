@@ -13,16 +13,24 @@ function starColor(stars: number): string {
   return "#00b67a";
 }
 
-const STAR_PATH =
+export const TRUSTPILOT_STAR_PATH =
   "M12 0l3.09 9.5h9.91l-8.09 5.88 3.09 9.5-8.09-5.88-8.09 5.88 3.09-9.5L0 9.5h9.91z";
 
 /** A single Trustpilot-style star tile, filled `fill` (0–1) with `color`. */
-function StarTile({ fill, color }: { fill: number; color: string }) {
+function StarTile({
+  fill,
+  color,
+  size,
+}: {
+  fill: number;
+  color: string;
+  size: number;
+}) {
   const clamped = Math.max(0, Math.min(1, fill));
   return (
     <span
-      className="relative inline-block h-[22px] w-[22px]"
-      style={{ background: "#dcdce6" }}
+      className="relative inline-block"
+      style={{ width: size, height: size, background: "#dcdce6" }}
       aria-hidden="true"
     >
       <span
@@ -31,11 +39,32 @@ function StarTile({ fill, color }: { fill: number; color: string }) {
       />
       <svg
         viewBox="0 0 24 24"
-        className="absolute inset-0 m-auto h-[14px] w-[14px]"
+        className="absolute inset-0 m-auto"
+        style={{ width: size * 0.64, height: size * 0.64 }}
         fill="white"
       >
-        <path d={STAR_PATH} />
+        <path d={TRUSTPILOT_STAR_PATH} />
       </svg>
+    </span>
+  );
+}
+
+/** The five Trustpilot star tiles for a given rating. Reusable. */
+export function TrustpilotStars({
+  stars,
+  size = 22,
+  gap = 4,
+}: {
+  stars: number;
+  size?: number;
+  gap?: number;
+}) {
+  const color = starColor(stars);
+  return (
+    <span className="flex items-center" style={{ gap }}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <StarTile key={i} fill={stars - i} color={color} size={size} />
+      ))}
     </span>
   );
 }
@@ -57,7 +86,6 @@ export function TrustpilotScore({
   variant = "light",
   className,
 }: TrustpilotScoreProps) {
-  const color = starColor(data.stars);
   const isDark = variant === "dark";
   const textColor = isDark ? "text-white" : "text-brand-midnight";
   const subColor = isDark ? "text-white/60" : "text-brand-midnight/60";
@@ -72,16 +100,12 @@ export function TrustpilotScore({
     >
       <span className={`flex items-center gap-1.5 font-extrabold tracking-tight ${textColor}`}>
         <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" style={{ color: "#00b67a" }} fill="currentColor" aria-hidden="true">
-          <path d={STAR_PATH} />
+          <path d={TRUSTPILOT_STAR_PATH} />
         </svg>
         <span className="text-[0.95rem]">Trustpilot</span>
       </span>
 
-      <span className="flex items-center gap-1">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <StarTile key={i} fill={data.stars - i} color={color} />
-        ))}
-      </span>
+      <TrustpilotStars stars={data.stars} />
 
       <span className={`text-xs font-semibold ${subColor}`}>
         {data.starsString ? `${data.starsString} · ` : ""}
