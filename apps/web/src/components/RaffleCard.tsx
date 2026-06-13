@@ -107,11 +107,12 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
           : "Enter Now";
 
   if (variant === "compact") {
+    const compactStatusLabel = isAwaitingDraw ? 'Awaiting Draw' : isSoldOut ? 'Sold Out' : 'Entries Open';
     return (
       <div
-        className={`group overflow-hidden rounded-4xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl ${isAwaitingDraw ? 'border-amber-300/40' : isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
+        className={`group flex flex-col overflow-hidden rounded-2xl border border-brand-primary/10 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl sm:rounded-4xl ${isAwaitingDraw ? 'border-amber-300/40' : isSoldOut ? 'opacity-80 grayscale-[0.5]' : ''}`}
       >
-        <Link href={`/raffles/${raffle.slug}`} className="block">
+        <Link href={`/raffles/${raffle.slug}`} className="flex h-full flex-col">
           <div className="relative aspect-11/6 overflow-hidden bg-brand-accent">
             {discountRibbonLabel && <DiscountRibbon label={discountRibbonLabel} />}
             {raffle.heroImageUrl ? (
@@ -119,45 +120,49 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
                 src={raffle.heroImageUrl}
                 alt={raffle.title}
                 fill
-                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
                 className="object-cover"
               />
             ) : (
               <div className="h-full w-full bg-brand-accent" />
             )}
+            {/* Status + countdown overlay the image so the body stays compact at 2-up on mobile */}
+            <span className={`absolute left-2 top-2 rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-md sm:left-3 sm:top-3 sm:px-2 sm:py-1 sm:text-[10px] ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
+              {compactStatusLabel}
+            </span>
+            {showCountdown && (
+              <CountdownPill
+                endAt={raffle.endAt}
+                className="absolute right-2 top-2 sm:right-3 sm:top-3"
+              />
+            )}
           </div>
-          <div className="p-6 bg-white">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <span className={`rounded-lg px-2 py-1 text-[10px] font-bold text-white uppercase ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
-                {isAwaitingDraw ? 'Awaiting Live Draw' : isSoldOut ? 'Sold Out' : 'Entries Open'}
-              </span>
-              {showCountdown && <CountdownPill endAt={raffle.endAt} />}
-            </div>
-            <h3 className="text-lg font-bold tracking-tight text-brand-midnight">
+          <div className="flex flex-1 flex-col p-3 sm:p-6">
+            <h3 className="line-clamp-2 min-h-[2.25rem] text-sm font-bold leading-tight tracking-tight text-brand-midnight sm:min-h-0 sm:text-lg">
               {raffle.title}
             </h3>
-            <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-brand-midnight/40 uppercase">
+            <div className="mt-2 flex flex-col gap-0.5 text-[10px] font-bold uppercase text-brand-midnight/40 sm:flex-row sm:items-center sm:justify-between sm:text-[11px]">
               <div className="flex items-center gap-1.5">
-                <div className={`h-1.5 w-1.5 rounded-full ${isAwaitingDraw ? 'bg-amber-500 animate-pulse' : isSoldOut ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
-                <span>{isAwaitingDraw ? 'Sold Out · Draw Pending' : `${currentTicketsSold} / ${maxTickets} Sold`}</span>
+                <div className={`h-1.5 w-1.5 shrink-0 rounded-full ${isAwaitingDraw ? 'bg-amber-500 animate-pulse' : isSoldOut ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`} />
+                <span>{isAwaitingDraw ? 'Draw Pending' : `${currentTicketsSold} / ${maxTickets} Sold`}</span>
               </div>
               {!isAwaitingDraw && (
                 <span>Ends: {formatShortDate(raffle.endAt)}</span>
               )}
             </div>
-            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-brand-accent">
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-brand-accent">
               <div
                 className={`h-full ${isAwaitingDraw ? 'bg-amber-500' : 'bg-brand-secondary'}`}
                 style={{ width: `${isAwaitingDraw ? 100 : progress}%` }}
               />
             </div>
-            <div className="mt-6 text-center">
+            <div className="mt-3 text-center sm:mt-6">
               {isAwaitingDraw ? (
-                <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 sm:text-xs">
                   Live draw coming soon
                 </p>
               ) : (
-                <p className="text-xs font-bold text-brand-midnight/60 uppercase tracking-widest">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/60 sm:text-xs">
                   {pricing.isFree ? (
                     <PriceLine
                       originalPricePence={raffle.ticketPricePence}
@@ -179,7 +184,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
                   )}
                 </p>
               )}
-              <BrandButtonLabel fullWidth className="mt-4" variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
+              <BrandButtonLabel fullWidth className="mt-2 sm:mt-4" variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
                 {ctaLabel}
               </BrandButtonLabel>
             </div>

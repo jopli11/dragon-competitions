@@ -82,14 +82,7 @@ export default async function Home() {
 
       <BrandHeroCarousel slides={carouselSlides} />
 
-      <HomeCountdown
-        endAt={nextEndingRaffle?.endAt}
-        title={nextEndingRaffle?.title}
-        slug={nextEndingRaffle?.slug}
-      />
-
-
-      <Container className="pt-6 pb-20">
+      <Container className="pt-16 pb-20">
         <div className="text-center">
           <BrandSectionHeading>Current Competitions</BrandSectionHeading>
           <p className="mx-auto mt-4 max-w-2xl text-sm font-medium uppercase tracking-widest text-brand-midnight/60">
@@ -97,7 +90,15 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 px-4 sm:grid-cols-2 sm:px-0 lg:grid-cols-3">
+        <div className="mt-8">
+          <HomeCountdown
+            endAt={nextEndingRaffle?.endAt}
+            title={nextEndingRaffle?.title}
+            slug={nextEndingRaffle?.slug}
+          />
+        </div>
+
+        <div className="mt-12 grid grid-cols-2 gap-3 px-4 sm:gap-6 sm:px-0 lg:grid-cols-3">
           {sortedRaffles.map((raffle) => (
             <RaffleCard
               key={raffle.id}

@@ -11,7 +11,6 @@ const CountdownContainer = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 1.5rem;
-  margin-top: -2.5rem;
   position: relative;
   z-index: 20;
   box-shadow: 0 15px 35px -8px rgba(14, 126, 139, 0.4);
@@ -30,7 +29,6 @@ const CountdownContainer = styled(Link)`
     gap: 0.5rem 0.75rem;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: -1.5rem;
     border-radius: 1rem;
     width: calc(100% - 2rem);
     max-width: 340px;

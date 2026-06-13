@@ -112,45 +112,48 @@ export function DrawResultsList({ results }: DrawResultsListProps) {
         <>
           <div className="grid gap-12 grid-cols-1">
             {paginatedResults.map((result) => (
-              <GlassCard key={result.id} className="overflow-hidden border-brand-primary/10 shadow-xl">
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-0">
-                  <div className="relative aspect-video lg:aspect-auto">
-                    <Image
-                      src={result.image}
-                      alt={result.title}
-                      fill
-                      sizes="(min-width: 1024px) 40vw, 100vw"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-linear-to-t from-brand-midnight/40 via-transparent to-transparent" />
-                    <div className="absolute bottom-6 left-8">
-                      <span className={`text-[10px] font-black text-brand-accent uppercase tracking-widest px-2 py-1 rounded backdrop-blur-sm ${result.isLiveDraw ? "bg-amber-500/30" : "bg-brand-secondary/20"}`}>
+              <GlassCard key={result.id} className="border-brand-primary/10 shadow-xl">
+                <div className="space-y-8">
+                  {/* Top row — image alongside the headline result, vertically centred */}
+                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
+                    {/* Image — shown at its native 16:9 ratio so 1920x1080 art is never cropped */}
+                    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-brand-midnight/5 shadow-md ring-1 ring-black/5">
+                      <Image
+                        src={result.image}
+                        alt={result.title}
+                        fill
+                        sizes="(min-width: 1024px) 45vw, 100vw"
+                        className="object-cover"
+                      />
+                      <span className={`absolute left-4 top-4 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-sm backdrop-blur-md ${result.isLiveDraw ? "bg-amber-500/90" : "bg-brand-secondary/90"}`}>
                         {result.isLiveDraw ? "Live Draw Result" : "Official Result"}
                       </span>
-                      <h3 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight mt-2">
+                    </div>
+
+                    <div className="space-y-6">
+                      <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-brand-midnight">
                         {result.title}
                       </h3>
+                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                        <div>
+                          <span className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 mb-2">Winner</span>
+                          <span className="text-xl font-black text-brand-midnight break-all">{result.winner}</span>
+                        </div>
+                        <div>
+                          <span className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 mb-2">Winning Ticket</span>
+                          <span className="text-2xl font-black text-brand-secondary">#{result.ticket}</span>
+                        </div>
+                        <div>
+                          <span className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 mb-2">Draw Date</span>
+                          <span className="text-xl font-black text-brand-midnight">{result.date}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="p-8 sm:p-12 space-y-10">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 border-b border-brand-primary/5 pb-10">
-                      <div>
-                        <span className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 mb-2">Winner</span>
-                        <span className="text-xl font-black text-brand-midnight break-all">{result.winner}</span>
-                      </div>
-                      <div>
-                        <span className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 mb-2">Winning Ticket</span>
-                        <span className="text-2xl font-black text-brand-secondary">#{result.ticket}</span>
-                      </div>
-                      <div>
-                        <span className="block text-[10px] font-black uppercase tracking-widest text-brand-midnight/40 mb-2">Draw Date</span>
-                        <span className="text-xl font-black text-brand-midnight">{result.date}</span>
-                      </div>
-                    </div>
-
-                    {result.isLiveDraw ? (
-                      <div className="bg-amber-50 rounded-3xl p-6 sm:p-8">
+                  {/* Verification / live-draw detail — full card width */}
+                  {result.isLiveDraw ? (
+                    <div className="bg-amber-50 rounded-3xl p-6 sm:p-8">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
                             <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -197,7 +200,6 @@ export function DrawResultsList({ results }: DrawResultsListProps) {
                         </div>
                       </div>
                     )}
-                  </div>
                 </div>
               </GlassCard>
             ))}

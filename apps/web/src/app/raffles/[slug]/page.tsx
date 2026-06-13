@@ -80,7 +80,7 @@ export default async function RaffleDetailPage({
         raffle={raffle}
         initialStats={stats}
         slug={slug}
-        breadcrumbs={<Breadcrumbs items={breadcrumbItems} variant="dark" />}
+        breadcrumbs={<Breadcrumbs items={breadcrumbItems} variant="light" />}
       />
     </>
   );

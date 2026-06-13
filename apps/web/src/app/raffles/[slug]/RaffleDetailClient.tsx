@@ -95,22 +95,10 @@ export function RaffleDetailClient({
     <div className="min-h-screen overflow-x-clip bg-white pb-20">
       <DnaScript />
       <JsonLd id={`schema-raffle-product-${slug}`} schema={productSchema} />
-      {/* Hero Section */}
-      <div className="relative h-[20vh] min-h-[240px] w-full overflow-hidden bg-brand-midnight">
-        {raffle.heroImageUrl && (
-          <Image
-            src={raffle.heroImageUrl}
-            alt={raffle.title}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-60 blur-[2px] scale-110"
-          />
-        )}
-        <div className="absolute inset-0 bg-linear-to-t from-white via-brand-midnight/40 to-transparent" />
-        
-        <Container className="relative h-full flex flex-col justify-end pb-6">
-          {breadcrumbs ? <div className="mb-4">{breadcrumbs}</div> : null}
+      {/* Page Header — clean white background keeps the title crisp and high-contrast. */}
+      <div className="w-full border-b border-black/5 bg-white">
+        <Container className="pt-6 pb-8 sm:pt-8">
+          {breadcrumbs ? <div className="mb-5">{breadcrumbs}</div> : null}
           <BrandBadge className={`mb-3 self-start ${isAwaitingDraw ? 'bg-amber-500 text-white' : isEnded ? 'bg-gray-500 text-white' : isSoldOut ? 'bg-red-500 text-white' : ''}`}>
             {isAwaitingDraw ? 'Awaiting Live Draw' : isEnded ? 'Draw Complete' : isSoldOut ? 'Sold Out' : 'Entries Open'}
           </BrandBadge>
@@ -134,7 +122,7 @@ export function RaffleDetailClient({
         </Container>
       </div>
 
-      <Container className="-mt-4 relative z-10">
+      <Container className="mt-8 relative z-10">
         <div className="grid min-w-0 gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-start">
           <div className="min-w-0 space-y-8">
             {/* Main Image Card */}
@@ -303,6 +291,29 @@ export function RaffleDetailClient({
 
           {/* Sticky Sidebar */}
           <div className="min-w-0 space-y-6 lg:sticky lg:top-24 lg:self-start">
+            {/* Ticket progress sits at the top of the buy column so scarcity is
+                visible immediately, without scrolling to the foot of the page. */}
+            <GlassCard className="text-center py-8">
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-midnight/40 mb-2">
+                Tickets Sold
+              </div>
+              <div className="text-3xl font-black text-brand-midnight">
+                {currentTicketsSold} <span className="text-lg text-brand-midnight/20">/ {maxTickets}</span>
+              </div>
+              <div className="mt-4 h-2 w-full bg-brand-accent rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-brand-secondary rounded-full shadow-[0_0_10px_rgba(0,112,224,0.3)]"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/60">
+                  Real-time entry tracking active
+                </p>
+              </div>
+            </GlassCard>
+
             {isAwaitingDraw ? (
               <GlassCard className="p-8 text-center border-amber-500/20 bg-amber-50">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 mb-4">
@@ -392,33 +403,16 @@ export function RaffleDetailClient({
                 Click here
               </Link>
             </div>
-
-            <GlassCard className="text-center py-8">
-              <div className="text-xs font-bold uppercase tracking-[0.2em] text-brand-midnight/40 mb-2">
-                Tickets Sold
-              </div>
-              <div className="text-3xl font-black text-brand-midnight">
-                {currentTicketsSold} <span className="text-lg text-brand-midnight/20">/ {maxTickets}</span>
-              </div>
-              <div className="mt-4 h-2 w-full bg-brand-accent rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-brand-secondary rounded-full shadow-[0_0_10px_rgba(0,112,224,0.3)]" 
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <div className="mt-4 flex items-center justify-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-midnight/60">
-                  Real-time entry tracking active
-                </p>
-              </div>
-            </GlassCard>
           </div>
         </div>
       </Container>
 
       {/* Mobile Floating CTA */}
-      <RaffleMobileCTA ticketPriceFormatted={ticketPriceFormatted} />
+      <RaffleMobileCTA
+        ticketPriceFormatted={ticketPriceFormatted}
+        ticketsSold={currentTicketsSold}
+        maxTickets={maxTickets}
+      />
     </div>
   );
 }
