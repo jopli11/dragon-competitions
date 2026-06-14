@@ -126,10 +126,13 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
             ) : (
               <div className="h-full w-full bg-brand-accent" />
             )}
-            {/* Status + countdown overlay the image so the body stays compact at 2-up on mobile */}
-            <span className={`absolute left-2 top-2 rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-md sm:left-3 sm:top-3 sm:px-2 sm:py-1 sm:text-[10px] ${isAwaitingDraw ? 'bg-amber-500' : isSoldOut ? 'bg-red-500' : 'bg-brand-secondary/90'}`}>
-              {compactStatusLabel}
-            </span>
+            {/* Only flag the exceptional states — the default "Entries Open" tag
+                was redundant clutter at 2-up card width. */}
+            {(isAwaitingDraw || isSoldOut) && (
+              <span className={`absolute left-2 top-2 rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-md sm:left-3 sm:top-3 sm:px-2 sm:py-1 sm:text-[10px] ${isAwaitingDraw ? 'bg-amber-500' : 'bg-red-500'}`}>
+                {compactStatusLabel}
+              </span>
+            )}
             {showCountdown && (
               <CountdownPill
                 endAt={raffle.endAt}

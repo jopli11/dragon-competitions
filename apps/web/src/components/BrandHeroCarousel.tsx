@@ -54,7 +54,7 @@ const SlideLink = styled(Link)`
 
 const Controls = styled.div`
   position: absolute;
-  bottom: clamp(3.75rem, 5vw, 5rem);
+  bottom: clamp(1rem, 3vw, 1.75rem);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -65,12 +65,22 @@ const Controls = styled.div`
   padding: 0.35rem 0.55rem;
   box-shadow: 0 8px 24px rgba(14, 126, 139, 0.16);
   z-index: 30;
+
+  @media (max-width: 768px) {
+    gap: 0.35rem;
+    padding: 0.25rem 0.4rem;
+  }
 `;
 
 const Dot = styled.button<{ active: boolean }>`
   width: 0.75rem;
   height: 0.75rem;
   border-radius: 9999px;
+
+  @media (max-width: 768px) {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
   background: ${({ active }) => (active ? "#0E7E8B" : "rgba(14, 126, 139, 0.28)")};
   border: none;
   cursor: pointer;
