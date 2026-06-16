@@ -95,6 +95,35 @@ export function middleware(request: NextRequest) {
     return new NextResponse(null, { status: 404 });
   }
 
+  // 4. Reject unexpected write-method requests to the GET-only homepage.
+  //    The homepage has no <form> and no server action, so it never receives a
+  //    legitimate POST. Scanners still POST multipart/form-data bodies to "/",
+  //    which Next.js tries to decode as a server-action payload; a truncated
+  //    body makes its internal parser throw "Unexpected end of form" and return
+  //    an unhandled 500 before any page code runs. Stopping it here returns a
+  //    correct 405 and avoids the noisy 500.
+  //
+  //    JS-dispatched server actions carry a `Next-Action` header, so they are
+  //    allowed through — if a no-JS server-action form is ever added to "/",
+  //    revisit this guard (the no-JS fallback posts multipart without that header).
+  if (
+    pathname === '/' &&
+    request.method !== 'GET' &&
+    request.method !== 'HEAD' &&
+    !request.headers.has('next-action')
+  ) {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    console.warn(JSON.stringify({
+      event: 'blocked_unexpected_write_method',
+      requestId,
+      method: request.method,
+      path: pathname,
+      ip,
+      userAgent: request.headers.get('user-agent') || undefined,
+    }));
+    return new NextResponse(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
+  }
+
   if (shouldLogNavigation(request)) {
     console.info(JSON.stringify(getRequestDiagnostics(request, requestId)));
   }
