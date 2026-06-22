@@ -14,6 +14,14 @@ const winners: {
   instagramUrl?: string;
 }[] = [
   {
+    prize: "Anker SOLIX C800X",
+    winner: "David Hird",
+    date: "June 4, 2026",
+    quote: "Absolutely buzzing, couldn't be happier — perfect bit of kit to use on the camper van and my fishing trips.",
+    image: "/winners/3/1.jpg",
+    secondaryImage: "/winners/3/2.jpg",
+  },
+  {
     prize: "£100 Cash",
     winner: "Mathew Hulse",
     date: "May 31, 2026",
