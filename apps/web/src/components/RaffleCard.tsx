@@ -187,7 +187,7 @@ export function RaffleCard({ raffle, initialTicketsSold, variant = "default" }: 
                   )}
                 </p>
               )}
-              <BrandButtonLabel fullWidth className="mt-2 sm:mt-4" variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
+              <BrandButtonLabel fullWidth size="sm" className="mt-2 sm:mt-4 min-h-[44px]" variant={isAwaitingDraw || isSoldOut ? "outline" : "primary"}>
                 {ctaLabel}
               </BrandButtonLabel>
             </div>
