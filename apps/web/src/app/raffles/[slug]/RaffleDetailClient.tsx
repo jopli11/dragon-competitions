@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { SkillQuestionCard } from "@/components/SkillQuestionCard";
 import { RaffleMobileCTA } from "@/components/RaffleMobileCTA";
+import { RaffleCountdownPanel } from "@/components/RaffleCountdownPanel";
+import { CountdownPill } from "@/components/CountdownPill";
 import { DnaScript } from "@/components/DnaScript";
 import { SocialLinks } from "@/components/SocialLinks";
 import { useRaffleStats } from "@/lib/firebase/use-raffle-stats";
@@ -118,6 +120,9 @@ export function RaffleDetailClient({
               </span>
               <span>{pricing.isFree ? "to enter" : "per entry"}</span>
             </div>
+            {!isAwaitingDraw && !isEnded && raffle.endAt && (
+              <CountdownPill endAt={raffle.endAt} />
+            )}
           </div>
         </Container>
       </div>
@@ -291,6 +296,12 @@ export function RaffleDetailClient({
 
           {/* Sticky Sidebar */}
           <div className="min-w-0 space-y-6 lg:sticky lg:top-24 lg:self-start">
+            {/* Countdown leads the buy column so the deadline (and the urgency it
+                creates) is the first thing the user sees. Hidden once the draw is
+                awaiting/complete, where a countdown would be misleading. */}
+            {!isAwaitingDraw && !isEnded && raffle.endAt && (
+              <RaffleCountdownPanel endAt={raffle.endAt} />
+            )}
             {/* Ticket progress sits at the top of the buy column so scarcity is
                 visible immediately, without scrolling to the foot of the page. */}
             <GlassCard className="text-center py-8">
